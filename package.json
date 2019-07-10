@@ -4,7 +4,7 @@
   "description": "Reducers-actions-selectors free reactive state management in redux-way",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "rimraf dist && tsc",
     "test": "exit 1"
   },
   "repository": {
@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/GrushinEgor/painless-redux#readme",
   "devDependencies": {
+    "rimraf": "^2.6.3",
     "typescript": "^3.5.3"
   },
   "dependencies": {
