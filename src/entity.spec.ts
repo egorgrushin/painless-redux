@@ -2,7 +2,7 @@ import { Entity } from './entity';
 import { StoreLib } from './store';
 import { TestBed } from '@angular/core/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { StoreLibConnectingModule } from './store-connecting.module';
+import { StoreConnectingModule } from './store-connecting.module';
 import { combineReducers, Store } from '@ngrx/store';
 import { getOrderedMarbleStream } from '../../../testing/helpers/rxjs';
 import { cold, hot } from 'jest-marbles';
@@ -35,7 +35,7 @@ describe('Entity', () => {
 		});
 		TestBed.configureTestingModule({
 			imports: [
-				StoreLibConnectingModule.forRoot({
+				StoreConnectingModule.forRoot({
 					slots: [entity, tupleEntity],
 				}),
 			],
