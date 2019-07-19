@@ -15,7 +15,16 @@ import {
 	createPagesSelector,
 } from './selectors';
 
-import { BASE_PAGE_SIZE, IActorSchema, Id, IEntityActionOptions, IForeignKey, ILoadingState, IPage } from './types';
+import {
+	BASE_PAGE_SIZE,
+	IActorSchema,
+	Id,
+	IDictionary,
+	IEntityActionOptions,
+	IForeignKey,
+	ILoadingState,
+	IPage,
+} from './types';
 import { createDictionaryReducer } from './reducers/dictionaryFactory';
 import { createIdsReducer } from './reducers/idsFactory';
 import { createPagesReducer } from './reducers/pagesFactory';
@@ -75,12 +84,12 @@ export class Actor<T extends object = object, S extends IActorSchema = IActorSch
 
 	getPurePageItems<R>(config: any, options?: IEntityActionOptions): Observable<R> {
 		const pageIdsSelector = this.getPageIdsSelector(config);
-		const selector = createSelector(pageIdsSelector, this.selectors.dictionary, (ids: Id[], dict) => {
-			if (!ids) return undefined;
-			const entities = ids.map(id => dict[id]);
-			if (options && options.asDict) return keyBy(entities, 'id');
-			return entities;
-		});
+		const selector = this.getEntitiesSelectorByIdsSelector(pageIdsSelector, options);
+		return this.select(selector);
+	}
+
+	getAll(options?: IEntityActionOptions): Observable<any> {
+		const selector = this.getEntitiesSelectorByIdsSelector(this.selectors.ids, options);
 		return this.select(selector);
 	}
 
@@ -143,6 +152,18 @@ export class Actor<T extends object = object, S extends IActorSchema = IActorSch
 			loadingStates: createLoadingStatesReducer(this.actionTypes),
 			pages: createPagesReducer(this.actionTypes),
 		});
+	}
+
+	private getEntitiesSelectorByIdsSelector(idsSelector, options?: IEntityActionOptions) {
+		return createSelector(
+			idsSelector,
+			this.selectors.dictionary,
+			(ids: Id[], dict: IDictionary<T>) => {
+				const entities = ids.map(id => dict[id]);
+				if (options && options.asDict) return keyBy(entities, 'id');
+				return entities;
+			},
+		);
 	}
 
 	protected isRelatedConfigEmpty() {
