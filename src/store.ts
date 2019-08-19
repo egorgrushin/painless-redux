@@ -1,7 +1,7 @@
 import { defaultsDeep, isArray, values } from 'lodash';
 import { createDomainSelector, createLoadingStatesGlobalSelector, createSlotSelector } from './selectors';
-import { IDictionary, IStoreSchema, StoreActionTypes, Type } from './types';
-import { combineReducers, Store } from '@ngrx/store';
+import { IDictionary, IRxStore, IStoreSchema, StoreActionTypes, Type } from './types';
+import * as combineReducers  from 'combine-reducers';
 import { Slot } from './slot';
 import { createLoadingStateReducer } from './reducers/loadingStateFactory';
 import { Entity } from './entity';
@@ -13,30 +13,23 @@ export class StoreLib extends Slot<IStoreSchema> {
 
 	private slotDomainsMap: IDictionary<Type<Slot>> = {};
 
-	constructor(schema?: IStoreSchema) {
+	constructor(rxStore: IRxStore<any>, schema?: IStoreSchema) {
 		super(defaultsDeep(schema, {
 			name: '@store',
 			entityDomainName: 'entities',
 			workspaceDomainName: 'workspaces',
 			domainSelector: (state) => state,
 		}));
+		this.rxStore = rxStore;
 		this.buildSlotDomainsMap();
 		this.registerSlot(this, true);
-	}
-
-	connect(rxStore: Store<any>, slots: Slot[]) {
-		this.rxStore = rxStore;
-		if (slots) {
-			this.registerSlots(slots);
-		}
-		this.getSlots().forEach(entity => entity.rxStore = rxStore);
-		const reducer = this.getReducer();
-		this.rxStore.addReducer(this.schema.name, reducer);
 	}
 
 	registerSlots(slots: Slot | Slot[]) {
 		slots = (isArray(slots) ? slots : [slots]) as Slot[];
 		slots.forEach((slot) => this.registerSlot(slot));
+		const reducer = this.getReducer();
+		this.rxStore.addReducer(this.schema.name, reducer);
 	}
 
 	getSlotByName(name: string): Slot {
@@ -55,6 +48,7 @@ export class StoreLib extends Slot<IStoreSchema> {
 	}
 
 	protected registerSlot(slot: Slot, itself = false) {
+		slot.rxStore = this.rxStore;
 		slot.store = this;
 		let domainSelector = this.schema.domainSelector;
 		if (!itself) {

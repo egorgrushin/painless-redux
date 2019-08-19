@@ -1,4 +1,4 @@
-import { createSelector } from '@ngrx/store';
+import { createSelector } from 'reselect';
 import { Id, IDictionary, ILoadingState, IPage } from '../types';
 import { createPageDomainSelector } from './pages';
 

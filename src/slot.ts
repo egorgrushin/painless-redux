@@ -2,16 +2,15 @@ import { asapScheduler, Observable } from 'rxjs';
 import { defaultsDeep } from 'lodash';
 
 import { subscribeOn, take } from 'rxjs/operators';
-import { IBaseSchema, IEntityActionEnhancedOptions, StoreActionTypes } from './types';
-import { select, Store } from '@ngrx/store';
-import { capitalizeAll, hashIt } from './utils';
+import { IBaseSchema, IEntityActionEnhancedOptions, IRxStore, StoreActionTypes } from './types';
+import { capitalizeAll, hashIt, select } from './utils';
 import { StoreLib } from './store';
 
 export abstract class Slot<S extends IBaseSchema = IBaseSchema> {
 	store: StoreLib;
 	actionCreators: any;
 	actionTypes: StoreActionTypes;
-	rxStore: Store<any>;
+	rxStore: IRxStore<any>;
 	protected _selector: (state: any) => any;
 	protected selectors;
 
@@ -36,7 +35,7 @@ export abstract class Slot<S extends IBaseSchema = IBaseSchema> {
 
 	protected select<R>(selector, isAsap?: boolean): Observable<R> {
 		const selectObs = this.rxStore.pipe(
-			select<any, any, R>(selector),
+			select<any, R>(selector),
 		);
 		if (!isAsap) return selectObs;
 		return selectObs.pipe(subscribeOn(asapScheduler));

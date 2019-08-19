@@ -1,6 +1,6 @@
 import { createLoadingStatesByIdReducer } from './loadingStateByIdFactory';
 import { createLoadingStateReducer } from './loadingStateFactory';
-import { combineReducers } from '@ngrx/store';
+import * as combineReducers  from 'combine-reducers';
 import { IStoreLoadingStateActionTypes } from '../types';
 
 export const createLoadingStatesReducer = (types: IStoreLoadingStateActionTypes) => combineReducers({

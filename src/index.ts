@@ -1,5 +1,7 @@
 export * from './store';
 export * from './entity';
+export * from './slot';
+export * from './actor';
 export * from './types';
 export * from './workspace';
 export * from './foreign-keys';
@@ -7,4 +9,3 @@ export { undoReducerFactory, batchActionsReducerFactory } from './reducers/syste
 export { loadingStateByKeysReducer, loadingStateReducer } from './reducers/loadingStateFactory';
 export { updateAtPath, hashString, actionSanitizer, hashIt, affectStateFactory } from './utils';
 export * from './action-creators/system';
-export * from './store-connecting.module';

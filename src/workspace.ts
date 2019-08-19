@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 import { BooleanMap, ILoadingState, IWorkspaceSchema, DeepPartial, SelectResult } from './types';
 import { Slot } from './slot';
 import * as actionCreators from './action-creators/workspaces';
-import { combineReducers } from '@ngrx/store';
+import * as combineReducers  from 'combine-reducers';
 import { createLoadingStateReducer } from './reducers/loadingStateFactory';
 import { createLoadingStateByKeySelector, createLoadingStateSelector } from './selectors';
 import { createWorkspaceValueReducer } from './reducers/worspaceFactories';

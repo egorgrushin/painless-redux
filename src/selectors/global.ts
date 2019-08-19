@@ -1,4 +1,4 @@
-import { createSelector } from '@ngrx/store';
+import { createSelector } from 'reselect';
 
 export const createSlotSelector = (domainSelector, slotName) =>
 	createSelector(domainSelector, (s: any) => s[slotName]);

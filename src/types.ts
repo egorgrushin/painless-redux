@@ -1,5 +1,10 @@
 import { Observable } from 'rxjs';
 
+export interface IRxStore<T> extends Observable<T> {
+	dispatch(action: { type: string });
+	addReducer(key: string, reducer: any);
+}
+
 export const BASE_PAGE_SIZE = 300;
 
 export interface IStoreSchema extends IBaseSchema {
