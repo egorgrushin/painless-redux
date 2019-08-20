@@ -7,7 +7,7 @@ import { createLoadingStateReducer } from './reducers/loadingStateFactory';
 import { Entity } from './entity';
 import { Workspace } from './workspace';
 
-export class StoreLib extends Slot<IStoreSchema> {
+export class PainlessRedux extends Slot<IStoreSchema> {
 	private slots: IDictionary<Slot> = {};
 	private registeredActionTypes = {};
 
