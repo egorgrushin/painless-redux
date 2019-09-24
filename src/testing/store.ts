@@ -1,5 +1,5 @@
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
-import { IRxStore } from '../src';
+import { IRxStore } from '../index';
 
 export class TestStore<T> extends BehaviorSubject<T> implements IRxStore<T> {
 	actions$: ReplaySubject<T> = new ReplaySubject();

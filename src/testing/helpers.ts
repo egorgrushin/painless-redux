@@ -1,4 +1,4 @@
-import { PainlessRedux, Slot } from '../src';
+import { PainlessRedux, Slot } from '../index';
 import { cold } from 'jest-marbles';
 import { TestStore } from './store';
 import * as combineReducers from 'combine-reducers';

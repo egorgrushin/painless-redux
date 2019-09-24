@@ -1,4 +1,4 @@
-/* tslint:disable:no-magic-numbers */
+
 import { BATCH_ACTIONS, batchActionsReducerFactory, IStoreAction, UNDO_ACTION, undoReducerFactory } from '..';
 
 describe('systemFactory', () => {

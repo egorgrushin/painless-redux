@@ -1,8 +1,8 @@
 import 'jest';
 import { cold } from 'jest-marbles';
 import { Workspace } from './workspace';
-import { registerSlotsInStore } from '../testing/helpers';
-import { TestStore } from '../testing/store';
+import { registerSlotsInStore } from './testing/helpers';
+import { TestStore } from './testing/store';
 
 interface ITestWorkspace {
 	fill?: boolean;
