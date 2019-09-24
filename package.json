@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "rimraf dist && tsc",
-    "preversion": "npm run test",
+    "preversion": "npm run build && npm run test",
     "test": "jest"
   },
   "repository": {
