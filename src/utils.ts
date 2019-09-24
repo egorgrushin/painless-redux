@@ -134,7 +134,7 @@ export const affectStatePipeFactory = <IArgsType>(stateSetter: AffectStateFactor
 			let stateCleared: boolean;
 			return (source as any).pipe(
 				tap(() => {
-					stateSetter(true, argumentsToSetter);
+					stateSetter(true, argumentsToSetter, undefined);
 					stateCleared = false;
 				}),
 				switchMap((value) => (of(value) as any).pipe(
@@ -146,12 +146,12 @@ export const affectStatePipeFactory = <IArgsType>(stateSetter: AffectStateFactor
 					}),
 				)),
 				tap((value) => {
-					stateSetter(false, argumentsToSetter, null, value);
+					stateSetter(false, argumentsToSetter, undefined, value);
 					stateCleared = true;
 				}),
 				finalize(() => {
 					if (stateCleared) return;
-					stateSetter(false, argumentsToSetter, null, undefined, true);
+					stateSetter(false, argumentsToSetter, undefined, undefined, true);
 				}),
 			);
 		};

@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "rimraf dist && tsc",
-    "test": "exit 1"
+    "preversion": "npm run test",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -31,7 +32,13 @@
     "uuid": "^3.3.2"
   },
   "devDependencies": {
+    "@types/jest": "^24.0.18",
+    "@types/node": "^12.7.5",
+    "jest": "^24.9.0",
+    "jest-marbles": "^2.5.0",
     "rimraf": "^2.6.3",
+    "rxjs": "^6.5.3",
+    "ts-jest": "^24.1.0",
     "typescript": "^3.5.3"
   },
   "peerDependencies": {

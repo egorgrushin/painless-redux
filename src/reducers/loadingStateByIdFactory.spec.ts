@@ -1,10 +1,6 @@
 /* tslint:disable:no-magic-numbers */
-import { ILoadingState, IStoreEntityActionTypes } from '../types';
+import { IStoreEntityActionTypes } from '../types';
 import { createLoadingStatesByIdReducer } from './loadingStateByIdFactory';
-import * as loadingStateFactory from './loadingStateFactory';
-
-const loadingStateReducer = jest.fn<ILoadingState>();
-loadingStateFactory.createLoadingStateReducer = () => loadingStateReducer as any;
 
 const types: IStoreEntityActionTypes = {
 	SET_STATE: 'SET_STATE',
@@ -34,12 +30,10 @@ describe('loadingStateByIdFactory', () => {
 			payload: { id, state },
 		};
 		const initialState = {};
-		loadingStateReducer.mockReturnValue(state);
 		// act
 		const actual = reducer(initialState, action);
 		// assert
 		if (id) {
-			expect(loadingStateReducer).lastCalledWith(initialState[id], action);
 			expect(actual).toEqual({ [id]: state });
 		} else {
 			expect(actual).toEqual({});
