@@ -186,8 +186,10 @@ export const actionSanitizer = (action: IStoreAction) => ({
 	type: action.label || action.type,
 });
 
-export const select = <S, R>(selector: (value: S, index: number) => R) =>
-	(source: Observable<S>) => source.pipe(
+export const select = <S, R>(selector?: (value: S, index?: number) => R) => {
+	selector = selector || ((value: S) => value as unknown as R);
+	return (source: Observable<S>) => source.pipe(
 		map<S, R>(selector),
 		distinctUntilChanged(),
 	);
+};

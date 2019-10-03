@@ -4,7 +4,6 @@ import { Id, ILoadingState, IPagination } from './types';
 import { BehaviorSubject } from 'rxjs';
 import { getOrderedMarbleStream, registerSlotsInStore } from './testing/helpers';
 import { TestStore } from './testing/store';
-import { tap } from 'rxjs/operators';
 
 describe('Entity', () => {
 
@@ -187,6 +186,31 @@ describe('Entity', () => {
 				a: setStateActionFactory({ isLoading: true }),
 				b: addAction,
 				c: setStateActionFactory({ isLoading: false }),
+			});
+			// act
+			entity.get$(null, remoteObs).subscribe();
+			// assert
+			expect(store.actions$).toBeObservable(actions$);
+		});
+
+		xtest('should log if observable source throws error', () => {
+			// arrange
+			const error = new Error('Some error');
+			const remoteObs = cold('#|', null, error);
+			console.error = jest.fn();
+			// act
+			entity.get$(null, remoteObs).subscribe();
+			// assert
+			expect(console.error).lastCalledWith(error);
+		});
+
+		test('should set error if observable source throws error', () => {
+			// arrange
+			const error = new Error('Some error');
+			const remoteObs = cold('--#|', null, error);
+			const actions$ = cold('a-b', {
+				a: setStateActionFactory({ isLoading: true }),
+				b: setStateActionFactory({ isLoading: false, error: error.message }),
 			});
 			// act
 			entity.get$(null, remoteObs).subscribe();

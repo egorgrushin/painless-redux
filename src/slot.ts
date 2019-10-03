@@ -33,7 +33,7 @@ export abstract class Slot<S extends IBaseSchema = IBaseSchema> {
 		this.rxStore.dispatch(action);
 	}
 
-	protected select<R>(selector, isAsap?: boolean): Observable<R> {
+	protected select<R>(selector?, isAsap?: boolean): Observable<R> {
 		const selectObs = this.rxStore.pipe(
 			select<any, R>(selector),
 		);

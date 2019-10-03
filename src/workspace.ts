@@ -1,30 +1,30 @@
 import { Observable } from 'rxjs';
-import { BooleanMap, ILoadingState, IWorkspaceSchema, DeepPartial, SelectResult } from './types';
+import { BooleanMap, DeepPartial, ILoadingState, IWorkspaceSchema, SelectResult } from './types';
 import { Slot } from './slot';
 import * as actionCreators from './action-creators/workspaces';
-import * as combineReducers  from 'combine-reducers';
+import * as combineReducers from 'combine-reducers';
 import { createLoadingStateReducer } from './reducers/loadingStateFactory';
 import { createLoadingStateByKeySelector, createLoadingStateSelector } from './selectors';
 import { createWorkspaceValueReducer } from './reducers/worspaceFactories';
 import { createWorkspaceValueSelector } from './selectors/workspaces';
-import { map } from 'rxjs/operators';
+import { map, pluck } from 'rxjs/operators';
 import { affectStateFactory, maskObject } from './utils';
 
 export class Workspace<T> extends Slot<IWorkspaceSchema<T>> {
 	constructor(schema: IWorkspaceSchema<T>) { super(schema); }
 
-	get$(): Observable<T>;
-	get$<M extends BooleanMap<T>>(selectMap: M): Observable<SelectResult<T, M>>;
-	get$<M extends BooleanMap<T>>(selectMap?: M): Observable<SelectResult<T, M>> | Observable<T> {
+	getByMap$(): Observable<T>;
+	getByMap$<M extends BooleanMap<T>>(selectMap: M): Observable<SelectResult<T, M>>;
+	getByMap$<M extends BooleanMap<T>>(selectMap?: M): Observable<SelectResult<T, M>> | Observable<T> {
 		const obs = this.select(this.selectors.value);
 		if (!selectMap) return obs as Observable<T>;
-		return obs.pipe(map((value) => maskObject(value, selectMap))) as Observable<SelectResult<T, M>>;
+		return obs.pipe(map((value: T) => maskObject(value, selectMap))) as Observable<SelectResult<T, M>>;
 	}
 
-	get(): T;
-	get<M>(selectMap: M): SelectResult<T, M>;
-	get<M>(selectMap?: M): SelectResult<T, M> | T {
-		return this.snapshotFromObs(this.get$(selectMap));
+	getByMap(): T;
+	getByMap<M>(selectMap: M): SelectResult<T, M>;
+	getByMap<M>(selectMap?: M): SelectResult<T, M> | T {
+		return this.snapshotFromObs(this.getByMap$(selectMap));
 	}
 
 	change(patch: DeepPartial<T> | ((value: DeepPartial<T>) => DeepPartial<T>), label: string) {
@@ -57,6 +57,166 @@ export class Workspace<T> extends Slot<IWorkspaceSchema<T>> {
 			value: createWorkspaceValueReducer(this.actionTypes, this.schema.initialValue),
 			loadingStates: createLoadingStateReducer(this.actionTypes),
 		});
+	}
+
+	get$(): Observable<T>
+	get$<A extends keyof T,
+		B extends keyof T[A],
+		V extends T[A][B],
+		>(a: A, b: B): Observable<V>
+	get$<A extends keyof T,
+		B extends keyof T[A],
+		C extends keyof T[A][B],
+		V extends T[A][B][C],
+		>(a: A, b: B, c: C): Observable<V>
+	get$<A extends keyof T,
+		B extends keyof T[A],
+		C extends keyof T[A][B],
+		D extends keyof T[A][B][C],
+		V extends T[A][B][C][D],
+		>(a: A, b: B, c: C, d: D): Observable<V>
+	get$<A extends keyof T,
+		B extends keyof T[A],
+		C extends keyof T[A][B],
+		D extends keyof T[A][B][C],
+		E extends keyof T[A][B][C][D],
+		V extends T[A][B][C][D][E],
+		>(a: A, b: B, c: C, d: D, e: E): Observable<V>
+	get$<A extends keyof T,
+		B extends keyof T[A],
+		C extends keyof T[A][B],
+		D extends keyof T[A][B][C],
+		E extends keyof T[A][B][C][D],
+		F extends keyof T[A][B][C][D][E],
+		V extends T[A][B][C][D][E][F],
+		>(a: A, b: B, c: C, d: D, e: E, f: F): Observable<V>
+	get$<A extends keyof T,
+		B extends keyof T[A],
+		C extends keyof T[A][B],
+		D extends keyof T[A][B][C],
+		E extends keyof T[A][B][C][D],
+		F extends keyof T[A][B][C][D][E],
+		G extends keyof T[A][B][C][D][E][F],
+		V extends T[A][B][C][D][E][F][G],
+		>(a: A, b: B, c: C, d: D, e: E, f: F, g: G): Observable<V>
+	get$<A extends keyof T,
+		B extends keyof T[A],
+		C extends keyof T[A][B],
+		D extends keyof T[A][B][C],
+		E extends keyof T[A][B][C][D],
+		F extends keyof T[A][B][C][D][E],
+		G extends keyof T[A][B][C][D][E][F],
+		H extends keyof T[A][B][C][D][E][F][G],
+		V extends T[A][B][C][D][E][F][G][H],
+		>(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H): Observable<V>
+	get$<A extends keyof T,
+		B extends keyof T[A],
+		C extends keyof T[A][B],
+		D extends keyof T[A][B][C],
+		E extends keyof T[A][B][C][D],
+		F extends keyof T[A][B][C][D][E],
+		G extends keyof T[A][B][C][D][E][F],
+		H extends keyof T[A][B][C][D][E][F][G],
+		I extends keyof T[A][B][C][D][E][F][G][H],
+		V extends T[A][B][C][D][E][F][G][H][I],
+		>(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I): Observable<V>
+	get$<A extends keyof T,
+		B extends keyof T[A],
+		C extends keyof T[A][B],
+		D extends keyof T[A][B][C],
+		E extends keyof T[A][B][C][D],
+		F extends keyof T[A][B][C][D][E],
+		G extends keyof T[A][B][C][D][E][F],
+		H extends keyof T[A][B][C][D][E][F][G],
+		I extends keyof T[A][B][C][D][E][F][G][H],
+		J extends keyof T[A][B][C][D][E][F][G][H][I],
+		V extends T[A][B][C][D][E][F][G][H][I][J],
+		>(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I, j: J): Observable<V>
+	get$(...args: string[]): Observable<T> {
+		const obs = this.select<T>(this.selectors.value);
+		if (args.length === 0) return obs;
+		return obs.pipe(pluck(...args));
+	}
+
+	get(): T
+	get<A extends keyof T,
+		V extends T[A],
+		>(a: A): V
+	get<A extends keyof T,
+		B extends keyof T[A],
+		V extends T[A][B],
+		>(a: A, b: B): V
+	get<A extends keyof T,
+		B extends keyof T[A],
+		C extends keyof T[A][B],
+		V extends T[A][B][C],
+		>(a: A, b: B, c: C): V
+	get<A extends keyof T,
+		B extends keyof T[A],
+		C extends keyof T[A][B],
+		D extends keyof T[A][B][C],
+		V extends T[A][B][C][D],
+		>(a: A, b: B, c: C, d: D): V
+	get<A extends keyof T,
+		B extends keyof T[A],
+		C extends keyof T[A][B],
+		D extends keyof T[A][B][C],
+		E extends keyof T[A][B][C][D],
+		V extends T[A][B][C][D][E],
+		>(a: A, b: B, c: C, d: D, e: E): V
+	get<A extends keyof T,
+		B extends keyof T[A],
+		C extends keyof T[A][B],
+		D extends keyof T[A][B][C],
+		E extends keyof T[A][B][C][D],
+		F extends keyof T[A][B][C][D][E],
+		V extends T[A][B][C][D][E][F],
+		>(a: A, b: B, c: C, d: D, e: E, f: F): V
+	get<A extends keyof T,
+		B extends keyof T[A],
+		C extends keyof T[A][B],
+		D extends keyof T[A][B][C],
+		E extends keyof T[A][B][C][D],
+		F extends keyof T[A][B][C][D][E],
+		G extends keyof T[A][B][C][D][E][F],
+		V extends T[A][B][C][D][E][F][G],
+		>(a: A, b: B, c: C, d: D, e: E, f: F, g: G): V
+	get<A extends keyof T,
+		B extends keyof T[A],
+		C extends keyof T[A][B],
+		D extends keyof T[A][B][C],
+		E extends keyof T[A][B][C][D],
+		F extends keyof T[A][B][C][D][E],
+		G extends keyof T[A][B][C][D][E][F],
+		H extends keyof T[A][B][C][D][E][F][G],
+		V extends T[A][B][C][D][E][F][G][H],
+		>(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H): V
+	get<A extends keyof T,
+		B extends keyof T[A],
+		C extends keyof T[A][B],
+		D extends keyof T[A][B][C],
+		E extends keyof T[A][B][C][D],
+		F extends keyof T[A][B][C][D][E],
+		G extends keyof T[A][B][C][D][E][F],
+		H extends keyof T[A][B][C][D][E][F][G],
+		I extends keyof T[A][B][C][D][E][F][G][H],
+		V extends T[A][B][C][D][E][F][G][H][I],
+		>(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I): V
+	get<A extends keyof T,
+		B extends keyof T[A],
+		C extends keyof T[A][B],
+		D extends keyof T[A][B][C],
+		E extends keyof T[A][B][C][D],
+		F extends keyof T[A][B][C][D][E],
+		G extends keyof T[A][B][C][D][E][F],
+		H extends keyof T[A][B][C][D][E][F][G],
+		I extends keyof T[A][B][C][D][E][F][G][H],
+		J extends keyof T[A][B][C][D][E][F][G][H][I],
+		V extends T[A][B][C][D][E][F][G][H][I][J],
+		>(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I, j: J): V
+	get(...args: string[]) {
+		const obs = this.get$.call(this, ...args);
+		return this.snapshotFromObs(obs);
 	}
 
 	protected stateSetter(isLoading: boolean, args: { key: string }, error?: { message: string }) {

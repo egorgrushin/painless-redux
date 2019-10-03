@@ -1,5 +1,5 @@
 import { IStoreAction, IStoreWorkspaceActionTypes } from '../types';
-import { merge } from 'lodash/fp';
+import { mergeWith } from 'lodash/fp';
 
 export const createWorkspaceValueReducer = <T>(types: IStoreWorkspaceActionTypes, initialValue: Partial<T>) => (
 	state: Partial<T> = initialValue,
@@ -8,7 +8,9 @@ export const createWorkspaceValueReducer = <T>(types: IStoreWorkspaceActionTypes
 	const payload = action.payload;
 	switch (action.type) {
 		case types.CHANGE: {
-			return merge(state, payload.patch);
+			return mergeWith((objValue, srcValue) => {
+				if (Array.isArray(objValue)) return srcValue;
+			}, state, payload.patch);
 		}
 		default:
 			return state;
