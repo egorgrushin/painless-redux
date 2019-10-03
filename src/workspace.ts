@@ -61,6 +61,9 @@ export class Workspace<T> extends Slot<IWorkspaceSchema<T>> {
 
 	get$(): Observable<T>
 	get$<A extends keyof T,
+		V extends T[A],
+		>(a: A): Observable<V>
+	get$<A extends keyof T,
 		B extends keyof T[A],
 		V extends T[A][B],
 		>(a: A, b: B): Observable<V>
