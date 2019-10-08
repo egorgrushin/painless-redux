@@ -5,7 +5,7 @@ import { merge, updateAtPath } from '../utils';
 const addList = (state: any, data: any[], options?: IEntityActionOptions) => {
 	const newEntities = keyBy(data, 'id');
 	if (options && options.merge) {
-		return merge(state, newEntities);
+		return merge(state, newEntities, options.crutch);
 	}
 	return { ...state, ...newEntities };
 };
