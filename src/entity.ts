@@ -1,4 +1,4 @@
-import { isNil } from 'lodash';
+import { isNil, defaultsDeep } from 'lodash';
 import { BehaviorSubject, EMPTY, merge, Observable, of, OperatorFunction } from 'rxjs';
 import { filter, first, map, scan, switchMap, tap } from 'rxjs/operators';
 import { Actor } from './actor';
@@ -79,6 +79,7 @@ export class Entity<T extends object = object, I extends Id[] | Id = Id> extends
 		options?: IEntityActionOptions,
 		paginatorSubj?: BehaviorSubject<boolean>,
 	): Observable<never> {
+		options = defaultsDeep(options, { pageSize: this.schema.pageSize });
 		const storeObs = this.get$(config, null, options);
 		const sourcePipe = this.getRemotePipe<IPagination, IPaginatedResponse<Partial<T>>, never>({
 				config,
@@ -94,7 +95,7 @@ export class Entity<T extends object = object, I extends Id[] | Id = Id> extends
 				},
 			},
 		);
-		return this.getPaginator(config, paginatorSubj).pipe(sourcePipe);
+		return this.getPaginator(config, paginatorSubj, options).pipe(sourcePipe);
 	}
 
 	loadById(id: I, dataObs?: OResponse<Partial<T>>, options?: IEntityActionOptions): Observable<never> {
@@ -217,6 +218,7 @@ export class Entity<T extends object = object, I extends Id[] | Id = Id> extends
 	private getPaginator(
 		config: any,
 		paginatorSubj: BehaviorSubject<boolean>,
+		options: IEntityActionOptions,
 	): Observable<IPagination> {
 		paginatorSubj = paginatorSubj || new BehaviorSubject(false);
 		const pageObs = this.getPage(config);
@@ -225,7 +227,7 @@ export class Entity<T extends object = object, I extends Id[] | Id = Id> extends
 			switchMap((isNext) => this.guardIfLoading(loadingStateObs).pipe(map(() => isNext))),
 			scan((prevIndex: number, isNext: boolean) => isNext ? prevIndex + 1 : 0, -1),
 			map((index: number) => {
-				const size = this.schema.pageSize;
+				const size = options.pageSize;
 				const from = index * size;
 				const to = from + size - 1;
 				return { index, size, from, to };
