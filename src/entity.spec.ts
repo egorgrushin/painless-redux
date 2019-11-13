@@ -181,7 +181,7 @@ describe('Entity', () => {
 			// arrange
 			const users = [user];
 			const remoteObs = cold('--a|', { a: { data: users } });
-			const addAction = entity.actionCreators.addList(users, null, true, true);
+			const addAction = entity.actionCreators.addList(users, null, true, true, { pageSize: 1 });
 			const actions$ = cold('a-(bc)', {
 				a: setStateActionFactory({ isLoading: true }),
 				b: addAction,
