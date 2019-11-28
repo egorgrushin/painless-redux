@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/GrushinEgor/painless-redux.git"
+    "url": "git+https://github.com/egorgrushin/painless-redux.git"
   },
   "keywords": [
     "redux",
@@ -20,9 +20,9 @@
   "author": "Grushin Egor",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/GrushinEgor/painless-redux/issues"
+    "url": "https://github.com/egorgrushin/painless-redux/issues"
   },
-  "homepage": "https://github.com/GrushinEgor/painless-redux#readme",
+  "homepage": "https://github.com/egorgrushin/painless-redux#readme",
   "dependencies": {
     "combine-reducers": "^1.0.0",
     "crypto-js": "^3.1.9-1",
