@@ -2,7 +2,9 @@
 Reducers-actions-selectors free reactive state management in redux-way
 
 # Overview
-This package allows you to use CRUD (Create, Read, Update and Delete) manipulations with entities and workspaces. Underhood it uses [@ngrx/store](https://github.com/ngrx/platform) (redux like + rxjs), but with this library you don't have to create boilerplate code (e.g. reducers, actions, selectors, action creators etc.). It provides several simple methods such as get, create, remove, change etc. for using on Entity instance. It also provides loading state management (i.e. isLoading and error). For working with Angular it provides connector.
+This package allows you to use CRUD (Create, Read, Update and Delete) manipulations with entities and workspaces.
+Underhood it uses any redux-like library you want to (e.g. [@ngrx/store](https://github.com/ngrx/platform)) but with this library you don't have to create boilerplate code (e.g. reducers, actions, selectors, action creators etc.). It provides several simple methods such as get, create, remove, change etc. for using on Entity instance. It also provides loading state management (i.e. isLoading and error). For working with Angular it provides connector.
+All methods working with outer data sources (e.g. requests passed to `get$` method) are rxjs powered.
 
 # How to use
 
