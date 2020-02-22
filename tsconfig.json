@@ -4,9 +4,7 @@
     "module": "commonjs",
     "declaration": true,
     "outDir": "./dist",
-    "noImplicitAny": false,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
+    "strict": true,
     "lib": [
       "dom",
       "es2015",
