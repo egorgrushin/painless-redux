@@ -6,7 +6,6 @@ import { WorkspaceActions } from './actions';
 import { createLoadingStateReducer } from '../shared/loading-state/reducers';
 import { createChangeReducer } from '../shared/change/reducer';
 
-
 export const createWorkspaceReducer = <T>(
     actionTypes: WorkspaceActionTypes,
     initialValue?: Partial<T>,

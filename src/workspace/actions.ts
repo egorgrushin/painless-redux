@@ -1,13 +1,13 @@
 import * as changeActions from '../shared/change/actions';
 import { LoadingStateActions } from '../shared/loading-state/actions';
-import { ChangeActionOptions } from '../shared/change/types';
+import { ChangeOptions } from '../shared/change/types';
 import { WorkspaceActionTypes } from './types';
 
 
 export const createChange = (types: WorkspaceActionTypes) => (
     patch: any,
     label: string,
-    options?: ChangeActionOptions,
+    options?: ChangeOptions,
 ) => {
     const action = changeActions.createChange(types)(patch, options);
     return { ...action, label } as const;

@@ -1,12 +1,12 @@
 import {
     EntityAddOptions,
+    EntityChangeOptions,
     EntityGetListOptions,
     EntityGetOptions,
     EntityLoadListOptions,
     EntityLoadOptions,
     EntityRemoveOptions,
     EntityResponse,
-    EntitySchema,
     PaginatedResponse,
     Pagination,
     Response$,
@@ -15,24 +15,23 @@ import {
 import { BehaviorSubject, merge, Observable, of } from 'rxjs';
 import { DispatchEntityMethods } from '../dispatch/types';
 import { SelectEntityMethods } from '../select/types';
-import { typedDefaultsDeep } from '../../../utils';
 import { getPaginated$, guardIfLoading } from '../../utils';
 import { DeepPartial, Dictionary, Id, LoadingState } from '../../../system-types';
 import { createMixedEntityMethodsUtils } from './utils';
 import { MixedEntityMethods } from './types';
-import { ChangeActionOptions } from '../../../shared/change/types';
-
+import { v4 } from 'uuid';
 
 export const createMixedEntityMethods = <T>(
     dispatchMethods: DispatchEntityMethods<T>,
     selectMethods: SelectEntityMethods<T>,
-    schema: EntitySchema<T>,
 ): MixedEntityMethods<T> => {
 
     const {
         getRemotePipe,
         getPaginator,
         tryInvoke,
+        getPatchByOptions,
+        getResolvePatchByOptions,
     } = createMixedEntityMethodsUtils(dispatchMethods, selectMethods);
 
     const loadList = (
@@ -41,19 +40,19 @@ export const createMixedEntityMethods = <T>(
         options?: EntityLoadListOptions,
         paginatorSubj?: BehaviorSubject<boolean>,
     ): Observable<never> => {
-        options = typedDefaultsDeep(options, { pageSize: schema.pageSize });
         const store$ = selectMethods.get$(config);
-        const sourcePipe = getRemotePipe<Pagination, PaginatedResponse<Partial<T>>, never>({
+        const sourcePipe = getRemotePipe<Pagination, PaginatedResponse<T>, never>({
                 config,
                 options,
                 store$,
                 remoteObsOrFactory: (pagination) => getPaginated$(dataSource, pagination),
                 success: (result) => {
+                    if (!result) return;
                     const { index, size, response } = result;
                     const data = response.data || [];
                     const isReplace = index === 0;
                     const hasMore = data.length >= size;
-                    dispatchMethods.addList(data, config, isReplace, hasMore, options);
+                    return dispatchMethods.addList(data, config, isReplace, hasMore, options);
                 },
             },
         );
@@ -61,20 +60,23 @@ export const createMixedEntityMethods = <T>(
     };
 
     const loadById = (
-        id: Id | Id[],
-        dataSource$: Response$<Partial<T>>,
+        id: Id,
+        dataSource$: Response$<T>,
         options?: EntityLoadOptions,
     ): Observable<never> => {
         const store$ = selectMethods.getById$(id);
-        const sourcePipe = getRemotePipe<LoadingState | undefined, EntityResponse<Partial<T>>, never>({
+        const sourcePipe = getRemotePipe<LoadingState | undefined, EntityResponse<T>, never>({
             id,
             options,
             store$,
             remoteObsOrFactory: dataSource$,
-            success: (response) => dispatchMethods.add({
-                ...response.data,
-                id,
-            }, null, options),
+            success: (response) => {
+                if (!response) return;
+                return dispatchMethods.add({
+                    ...response.data,
+                    id,
+                }, null, options);
+            },
         });
         const loadingState$ = selectMethods.getLoadingStateById$(id, true);
         return guardIfLoading(loadingState$).pipe(sourcePipe);
@@ -96,7 +98,6 @@ export const createMixedEntityMethods = <T>(
         return tryInvoke(store$, invoker, dataSource);
     };
 
-
     const get$ = (
         config: any,
         dataSource?: Response$<T[]> | Response$Factory<T[]>,
@@ -112,7 +113,6 @@ export const createMixedEntityMethods = <T>(
             paginatorSubj,
         );
     };
-
 
     const getDictionary$ = (
         config: any,
@@ -131,8 +131,8 @@ export const createMixedEntityMethods = <T>(
     };
 
     const getById$ = (
-        id: Id | Id[],
-        dataSource?: Response$<Partial<T>>,
+        id: Id,
+        dataSource?: Response$<T>,
         options?: EntityGetOptions,
     ): Observable<T | undefined> => {
         const store$ = selectMethods.getById$(id);
@@ -145,43 +145,58 @@ export const createMixedEntityMethods = <T>(
 
     const createRemote = (
         config: any,
-        dataSource$: Response$<Partial<T>>,
+        dataSource$: Response$<T>,
         options?: EntityAddOptions,
-    ): Response$<Partial<T>> => {
-        const sourcePipe = getRemotePipe<null, EntityResponse<Partial<T>>>({
+    ): Response$<T> => {
+        const sourcePipe = getRemotePipe<null, EntityResponse<T>>({
             config,
             options,
             remoteObsOrFactory: dataSource$,
             success: (result) => {
-                dispatchMethods.create(result.data, config, options);
+                if (!result) return;
+                return dispatchMethods.create(result.data, config, options);
             },
             emitOnSuccess: true,
         });
         return of(null).pipe(sourcePipe);
     };
 
-
     const changeRemote = (
+        id: Id,
         patch: DeepPartial<T>,
-        id: Id | Id[],
         dataSource$: Observable<any>,
-        options?: ChangeActionOptions,
-    ): Response$<Partial<T>> => {
-        const sourcePipe = getRemotePipe<LoadingState | undefined, EntityResponse<Partial<T>>>({
+        options?: EntityChangeOptions,
+    ): Response$<DeepPartial<T>> => {
+        const changeId = v4();
+        const { changeWithId, resolveChange } = dispatchMethods;
+        const { getLoadingStateById$ } = selectMethods;
+
+        const sourcePipe = getRemotePipe<LoadingState | undefined, EntityResponse<DeepPartial<T>>>({
             id,
             options,
             remoteObsOrFactory: dataSource$,
-            success: () => {
-                dispatchMethods.change(id, patch, options);
+            success: (
+                response?: EntityResponse<DeepPartial<T>>,
+            ) => {
+                const patchToApply = getPatchByOptions(patch, response, options) ?? {};
+                return changeWithId(id, patchToApply, changeId, options);
             },
             emitOnSuccess: true,
+            optimistic: options?.optimistic,
+            optimisticResolve: (
+                success: boolean,
+                response?: EntityResponse<DeepPartial<T>>,
+            ) => {
+                const patchToApply = getResolvePatchByOptions(patch, response, options);
+                return resolveChange(id, changeId, success, patchToApply, options);
+            },
         });
-        const loadingState$ = selectMethods.getLoadingStateById$(id, true);
+        const loadingState$ = getLoadingStateById$(id, true);
         return guardIfLoading(loadingState$).pipe(sourcePipe);
     };
 
     const removeRemote = (
-        id: Id | Id[],
+        id: Id,
         observable: Observable<EntityResponse>,
         options?: EntityRemoveOptions,
     ): Observable<EntityResponse> => {
@@ -189,16 +204,14 @@ export const createMixedEntityMethods = <T>(
             id,
             options,
             remoteObsOrFactory: observable,
-            success: () => {
-                dispatchMethods.remove(id, options);
-            },
+            success: () => dispatchMethods.remove(id, options),
             emitSuccessOutsideAffectState: true,
             emitOnSuccess: true,
+            optimistic: options?.optimistic,
         });
         const loadingState$ = selectMethods.getLoadingStateById$(id, true);
         return guardIfLoading(loadingState$).pipe(sourcePipe);
     };
-
 
     return {
         loadList,

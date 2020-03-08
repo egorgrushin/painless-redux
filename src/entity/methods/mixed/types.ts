@@ -1,5 +1,6 @@
 import {
     EntityAddOptions,
+    EntityChangeOptions,
     EntityGetListOptions,
     EntityGetOptions,
     EntityLoadListOptions,
@@ -11,51 +12,57 @@ import {
 } from '../../types';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { DeepPartial, Dictionary, Id } from '../../../system-types';
-import { ChangeActionOptions } from '../../../shared/change/types';
 
 export interface MixedEntityMethods<T> {
-    loadList: (
+    loadList(
         config: any,
         dataSource: (Response$<T[]> | Response$Factory<T[]>),
         options?: EntityLoadListOptions,
         paginatorSubj?: BehaviorSubject<boolean>,
-    ) => Observable<never>;
-    loadById: (
-        id: Id | Id[],
-        dataSource$: Response$<Partial<T>>,
+    ): Observable<never>;
+
+    loadById(
+        id: Id,
+        dataSource$: Response$<T>,
         options?: EntityLoadOptions,
-    ) => Observable<never>;
-    get$: (
+    ): Observable<never>;
+
+    get$(
         config: any,
         dataSource?: (Response$<T[]> | Response$Factory<T[]>),
         options?: EntityGetListOptions,
         paginatorSubj?: BehaviorSubject<boolean>,
-    ) => Observable<T[] | undefined>;
-    getDictionary$: (
+    ): Observable<T[] | undefined>;
+
+    getDictionary$(
         config: any,
         dataSource?: (Response$<T[]> | Response$Factory<T[]>),
         options?: EntityGetListOptions,
         paginatorSubj?: BehaviorSubject<boolean>,
-    ) => Observable<Dictionary<T>>;
-    getById$: (
-        id: Id | Id[],
-        dataSource?: Response$<Partial<T>>,
+    ): Observable<Dictionary<T>>;
+
+    getById$(
+        id: Id,
+        dataSource?: Response$<T>,
         options?: EntityGetOptions,
-    ) => Observable<T | undefined>;
-    createRemote: (
+    ): Observable<T | undefined>;
+
+    createRemote(
         config: any,
-        dataSource$: Response$<Partial<T>>,
+        dataSource$: Response$<T>,
         options?: EntityAddOptions,
-    ) => Response$<Partial<T>>;
-    changeRemote: (
+    ): Response$<T>;
+
+    changeRemote(
+        id: Id,
         patch: DeepPartial<T>,
-        id: Id | Id[],
         dataSource$: Observable<any>,
-        options?: ChangeActionOptions,
-    ) => Response$<Partial<T>>;
-    removeRemote: (
-        id: Id | Id[],
+        options?: EntityChangeOptions,
+    ): Response$<DeepPartial<T>>;
+
+    removeRemote(
+        id: Id,
         observable: Observable<EntityResponse>,
         options?: EntityRemoveOptions,
-    ) => Observable<EntityResponse>;
+    ): Observable<EntityResponse>;
 }
