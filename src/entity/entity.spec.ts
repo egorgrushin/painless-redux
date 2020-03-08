@@ -7,6 +7,10 @@ import { createPainlessRedux } from '../painless-redux/painless-redux';
 import { PainlessRedux } from '../painless-redux/types';
 import { Entity, Pagination } from './types';
 import { BehaviorSubject } from 'rxjs';
+import { mocked } from 'ts-jest';
+import * as uuid from 'uuid';
+
+jest.mock('uuid');
 
 interface TestEntity {
     id: number;
@@ -23,6 +27,7 @@ describe('Entity', () => {
     let user3: any;
     let initialState: any;
     let reducer: any;
+    let idFn = jest.fn();
 
     const setStateActionFactory = <E>(
         state: LoadingState<E>,
@@ -32,7 +37,11 @@ describe('Entity', () => {
     beforeEach(() => {
         store = new TestStore();
         pr = createPainlessRedux(store);
-        entity = createEntity<TestEntity>(pr, { name: 'test', pageSize: 1 });
+        entity = createEntity<TestEntity>(pr, {
+            name: 'test',
+            pageSize: 1,
+            id: idFn,
+        });
         reducer = initStoreWithPr(store, pr);
         user = { id: 1, name: 'John' };
         user2 = { id: 2, name: 'Alex' };
@@ -46,6 +55,37 @@ describe('Entity', () => {
             const actions$ = getOrderedMarbleStream(addAction);
             // act
             entity.add(user);
+            // assert
+            expect(store.actions$).toBeObservable(actions$);
+        });
+
+        test('should resolve id from schema.id fn and add entity', () => {
+            // arrange
+            mocked(idFn).mockImplementationOnce((data): string | number => data.id ?? `$${data.name}`);
+            const userWithoutId = { name: user.name };
+            const addAction = entity.actionCreators.ADD({
+                ...userWithoutId,
+                id: `$${userWithoutId.name}`,
+            });
+            const actions$ = getOrderedMarbleStream(addAction);
+            // act
+            entity.add(userWithoutId);
+            // assert
+            expect(store.actions$).toBeObservable(actions$);
+        });
+
+        test('should resolve id if it does not exist and add entity', () => {
+            // arrange
+            const randomId = 'adav3r2brh35';
+            mocked(uuid.v4).mockReturnValueOnce(randomId);
+            const userWithoutId = { name: user.name };
+            const addAction = entity.actionCreators.ADD({
+                ...userWithoutId,
+                id: randomId,
+            });
+            const actions$ = getOrderedMarbleStream(addAction);
+            // act
+            entity.add(userWithoutId);
             // assert
             expect(store.actions$).toBeObservable(actions$);
         });

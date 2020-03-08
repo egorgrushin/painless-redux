@@ -1,13 +1,8 @@
-import {
-    EntityAddListOptions,
-    EntityAddOptions,
-    EntityChangeOptions,
-    EntityRemoveOptions,
-    EntitySetStateOptions,
-} from '../../types';
+import { EntityAddListOptions, EntityAddOptions, EntityRemoveOptions, EntitySetStateOptions } from '../../types';
 import { DeepPartial, Id, LoadingState } from '../../../system-types';
 import { EntityActions } from '../../actions';
 import { Observable, OperatorFunction } from 'rxjs';
+import { ChangeActionOptions } from '../../../shared/change/types';
 
 export interface DispatchEntityMethods<T> {
     add: (
@@ -30,7 +25,7 @@ export interface DispatchEntityMethods<T> {
     change: (
         id: Id | Id[],
         patch: DeepPartial<T>,
-        options?: EntityChangeOptions,
+        options?: ChangeActionOptions,
     ) => EntityActions;
     remove: (
         id: Id | Id[],

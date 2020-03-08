@@ -8,7 +8,6 @@ import {
 } from './types';
 import { Id, LoadingState } from '../system-types';
 import * as changeActions from '../shared/change/actions';
-import { ChangeActions } from '../shared/change/actions';
 import { typedDefaultsDeep } from '../utils';
 import * as loadingStateActions from '../shared/loading-state/actions';
 import { ChangeActionOptions } from '../shared/change/types';
