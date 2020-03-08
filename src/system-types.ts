@@ -4,7 +4,7 @@ export type Dictionary<T> = Record<string, T>;
 
 export type Id = string | number;
 
-export interface LoadingState<E = string> {
+export interface LoadingState<E = any> {
     byKeys?: Dictionary<LoadingState>;
     isLoading: boolean;
     error?: E;
@@ -21,6 +21,11 @@ export interface RxStore<T = any> extends Observable<T> {
 
 export interface AnyAction {
     type: string;
+}
+
+export interface PayloadAction<T = any> {
+    type: string;
+    payload: T;
 }
 
 export type Reducer<S, A extends AnyAction> = (
@@ -50,5 +55,10 @@ export type DeepPartial<T> = {
             ? ReadonlyArray<DeepPartial<U>>
             : DeepPartial<T[P]>
 };
+
+
+
+
+
 
 

@@ -5,7 +5,7 @@ import { TestStore } from '../testing/store';
 import { createEntity } from './entity';
 import { createPainlessRedux } from '../painless-redux/painless-redux';
 import { PainlessRedux } from '../painless-redux/types';
-import { Entity, Pagination } from './types';
+import { Entity, EntityChangeOptions, Pagination } from './types';
 import { BehaviorSubject } from 'rxjs';
 import { mocked } from 'ts-jest';
 import * as uuid from 'uuid';
@@ -13,7 +13,6 @@ import * as uuid from 'uuid';
 jest.mock('uuid');
 
 interface TestEntity {
-    id: number;
     name: string;
 }
 
@@ -27,15 +26,15 @@ describe('Entity', () => {
     let user3: any;
     let initialState: any;
     let reducer: any;
-    let idFn = jest.fn();
+    let idFn = jest.fn((data) => data.id);
 
     const setStateActionFactory = <E>(
         state: LoadingState<E>,
-        id?: Id | Id[],
+        id?: Id,
     ) => entity.actionCreators.SET_STATE(state, undefined, id);
 
     beforeEach(() => {
-        store = new TestStore();
+        store = new TestStore(undefined, (state) => state);
         pr = createPainlessRedux(store);
         entity = createEntity<TestEntity>(pr, {
             name: 'test',
@@ -61,7 +60,7 @@ describe('Entity', () => {
 
         test('should resolve id from schema.id fn and add entity', () => {
             // arrange
-            mocked(idFn).mockImplementationOnce((data): string | number => data.id ?? `$${data.name}`);
+            mocked(idFn).mockImplementationOnce((data): string | number => `$${data.name}`);
             const userWithoutId = { name: user.name };
             const addAction = entity.actionCreators.ADD({
                 ...userWithoutId,
@@ -77,6 +76,7 @@ describe('Entity', () => {
         test('should resolve id if it does not exist and add entity', () => {
             // arrange
             const randomId = 'adav3r2brh35';
+            mocked(idFn).mockReturnValueOnce(undefined);
             mocked(uuid.v4).mockReturnValueOnce(randomId);
             const userWithoutId = { name: user.name };
             const addAction = entity.actionCreators.ADD({
@@ -118,6 +118,77 @@ describe('Entity', () => {
         });
     });
 
+    describe('#changeRemote', () => {
+        const patch = { name: 'Frank' };
+        const responsePatch = { name: 'Alice' };
+        const changeId = 'vn3n5k';
+        mocked(uuid.v4).mockReturnValue(changeId);
+
+        test.each`
+             useResponsePatch
+             ${false}
+             ${true}
+             `('should change entity remotely with useResponsePatch: $useResponsePatch', ({ useResponsePatch }) => {
+            // arrange
+            const options: EntityChangeOptions = { useResponsePatch };
+            const id = user.id;
+            const remote$ = cold(' --a| ', { a: { data: responsePatch } });
+            const resolvePatch = useResponsePatch ? responsePatch : patch;
+            const changeAction = entity.actionCreators.CHANGE(id, resolvePatch, changeId, options);
+            const actions$ = cold('a-(bc)', {
+                a: setStateActionFactory({ isLoading: true }, id),
+                b: changeAction,
+                c: setStateActionFactory({ isLoading: false }, id),
+            });
+            // act
+            entity.changeRemote(id, patch, remote$, options).subscribe();
+            // assert
+            expect(store.actions$).toBeObservable(actions$);
+        });
+
+        describe('#optimistic', () => {
+            test.each`
+	        	useResponsePatch
+		        ${false}
+		        ${true}
+	            `('should change entity remotely with useResponsePatch: $useResponsePatch', ({ useResponsePatch }) => {
+                const options: EntityChangeOptions = { optimistic: true, useResponsePatch };
+                const remote$ = cold(' --a| ', { a: { data: responsePatch } });
+                const id = user.id;
+                const changeAction = entity.actionCreators.CHANGE(id, patch, changeId, options);
+                const resolvePatch = useResponsePatch ? responsePatch : undefined;
+                const resolveChangeAction = entity.actionCreators.RESOLVE_CHANGE(id, changeId, true, resolvePatch, options);
+                const actions$ = cold('a-b', {
+                    a: changeAction,
+                    b: resolveChangeAction,
+                });
+                // act
+                entity.changeRemote(id, patch, remote$, options).subscribe();
+                // assert
+                expect(store.actions$).toBeObservable(actions$);
+            });
+
+            test('should resolve unsuccessfully if response failed', () => {
+                const options: EntityChangeOptions = { optimistic: true };
+                const error = new Error();
+                const failedRemote$ = cold(' --#|', undefined, error);
+                const id = user.id;
+                const changeAction = entity.actionCreators.CHANGE(id, patch, changeId, options);
+                const resolveChangeAction = entity.actionCreators.RESOLVE_CHANGE(id, changeId, false, undefined, options);
+                const actions$ = cold('a-(bc)', {
+                    a: changeAction,
+                    b: resolveChangeAction,
+                    c: setStateActionFactory({ isLoading: false, error }, id),
+                });
+                // act
+                entity.changeRemote(id, patch, failedRemote$, options).subscribe();
+                // assert
+                expect(store.actions$).toBeObservable(actions$);
+            });
+        });
+
+    });
+
     describe('#remove', () => {
         test('should remove entity', () => {
             // arrange
@@ -143,6 +214,39 @@ describe('Entity', () => {
             // assert
             expect(store.actions$).toBeObservable(actions$);
         });
+
+        test('should optimistic remove entity', () => {
+            // arrange
+            const options = { optimistic: true };
+            const removeAction = entity.actionCreators.REMOVE(user.id, options);
+            const remote$ = cold(' --a| ', { a: null });
+            const actions$ = cold('a', {
+                a: removeAction,
+            });
+            // act
+            entity.removeRemote(user.id, remote$, options).subscribe();
+            // assert
+            expect(store.actions$).toBeObservable(actions$);
+        });
+
+        xtest('should optimistic undo if failed', () => {
+            // arrange
+            const options = { optimistic: true };
+            const error = new Error('Failed');
+            const removeAction = entity.actionCreators.REMOVE(user.id, options);
+            const undoAction = { type: '[Store] Undo', payload: { action: removeAction }, options: {} };
+            const remote$ = cold(' --#| ', undefined, error);
+            const actions$ = cold('a-(bc)', {
+                a: removeAction,
+                b: undoAction,
+                c: setStateActionFactory<Error>({ isLoading: false, error }, user.id),
+            });
+            // act
+            entity.removeRemote(user.id, remote$, options).subscribe();
+            // assert
+            expect(store.actions$).toBeObservable(actions$);
+        });
+
     });
 
     describe('#create', () => {
@@ -205,7 +309,7 @@ describe('Entity', () => {
             const remote$ = cold('--a|', {
                 a: { data },
             });
-            const id = [data.objectId, data.type];
+            const id = [data.objectId, data.type].toString();
             const addAction = entity.actionCreators.ADD({ id, ...data });
             const actions$ = cold('a-(bc)', {
                 a: setStateActionFactory({ isLoading: true }, id),
@@ -233,14 +337,15 @@ describe('Entity', () => {
             // arrange
             const users = [user];
             const remote$ = cold('--a|', { a: { data: users } });
-            const addAction = entity.actionCreators.ADD_LIST(users, null, true, true, { pageSize: 1 });
+            const filter = null;
+            const addAction = entity.actionCreators.ADD_LIST(users, filter, true);
             const actions$ = cold('a-(bc)', {
                 a: setStateActionFactory({ isLoading: true }),
                 b: addAction,
                 c: setStateActionFactory({ isLoading: false }),
             });
             // act
-            entity.get$(null, remote$).subscribe();
+            entity.get$(filter, remote$).subscribe();
             // assert
             expect(store.actions$).toBeObservable(actions$);
         });

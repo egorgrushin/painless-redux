@@ -25,7 +25,7 @@ describe('Workspace', () => {
     let noLabel: string;
 
     beforeEach(() => {
-        store = new TestStore();
+        store = new TestStore(undefined, (state) => state);
         pr = createPainlessRedux(store);
         initialValue = {
             fill: true,

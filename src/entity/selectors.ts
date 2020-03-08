@@ -1,11 +1,12 @@
 import { createSelector, Selector } from 'reselect';
 import {
+    ActualSelector,
     BaseEntitySelectors,
     DictionarySelector,
+    EntityInstanceState,
     EntitySelectors,
     EntityState,
     IdsSelector,
-    InstanceSelector,
     ListSelector,
     LoadingStatesSelector,
     Page,
@@ -16,7 +17,8 @@ import { PainlessReduxState } from '../painless-redux/types';
 import { HashFn, Id } from '../system-types';
 import { createLoadingStateSelector } from '../shared/loading-state/selectors';
 import { LoadingStateSelector } from '../shared/loading-state/types';
-
+import { mergeStableChanges } from './reducers/instance';
+import { isNil } from 'lodash';
 
 export const createDictionarySelector = <T>(
     selector: Selector<PainlessReduxState, EntityState<T>>,
@@ -27,7 +29,6 @@ export const createIdsSelector = <T>(
     selector: Selector<PainlessReduxState, EntityState<T>>,
 ): IdsSelector<T> =>
     createSelector(selector, (s) => s.ids);
-
 
 export const createPagesSelector = <T>(
     selector: Selector<PainlessReduxState, EntityState<T>>,
@@ -41,11 +42,10 @@ export const createLoadingStatesSelector = <T>(
 
 const createCreateLoadingStateById = <T>(
     selector: LoadingStatesSelector<T>,
-) => (id: string) => createSelector(
+) => (id: Id) => createSelector(
     selector,
     (loadingStates) => loadingStates[id],
 );
-
 
 export const createBaseEntitySelectors = <T>(
     selector: Selector<PainlessReduxState, EntityState<T>>,
@@ -68,11 +68,18 @@ export const createBaseEntitySelectors = <T>(
     };
 };
 
-export const createCreateInstanceSelector = <T>(dictionarySelector: DictionarySelector<T>) => (
+const getActual = <T>(instance: EntityInstanceState<T> | undefined) => {
+    if (!instance) return undefined;
+    return mergeStableChanges(instance, true)?.actual;
+};
+
+export const createCreateActualSelector = <T>(
+    dictionarySelector: DictionarySelector<T>,
+) => (
     id: Id,
-): InstanceSelector<T> => createSelector(
+): ActualSelector<T> => createSelector(
     dictionarySelector,
-    (dictionary) => dictionary[id],
+    (dictionary) => getActual(dictionary[id]),
 );
 
 export const createListSelector = <T>(
@@ -87,7 +94,8 @@ export const createListSelector = <T>(
         dict,
     ) => {
         if (!ids) return undefined;
-        return ids.map(id => dict[id]);
+        return ids.map(id => getActual(dict[id]))
+            .filter((actual) => !isNil(actual)) as T[];
     },
 );
 
@@ -97,21 +105,7 @@ export const createPageSelector = <T>(
 ): PageSelector<T> =>
     createSelector(pagesSelector, (pages) => pages[hash]);
 
-
 export const createCreatePageIdsSelector = <T>(pagesSelector: PagesSelector<T>) => (
-    hash: string,
-): IdsSelector<T> => {
-    const pageSelector = createPageSelector<T>(pagesSelector, hash);
-    return createSelector(
-        pageSelector,
-        (page: Page | undefined) => {
-            if (!page) return undefined;
-            return page.ids;
-        },
-    );
-};
-
-export const createCreatePageListSelector = <T>(pagesSelector: PagesSelector<T>) => (
     hash: string,
 ): IdsSelector<T> => {
     const pageSelector = createPageSelector<T>(pagesSelector, hash);
@@ -144,7 +138,6 @@ export const createCreatePageByConfigSelector = <T>(
     return createPageSelector<T>(pagesSelector, hash);
 };
 
-
 export const createCreatePageLoadingState = <T>(
     pagesSelector: PagesSelector<T>,
     hashFn: HashFn,
@@ -158,7 +151,6 @@ export const createCreatePageLoadingState = <T>(
         (page) => page?.loadingState,
     );
 };
-
 
 // TODO(egorgrushin): refactor here
 export const createEntitySelectors = <T>(
@@ -176,8 +168,7 @@ export const createEntitySelectors = <T>(
     const createSelectorIdsList = createListSelector(dictionary);
     const all = createSelectorIdsList(ids);
 
-
-    const createInstance = createCreateInstanceSelector(dictionary);
+    const createActual = createCreateActualSelector(dictionary);
     const createPageIds = createCreatePageIdsSelector(pages);
     const createPageIdsByConfig = createCreatePageIdsByConfigSelector(pages, hashFn);
     const createPage = createCreatePageByConfigSelector(pages, hashFn);
@@ -188,7 +179,6 @@ export const createEntitySelectors = <T>(
         return createSelectorIdsList(pageIdsSelector);
     };
 
-
     return {
         dictionary,
         ids,
@@ -196,7 +186,7 @@ export const createEntitySelectors = <T>(
         loadingStates,
         loadingState,
         all,
-        createInstance,
+        createActual,
         createPageIds,
         createPageIdsByConfig,
         createSelectorIdsList,

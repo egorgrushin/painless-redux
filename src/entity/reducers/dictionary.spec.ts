@@ -1,8 +1,7 @@
 import { EntityActionTypes } from '../types';
 import { createDictionaryReducer } from './dictionary';
-import { EntityActions } from '../actions';
-import { Dictionary } from '../../system-types';
-
+import { Id } from '../../system-types';
+import { createEntityActionCreators } from '../action-creators';
 
 const types: EntityActionTypes = {
     ADD: 'ADD',
@@ -11,10 +10,22 @@ const types: EntityActionTypes = {
     CHANGE: 'CHANGE',
     SET_STATE: 'SET_STATE',
     CREATE: 'CREATE',
+    RESOLVE_CHANGE: 'RESOLVE_CHANGE',
 };
 
+type TestEntity = {
+    id: Id;
+    profile?: {
+        image?: string;
+        age?: number;
+        name?: string;
+    },
+}
+
+const actionCreators = createEntityActionCreators<TestEntity>(types);
+const reducer = createDictionaryReducer<TestEntity>(types);
+
 describe('dictionary', () => {
-    const reducer = createDictionaryReducer(types);
 
     test('should return default state', () => {
         // act
@@ -25,29 +36,19 @@ describe('dictionary', () => {
 
     test('should add entity', () => {
         // arrange
-        const entity = { id: 1 };
-        const payload = { entity, configHash: '' };
-        const action: EntityActions = { type: types.ADD, payload, options: {} };
+        const entity: TestEntity = { id: 1 };
+        const action = actionCreators.ADD(entity);
         // act
         const actual = reducer(undefined, action);
         // assert
-        const expected = { [entity.id]: entity };
+        const expected = { [entity.id]: { actual: entity } };
         expect(actual).toEqual(expected);
     });
 
     test('should add entities', () => {
         // arrange
         const entities = [{ id: 1 }, { id: 2 }];
-        const action: EntityActions = {
-            type: types.ADD_LIST,
-            payload: {
-                entities,
-                configHash: '',
-                hasMore: false,
-                isReplace: false,
-            },
-            options: {},
-        };
+        const action = actionCreators.ADD_LIST(entities, null);
         // act
         const actual = reducer(undefined, action);
         // assert
@@ -55,52 +56,40 @@ describe('dictionary', () => {
             memo: any,
             entity: any,
         ) => {
-            memo[entity.id] = entity;
+            memo[entity.id] = { actual: entity };
             return memo;
         }, {});
         expect(actual).toEqual(expected);
     });
 
     test.each`
-		merge
-		${true}
-		${undefined}
-	`('should merge entity with the same if options.merge option passed, otherwise replace ($merge)', ({ merge }) => {
+		options
+		${{ merge: true }}
+		${{ merge: false }}
+	`('should merge entity with the same if options.merge option passed, otherwise replace ($options)', ({ options }) => {
         // arrange
         const entity = { id: 1, name: 'entity 1' };
-        const action: EntityActions = {
-            type: types.ADD,
-            payload: { entity, configHash: '' },
-            options: {},
-        };
+        const action = actionCreators.ADD(entity);
         const entity2 = { id: 1, age: 1 };
-        const action2: EntityActions = {
-            type: types.ADD,
-            payload: { entity: entity2, configHash: '' },
-            options: { merge },
-        };
+        const action2 = actionCreators.ADD(entity2, undefined, options);
         // act
-        const actual = reducer(reducer(undefined, action), action2);
+        const instances = reducer(reducer(undefined, action), action2);
+        const actual = instances[entity.id].actual;
         // assert
-        const expected = merge ? {
-            id: 1,
-            name: 'entity 1',
-            age: 1,
-        } : { id: 1, age: 1 };
-        expect(actual[entity.id]).toEqual(expected);
+        const expected = options.merge ? { id: 1, name: 'entity 1', age: 1 } : { id: 1, age: 1 };
+        expect(actual).toEqual(expected);
     });
 
     test('should remove entity', () => {
         // arrange
-        const entity = { id: 1 };
-        const action: EntityActions = {
-            type: types.REMOVE,
-            payload: { id: entity.id },
-            options: {},
-        };
+        const entity: TestEntity = { id: 1 };
+        const action = actionCreators.REMOVE(entity.id);
         // act
         const actual = reducer({
-            [entity.id]: entity,
+            [entity.id]: {
+                actual: entity,
+                unstableChanges: [],
+            },
         }, action);
         // assert
         const expected = {};
@@ -108,41 +97,29 @@ describe('dictionary', () => {
     });
 
     describe('#CHANGE', () => {
-        test.each`
-			merge
-			${true}
-			${undefined}
-		`('should override entity when no merge option passed and merge otherwise ($merge)', ({ merge }) => {
+        test.each`	
+		    options
+		    ${{ merge: true }}
+		    ${{ merge: false }}
+		`('should override entity when no merge option passed and merge otherwise ($options)', ({ options }) => {
             // arrange
-            const entity = {
-                id: 1,
-                profile: {
-                    image: '1.png',
-                },
-            };
-            const action: EntityActions = {
-                type: types.CHANGE,
-                payload: {
-                    id: entity.id,
-                    patch: {
-                        profile: { age: 18 },
-                    },
-                },
-                options: { merge },
-            };
+            const entity: TestEntity = { id: 1, profile: { image: '1.png' } };
+            const patch = { profile: { age: 18 } };
+            const action = actionCreators.CHANGE(entity.id, patch, undefined, options);
             // act
-            const actual: Dictionary<any> = reducer({
-                [entity.id]: entity,
+            const instances = reducer({
+                [entity.id]: {
+                    actual: entity,
+                    unstableChanges: [],
+                },
             }, action);
             // assert
-            const expected = merge ? {
-                image: '1.png',
-                age: 18,
-            } : { age: 18 };
-            expect(actual[entity.id].profile).toEqual(expected);
+            const expected = options.merge ? { image: '1.png', age: 18 } : { age: 18 };
+            const actual = instances[entity.id].actual.profile;
+            expect(actual).toEqual(expected);
         });
 
-        test.each`
+        xtest.each`
 			ifNotExist
 			${undefined}
 			${true}
@@ -150,16 +127,8 @@ describe('dictionary', () => {
             'should create entity if options.ifNotExist=true, otherwise ignore ($ifNotExist)',
             ({ ifNotExist }) => {
                 // arrange
-                const action: EntityActions = {
-                    type: types.CHANGE,
-                    payload: {
-                        id: 1,
-                        patch: {
-                            profile: { age: 18 },
-                        },
-                    },
-                    options: { ifNotExist, merge: true },
-                };
+                const patch = { profile: { age: 18 } };
+                const action = actionCreators.CHANGE(1, patch);
                 // act
                 const actual = reducer(undefined, action);
                 // assert

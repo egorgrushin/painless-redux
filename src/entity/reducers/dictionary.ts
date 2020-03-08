@@ -1,61 +1,55 @@
 import { Dictionary } from '../../system-types';
-import { EntityActions } from '../actions';
-import { EntityActionTypes, EntityAddListOptions } from '../types';
-import { isNil, keyBy } from 'lodash';
-import { merge } from '../../utils';
-import { createChangeReducer } from '../../shared/change/reducer';
+import { createAddByHash, EntityActions } from '../actions';
+import { EntityActionTypes, EntityInstanceState } from '../types';
+import { keyBy } from 'lodash';
+import { createInstanceReducer } from './instance';
 
-
-const addList = <T>(
-    state: Dictionary<T>,
-    data: T[],
-    options?: EntityAddListOptions,
-): Dictionary<T> => {
-    const newEntities = keyBy(data, 'id');
-    if (options?.merge) {
-        return merge(state, newEntities);
-    }
-    return { ...state, ...newEntities };
+const addInstances = <T>(
+    state: Dictionary<EntityInstanceState<T>>,
+    instances: EntityInstanceState<T>[],
+): Dictionary<EntityInstanceState<T>> => {
+    const newInstances = keyBy<EntityInstanceState<T>>(instances, 'actual.id');
+    return { ...state, ...newInstances };
 };
 
 export const createDictionaryReducer = <T>(
     types: EntityActionTypes,
 ) => {
-    const changeReducer = createChangeReducer(types);
+    const instanceReducer = createInstanceReducer<T>(types);
     return (
-        state: Dictionary<T> = {},
+        state: Dictionary<EntityInstanceState<T>> = {},
         action: EntityActions,
-    ): Dictionary<T> => {
+    ): Dictionary<EntityInstanceState<T>> => {
         switch (action.type) {
             case types.ADD: {
                 const entity = action.payload.entity;
-                return addList(state, [entity], action.options);
+                const instance = instanceReducer(state[entity.id], action);
+                if (!instance) return state;
+                return addInstances(state, [instance]);
             }
             case types.ADD_LIST: {
-                const entities = action.payload.entities;
-                return addList(state, entities, action.options);
-            }
-            case types.REMOVE: {
-                const id = action.payload.id;
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                const { [id]: deleted, ...rest } = state;
-                return rest;
+                const { payload: { entities, configHash }, options } = action;
+                const add = createAddByHash(types);
+                const instances = entities.map((entity) => {
+                    const action = add(entity, configHash, options);
+                    return instanceReducer(state[entity.id], action) as EntityInstanceState<T>;
+                });
+                return addInstances(state, instances);
             }
             case types.CHANGE: {
-                const { id, patch } = action.payload;
-                if (isNil(id)) return state;
-                let existEntity: any = state[id];
-                if (isNil(existEntity)) {
-                    if (!action.options.ifNotExist) return state;
-                    existEntity = { id };
-                }
-                return {
-                    ...state,
-                    [id]: action.options.merge ? changeReducer(existEntity, action) : patch,
-                };
+                const { payload: { id } } = action;
+                const instance = instanceReducer(state[id], action) as EntityInstanceState<T>;
+                return { ...state, [id]: instance };
+            }
+            case types.REMOVE: {
+                const { payload: { id } } = action;
+                const instance = instanceReducer(state[id], action);
+                if (instance) return { ...state, [id]: instance };
+                const { [id]: deleted, ...rest } = state;
+                return rest;
             }
             default:
                 return state;
         }
-    }
+    };
 };

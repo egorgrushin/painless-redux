@@ -3,11 +3,12 @@ import { ActionCreator, AnyAction, Reducer, RxStore, SameShaped } from '../syste
 import { createDispatcher } from '../dispatcher/dispatcher';
 import { typedDefaultsDeep } from '../utils';
 import { createSlotSelector, createSlotsSelector } from './selectors';
-import { createFullReducer } from './reducers';
+import { getUndoableReducer } from './reducers';
 import { createSelectManager } from '../select-manager/select-manager';
 import { createRegister } from './register';
 import { createSelector } from 'reselect';
-
+import { createSystemActionTypes } from './utils';
+import { createSystemActionCreators } from './action-creators';
 
 export const createPainlessRedux = (
     rxStore: RxStore,
@@ -20,13 +21,16 @@ export const createPainlessRedux = (
         selector: (state: any) => state,
     }) as PainlessReduxSchema;
 
-    const name = fullSchema.name;
+    const domainName = fullSchema.name;
+    const initialValue = {};
 
-    const selector = createSelector(fullSchema.selector, (state: any) => state[fullSchema.name]);
+    const selector = createSelector(fullSchema.selector, (state: any) => state[domainName]);
     const slotsSelector = createSlotsSelector(fullSchema, selector);
+    const systemActionTypes = createSystemActionTypes(domainName);
+    const systemActionCreators = createSystemActionCreators(systemActionTypes);
 
     const { value: register, checkSlotUniq, addNewSlotToRegister } = createRegister();
-    const getReducer = () => createFullReducer(fullSchema, register);
+    const getReducer = () => getUndoableReducer(fullSchema, register, systemActionTypes, initialValue);
 
     const registerSlotReducer = <TState, TActions extends AnyAction>(
         type: SlotTypes,
@@ -36,7 +40,7 @@ export const createPainlessRedux = (
         checkSlotUniq(type, name);
         addNewSlotToRegister<TState, TActions>(type, name, reducer);
         const fullReducer = getReducer();
-        rxStore.addReducer(name, fullReducer);
+        rxStore.addReducer(domainName, fullReducer);
     };
 
     const registerSlot = <TState, TActionTypes, TActions extends AnyAction>(
@@ -45,7 +49,7 @@ export const createPainlessRedux = (
         reducer: Reducer<TState, TActions>,
         actionCreators: SameShaped<TActionTypes, ActionCreator<TActionTypes, TActions>>,
     ) => {
-        const dispatcher = createDispatcher<TActionTypes, TActions>(rxStore, actionCreators);
+        const dispatcher = createDispatcher<TActionTypes, TActions>(rxStore, actionCreators, systemActionCreators);
         const selectManager = createSelectManager(rxStore);
         const currentSlotsSelector = slotsSelector<TState>(type);
         const selector = createSlotSelector<TState>(currentSlotsSelector, name);
@@ -57,10 +61,9 @@ export const createPainlessRedux = (
         };
     };
 
-
     return {
         registerSlot,
         getReducer,
-        name,
+        name: domainName,
     };
 };

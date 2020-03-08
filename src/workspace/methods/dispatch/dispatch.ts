@@ -5,7 +5,7 @@ import { DispatchWorkspaceMethods } from './types';
 import { DeepPartial } from '../../../system-types';
 import { SelectWorkspaceMethods } from '../select/types';
 import { getHeadedActionName, snapshot } from '../../../utils';
-import { ChangeActionOptions } from '../../../shared/change/types';
+import { ChangeOptions } from '../../../shared/change/types';
 
 export const createDispatchWorkspaceMethods = <T>(
     dispatcher: Dispatcher<WorkspaceActionTypes, WorkspaceActions>,
@@ -16,7 +16,7 @@ export const createDispatchWorkspaceMethods = <T>(
     const change = (
         patch: DeepPartial<T> | ((value: DeepPartial<T> | undefined) => DeepPartial<T>),
         label: string,
-        options?: ChangeActionOptions,
+        options?: ChangeOptions,
     ) => {
         if (typeof patch === 'function') {
             const oldValue$ = selectMethods.get$();

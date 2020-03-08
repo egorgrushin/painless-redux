@@ -5,7 +5,6 @@ import { Dictionary, Id } from '../../../system-types';
 import { SelectEntityMethods } from './types';
 import { toDictionary } from '../../../utils';
 
-
 export const createSelectEntityMethods = <T>(
     selectManager: SelectManager,
     selectors: EntitySelectors<T>,
@@ -25,8 +24,8 @@ export const createSelectEntityMethods = <T>(
         return get$(config).pipe(toDictionary());
     };
 
-    const getById$ = (id: Id | Id[]): Observable<T | undefined> => {
-        const selector = selectors.createInstance(id?.toString());
+    const getById$ = (id: Id): Observable<T | undefined> => {
+        const selector = selectors.createActual(id);
         return selectManager.select$(selector);
     };
 
@@ -47,10 +46,10 @@ export const createSelectEntityMethods = <T>(
     };
 
     const getLoadingStateById$ = (
-        id: Id | Id[],
+        id: Id,
         isAsap: boolean = false,
     ) => {
-        const selector = selectors.createLoadingStateById(id?.toString());
+        const selector = selectors.createLoadingStateById(id);
         return selectManager.select$(selector, isAsap);
     };
 

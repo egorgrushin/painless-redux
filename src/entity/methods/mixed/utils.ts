@@ -1,10 +1,19 @@
-import { BehaviorSubject, EMPTY, merge, Observable, of, OperatorFunction } from 'rxjs';
-import { EntityGetListOptions, ObservableOrFactory, Page, Pagination, RemotePipeConfig } from '../../types';
-import { first, map, scan, switchMap, tap } from 'rxjs/operators';
+import { BehaviorSubject, EMPTY, merge, Observable, of, OperatorFunction, throwError } from 'rxjs';
+import {
+    EntityChangeOptions,
+    EntityGetListOptions,
+    EntityResponse,
+    ObservableOrFactory,
+    Page,
+    Pagination,
+    RemotePipeConfig,
+} from '../../types';
+import { catchError, first, map, scan, switchMap, take, tap } from 'rxjs/operators';
 import { getObservable$, guardByOptions, guardIfLoading } from '../../utils';
 import { DEFAULT_PAGE_SIZE } from '../../constants';
 import { DispatchEntityMethods } from '../dispatch/types';
 import { SelectEntityMethods } from '../select/types';
+import { DeepPartial } from '../../../system-types';
 
 export const createMixedEntityMethodsUtils = <T>(
     dispatchMethods: DispatchEntityMethods<T>,
@@ -31,13 +40,12 @@ export const createMixedEntityMethodsUtils = <T>(
                 return { index, size, from, to };
             }),
             switchMap((paging: Pagination) => page$.pipe(
-                first(),
+                take(1),
                 map((page: Page | undefined) => !page || page.hasMore !== false),
                 switchMap((hasMore: boolean) => paging.index === 0 || hasMore ? of(paging) : EMPTY),
             )),
         );
     };
-
 
     const getRemotePipe = <S, R, F = R>(
         {
@@ -49,18 +57,35 @@ export const createMixedEntityMethodsUtils = <T>(
             success,
             emitSuccessOutsideAffectState,
             emitOnSuccess,
+            optimistic,
+            optimisticResolve,
         }: RemotePipeConfig<S, R>,
     ): OperatorFunction<S, F> => {
-        let trailPipe: OperatorFunction<R, F> = map((result: R) => result as unknown as F);
-        if (!emitOnSuccess) {
-            trailPipe = switchMap(() => EMPTY);
-        }
+        const trailPipe: OperatorFunction<R, F> = emitOnSuccess
+            ? map((result: R) => result as unknown as F)
+            : switchMap(() => EMPTY);
+
         return (source: Observable<S>): Observable<F> => source.pipe(
             switchMap((value: S) => {
                 const remote$ = getObservable$<S, R>(remoteObsOrFactory, value);
+                if (optimistic) {
+                    success();
+                    return remote$.pipe(
+                        tap((response) => optimisticResolve?.(true, response)),
+                        catchError((error: any) => {
+                            optimisticResolve?.(false);
+                            dispatchMethods.setStateBus({ error, isLoading: false }, id, config);
+                            return EMPTY;
+                        }),
+                    );
+                }
                 const successPipe = tap((result: R) => success(result));
                 const pipesToAffect: any = [
                     switchMap(() => remote$),
+                    catchError((err) => {
+                        console.log(err);
+                        return throwError(err);
+                    }),
                 ];
                 const resultPipes: OperatorFunction<any, any>[] = [];
 
@@ -96,5 +121,23 @@ export const createMixedEntityMethodsUtils = <T>(
         return store$;
     };
 
-    return { getRemotePipe, getPaginator, tryInvoke };
+    const getPatchByOptions = (
+        patch: DeepPartial<T>,
+        response: EntityResponse<DeepPartial<T>> | undefined,
+        options?: EntityChangeOptions,
+    ): DeepPartial<T> => {
+        if (options?.optimistic) return patch;
+        if (options?.useResponsePatch) return response?.data ?? {};
+        return patch;
+    };
+
+    const getResolvePatchByOptions = (
+        patch: DeepPartial<T>,
+        response: EntityResponse<DeepPartial<T>> | undefined,
+        options?: EntityChangeOptions,
+    ): DeepPartial<T> | undefined => {
+        if (options?.useResponsePatch) return response?.data;
+    };
+
+    return { getRemotePipe, getPaginator, tryInvoke, getPatchByOptions, getResolvePatchByOptions };
 };

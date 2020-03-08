@@ -1,4 +1,4 @@
-export interface ChangeActionOptions {
+export interface ChangeOptions {
     merge?: boolean;
     ifNotExist?: boolean;
 }

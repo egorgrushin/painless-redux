@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 import { Selector } from 'reselect';
-import { Dictionary, HashFn, Id, LoadingState } from '../system-types';
-import { ChangeActionTypes } from '../shared/change/types';
+import { AnyAction, DeepPartial, Dictionary, HashFn, Id, LoadingState } from '../system-types';
+import { ChangeOptions } from '../shared/change/types';
 import {
     LoadingStateActionTypes,
     LoadingStateSelector,
@@ -14,10 +14,10 @@ import { DispatchEntityMethods } from './methods/dispatch/types';
 import { MixedEntityMethods } from './methods/mixed/types';
 import { EntityActionCreators } from './action-creators';
 
-export interface EntityResponse<T = any, M = any, E = any> {
+export type EntityType<T> = T & { id: Id };
+
+export interface EntityResponse<T = any> {
     data: T;
-    metadata?: M;
-    error?: E;
 }
 
 export interface EntitySchema<T> {
@@ -25,7 +25,7 @@ export interface EntitySchema<T> {
     hashFn: HashFn;
     pageSize: number;
 
-    id?(data: Partial<T>): Id;
+    id?(data: T): Id;
 }
 
 export interface EntityGetOptions {
@@ -48,8 +48,20 @@ export interface EntityAddOptions extends EntityInsertOptions {
 
 }
 
-export interface EntityRemoveOptions {
+export interface EntityOptimisticOptions {
+    optimistic?: boolean;
+}
 
+export interface EntityRemoteOptions extends EntityOptimisticOptions {
+    single?: boolean;
+}
+
+export interface EntityRemoveOptions extends EntityOptimisticOptions {
+    safe?: boolean;
+}
+
+export interface EntityChangeOptions extends EntityOptimisticOptions, ChangeOptions {
+    useResponsePatch?: boolean;
 }
 
 export interface EntitySetStateOptions extends LoadingStateSetOptions {
@@ -76,22 +88,25 @@ export interface PaginatedResponse<T> extends Pagination {
     response: EntityResponse<T[]>;
 }
 
-
 export type Response$<T> = Observable<EntityResponse<T>>;
 export type Response$Factory<T> = (pagination: Pagination) => Response$<T>;
 export type ObservableOrFactory<S, R> = (Observable<R>) | ((value: S) => Observable<R>);
 
 export interface RemotePipeConfig<S, R> {
     config?: any;
-    id?: Id | Id[];
+    id?: Id;
     store$?: Observable<any>;
     remoteObsOrFactory: ObservableOrFactory<S, R>;
-    options?: EntityInsertOptions;
-    success: (result: R) => void;
+    options?: EntityRemoteOptions;
+    success: (result?: R) => AnyAction | undefined;
     emitSuccessOutsideAffectState?: boolean;
     emitOnSuccess?: boolean;
+    optimistic?: boolean;
+    optimisticResolve?: (
+        success: boolean,
+        result?: R,
+    ) => AnyAction | undefined;
 }
-
 
 export interface Page {
     ids?: Id[];
@@ -99,19 +114,32 @@ export interface Page {
     loadingState?: LoadingState;
 }
 
+export interface UnstableChange<T> {
+    stable: boolean;
+    patch: DeepPartial<T>;
+    merge: boolean;
+    id?: string;
+}
+
+export interface EntityInstanceState<T> {
+    actual: EntityType<T>;
+    unstableChanges?: UnstableChange<T>[];
+    removed?: boolean;
+}
+
 export interface EntityState<T> extends LoadingStateState {
     ids: Id[];
-    dictionary: Dictionary<T>;
+    dictionary: Dictionary<EntityInstanceState<T>>;
     pages: Dictionary<Page>;
     loadingStates: Dictionary<LoadingState>;
 }
 
 export type IdsSelector<T> = Selector<EntityState<T>, Id[] | undefined>;
-export type DictionarySelector<T> = Selector<EntityState<T>, Dictionary<T>>;
+export type DictionarySelector<T> = Selector<EntityState<T>, Dictionary<EntityInstanceState<T>>>;
 export type PagesSelector<T> = Selector<EntityState<T>, Dictionary<Page>>;
 export type PageSelector<T> = Selector<EntityState<T>, Page | undefined>;
 export type LoadingStatesSelector<T> = Selector<EntityState<T>, Dictionary<LoadingState>>;
-export type InstanceSelector<T> = Selector<EntityState<T>, T>;
+export type ActualSelector<T> = Selector<EntityState<T>, T | undefined>;
 export type ListSelector<T> = Selector<EntityState<T>, T[] | undefined>;
 
 export interface BaseEntitySelectors<T> extends LoadingStateSelectors<EntityState<T>> {
@@ -119,11 +147,11 @@ export interface BaseEntitySelectors<T> extends LoadingStateSelectors<EntityStat
     dictionary: DictionarySelector<T>;
     pages: PagesSelector<T>;
     loadingStates: LoadingStatesSelector<T>;
-    createLoadingStateById: (id: string) => LoadingStateSelector<EntityState<T>>;
+    createLoadingStateById: (id: Id) => LoadingStateSelector<EntityState<T>>;
 }
 
 export interface EntitySelectors<T> extends BaseEntitySelectors<T> {
-    createInstance: (id: string) => InstanceSelector<T>;
+    createActual: (id: Id) => ActualSelector<T>;
     createPage: (config: any) => PageSelector<T>;
     createPageIds: (hash: string) => IdsSelector<T>;
     createPageLoadingState: (config: any) => LoadingStateSelector<EntityState<T>>;
@@ -133,15 +161,15 @@ export interface EntitySelectors<T> extends BaseEntitySelectors<T> {
     createPageListByConfig: (config: any) => ListSelector<T>;
 }
 
-
-export interface EntityActionTypes extends ChangeActionTypes {
+export interface EntityActionTypes {
     REMOVE: 'REMOVE';
     ADD: 'ADD';
     CREATE: 'CREATE';
     ADD_LIST: 'ADD_LIST';
     SET_STATE: LoadingStateActionTypes['SET_STATE'];
+    CHANGE: 'CHANGE';
+    RESOLVE_CHANGE: 'RESOLVE_CHANGE';
 }
-
 
 export type Entity<T> = {
     getPage$: SelectEntityMethods<T>['getPage$'];
