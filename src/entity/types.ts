@@ -32,12 +32,11 @@ export interface EntityGetOptions {
 
 }
 
-export interface EntityGetListOptions {
-    pageSize?: number;
+export interface EntityGetListOptions extends EntityLoadListOptions {
 }
 
-export interface EntityLoadListOptions extends EntityGetListOptions, EntityAddListOptions {
-
+export interface EntityLoadListOptions extends EntityAddListOptions {
+    pageSize?: number;
 }
 
 export interface EntityLoadOptions extends EntityGetOptions, EntityAddOptions {

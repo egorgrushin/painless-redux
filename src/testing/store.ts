@@ -8,7 +8,7 @@ export class TestStore<T = any> extends BehaviorSubject<T> implements RxStore<T>
     state: T;
 
     constructor(
-        initialState: T,
+        private initialState: T,
         private reducer: Reducer<T, AnyAction>,
     ) {
         super(initialState);
@@ -34,10 +34,15 @@ export class TestStore<T = any> extends BehaviorSubject<T> implements RxStore<T>
         this.performDispatch({ type: 'ADD_REDUCER' });
     }
 
+    clear() {
+        this.performDispatch({ type: 'TEST_CLEAR' }, this.initialState);
+    }
+
     private performDispatch(
         action: AnyAction,
+        state = this.state,
     ) {
-        this.state = this.reducer(this.state, action);
+        this.state = this.reducer(state, action);
         this.setState(this.state);
     }
 }

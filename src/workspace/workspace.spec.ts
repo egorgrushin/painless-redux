@@ -26,7 +26,7 @@ describe('Workspace', () => {
 
     beforeEach(() => {
         store = new TestStore(undefined, (state) => state);
-        pr = createPainlessRedux(store);
+        pr = createPainlessRedux(store, { useAsapSchedulerInLoadingGuards: false });
         initialValue = {
             fill: true,
             color: { red: 0, green: 0, blue: 0 },
