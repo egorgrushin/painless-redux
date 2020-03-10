@@ -1,13 +1,13 @@
 import { Id, LoadingState } from '../system-types';
 import { getOrderedMarbleStream, initStoreWithPr } from '../testing/helpers';
-import { cold, hot } from 'jest-marbles';
+import { cold } from 'jest-marbles';
 import { TestStore } from '../testing/store';
 import { createEntity } from './entity';
 import { createPainlessRedux } from '../painless-redux/painless-redux';
 import { PainlessRedux } from '../painless-redux/types';
 import { Entity, EntityChangeOptions, Pagination } from './types';
 import { BehaviorSubject } from 'rxjs';
-import { mocked } from 'ts-jest';
+import { mocked } from 'ts-jest/utils';
 import * as uuid from 'uuid';
 
 jest.mock('uuid');
@@ -24,7 +24,6 @@ describe('Entity', () => {
     let user: any;
     let user2: any;
     let user3: any;
-    let initialState: any;
     let reducer: any;
     let idFn = jest.fn((data) => data.id);
 
@@ -35,10 +34,10 @@ describe('Entity', () => {
 
     beforeEach(() => {
         store = new TestStore(undefined, (state) => state);
-        pr = createPainlessRedux(store);
+        pr = createPainlessRedux(store, { useAsapSchedulerInLoadingGuards: false });
         entity = createEntity<TestEntity>(pr, {
             name: 'test',
-            pageSize: 1,
+            pageSize: 2,
             id: idFn,
         });
         reducer = initStoreWithPr(store, pr);
@@ -141,7 +140,7 @@ describe('Entity', () => {
                 c: setStateActionFactory({ isLoading: false }, id),
             });
             // act
-            entity.changeRemote(id, patch, remote$, options).subscribe();
+            entity.changeRemote$(id, patch, remote$, options).subscribe();
             // assert
             expect(store.actions$).toBeObservable(actions$);
         });
@@ -163,7 +162,7 @@ describe('Entity', () => {
                     b: resolveChangeAction,
                 });
                 // act
-                entity.changeRemote(id, patch, remote$, options).subscribe();
+                entity.changeRemote$(id, patch, remote$, options).subscribe();
                 // assert
                 expect(store.actions$).toBeObservable(actions$);
             });
@@ -181,7 +180,7 @@ describe('Entity', () => {
                     c: setStateActionFactory({ isLoading: false, error }, id),
                 });
                 // act
-                entity.changeRemote(id, patch, failedRemote$, options).subscribe();
+                entity.changeRemote$(id, patch, failedRemote$, options).subscribe();
                 // assert
                 expect(store.actions$).toBeObservable(actions$);
             });
@@ -210,7 +209,7 @@ describe('Entity', () => {
                 c: removeAction,
             });
             // act
-            entity.removeRemote(user.id, remote$).subscribe();
+            entity.removeRemote$(user.id, remote$).subscribe();
             // assert
             expect(store.actions$).toBeObservable(actions$);
         });
@@ -224,7 +223,7 @@ describe('Entity', () => {
                 a: removeAction,
             });
             // act
-            entity.removeRemote(user.id, remote$, options).subscribe();
+            entity.removeRemote$(user.id, remote$, options).subscribe();
             // assert
             expect(store.actions$).toBeObservable(actions$);
         });
@@ -242,7 +241,7 @@ describe('Entity', () => {
                 c: setStateActionFactory<Error>({ isLoading: false, error }, user.id),
             });
             // act
-            entity.removeRemote(user.id, remote$, options).subscribe();
+            entity.removeRemote$(user.id, remote$, options).subscribe();
             // assert
             expect(store.actions$).toBeObservable(actions$);
         });
@@ -271,7 +270,7 @@ describe('Entity', () => {
                 c: setStateActionFactory({ isLoading: false }),
             });
             // act
-            const actual = entity.createRemote(undefined, remote$);
+            const actual = entity.createRemote$(undefined, remote$);
             // assert
             expect(actual).toBeObservable(remote$);
             expect(store.actions$).toBeObservable(actions$);
@@ -324,6 +323,7 @@ describe('Entity', () => {
     });
 
     describe('#get$', () => {
+
         test('should return observable to entity', () => {
             // arrange
             const storeObs = cold('a', { a: undefined });
@@ -338,7 +338,7 @@ describe('Entity', () => {
             const users = [user];
             const remote$ = cold('--a|', { a: { data: users } });
             const filter = null;
-            const addAction = entity.actionCreators.ADD_LIST(users, filter, true);
+            const addAction = entity.actionCreators.ADD_LIST(users, filter, true, false);
             const actions$ = cold('a-(bc)', {
                 a: setStateActionFactory({ isLoading: true }),
                 b: addAction,
@@ -354,11 +354,11 @@ describe('Entity', () => {
             // arrange
             const error = new Error('Some error');
             const remote$ = cold('#|', null, error);
-            console.error = jest.fn();
+            global.console.error = jest.fn();
             // act
             entity.get$(null, remote$).subscribe();
             // assert
-            expect(console.error).lastCalledWith(error);
+            expect(global.console.error).toBeCalled();
         });
 
         test('should set error if observable source throws error', () => {
@@ -377,36 +377,42 @@ describe('Entity', () => {
 
         // FIXME(yrgrushi): due to using of schedulers under the hood
         //  this test is broken
-        test.skip('should page entities', () => {
+        test('should page entities', () => {
             // arrange
             const remoteMarble = '    --a|   --a|   --a|   --a|  ';
-            const paginationMarble = '-------a------b------b-----';
-            const actionsMarble = '   a-(bc)-a-(ec)-a-(bc)-a-(bc)';
-            const users1 = [user];
-            const users2 = [user2, user3];
-            const remote$ = (value: Pagination) => cold('--a|', { a: { data: value.index ? users2 : users1 } });
-            const addAction = entity.actionCreators.ADD_LIST(users1, null, true, true);
-            const addAction2 = entity.actionCreators.ADD_LIST(users2, null, false, false);
+            // const paginationMarble = '-------a------b------b-----';
+            const paginationMarble = '-------a-----';
+            const actionsMarble = '   a-(bc)-a-(ec)';
+            // const actionsMarble = '   a-(bc)-a-(ec)-a-(bc)-a-(bc)';
+            const filter = null;
+            const options = undefined;
+            const users1 = [user, user2];
+            const users2 = [user3];
+            const remote$ = (value: Pagination) => {
+                const data = value.index ? users2 : users1;
+                return cold('--a|', { a: { data } });
+            };
+            const addAction = entity.actionCreators.ADD_LIST(users1, filter, true, true);
+            const addAction2 = entity.actionCreators.ADD_LIST(users2, filter);
             const paginator = new BehaviorSubject<boolean>(true);
             const setStateTrueAction = setStateActionFactory({ isLoading: true });
             const setStateFalseAction = setStateActionFactory({ isLoading: false });
 
-            hot(paginationMarble, { a: true, b: false })
-                .subscribe((value) => {
+            cold(paginationMarble, {
+                a: true,
+                b: false,
+            }).subscribe((value) => {
+                paginator.next(value);
+            });
 
-                    initialState = reducer(initialState, addAction);
-                    store.setState(initialState);
-
-                    paginator.next(value);
-                });
             const actions$ = cold(actionsMarble, {
                 a: setStateTrueAction,
-                c: setStateFalseAction,
                 b: addAction,
+                c: setStateFalseAction,
                 e: addAction2,
             });
             // act
-            entity.get$(null, remote$, undefined, paginator).subscribe();
+            entity.get$(filter, remote$, options, paginator).subscribe();
             // assert
             expect(store.actions$).toBeObservable(actions$);
         });

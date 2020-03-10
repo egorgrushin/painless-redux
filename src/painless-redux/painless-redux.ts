@@ -18,6 +18,7 @@ export const createPainlessRedux = (
         name: '@store',
         entityDomainName: 'entities',
         workspaceDomainName: 'workspaces',
+        useAsapSchedulerInLoadingGuards: true,
         selector: (state: any) => state,
     }) as PainlessReduxSchema;
 
@@ -65,5 +66,6 @@ export const createPainlessRedux = (
         registerSlot,
         getReducer,
         name: domainName,
+        schema: fullSchema,
     };
 };

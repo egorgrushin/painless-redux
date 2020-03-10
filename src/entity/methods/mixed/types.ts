@@ -14,14 +14,14 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { DeepPartial, Dictionary, Id } from '../../../system-types';
 
 export interface MixedEntityMethods<T> {
-    loadList(
+    loadList$(
         config: any,
         dataSource: (Response$<T[]> | Response$Factory<T[]>),
         options?: EntityLoadListOptions,
         paginatorSubj?: BehaviorSubject<boolean>,
     ): Observable<never>;
 
-    loadById(
+    loadById$(
         id: Id,
         dataSource$: Response$<T>,
         options?: EntityLoadOptions,
@@ -47,20 +47,20 @@ export interface MixedEntityMethods<T> {
         options?: EntityGetOptions,
     ): Observable<T | undefined>;
 
-    createRemote(
+    createRemote$(
         config: any,
         dataSource$: Response$<T>,
         options?: EntityAddOptions,
     ): Response$<T>;
 
-    changeRemote(
+    changeRemote$(
         id: Id,
         patch: DeepPartial<T>,
         dataSource$: Observable<any>,
         options?: EntityChangeOptions,
     ): Response$<DeepPartial<T>>;
 
-    removeRemote(
+    removeRemote$(
         id: Id,
         observable: Observable<EntityResponse>,
         options?: EntityRemoveOptions,

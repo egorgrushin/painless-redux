@@ -124,7 +124,7 @@ describe('dictionary', () => {
 			${undefined}
 			${true}
 		`(
-            'should create entity if options.ifNotExist=true, otherwise ignore ($ifNotExist)',
+            'should either create entity or ignore based on options.ifNotExist=$ifNotExist',
             ({ ifNotExist }) => {
                 // arrange
                 const patch = { profile: { age: 18 } };
