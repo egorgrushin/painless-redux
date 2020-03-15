@@ -17,7 +17,7 @@ import { PainlessReduxState } from '../painless-redux/types';
 import { HashFn, Id } from '../system-types';
 import { createLoadingStateSelector } from '../shared/loading-state/selectors';
 import { LoadingStateSelector } from '../shared/loading-state/types';
-import { mergeStableChanges } from './reducers/instance';
+import { getMergedChanges } from './reducers/instance';
 import { isNil } from 'lodash';
 
 export const createDictionarySelector = <T>(
@@ -70,7 +70,7 @@ export const createBaseEntitySelectors = <T>(
 
 const getActual = <T>(instance: EntityInstanceState<T> | undefined) => {
     if (!instance) return undefined;
-    return mergeStableChanges(instance, true)?.actual;
+    return getMergedChanges(instance).actual;
 };
 
 export const createCreateActualSelector = <T>(

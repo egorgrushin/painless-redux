@@ -113,7 +113,7 @@ export interface Page {
     loadingState?: LoadingState;
 }
 
-export interface UnstableChange<T> {
+export interface EntityChange<T> {
     stable: boolean;
     patch: DeepPartial<T>;
     merge: boolean;
@@ -122,7 +122,7 @@ export interface UnstableChange<T> {
 
 export interface EntityInstanceState<T> {
     actual: EntityType<T>;
-    unstableChanges?: UnstableChange<T>[];
+    changes?: EntityChange<T>[];
     removed?: boolean;
 }
 

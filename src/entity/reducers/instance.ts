@@ -1,33 +1,33 @@
-import { EntityActionTypes, EntityInstanceState, EntityType, UnstableChange } from '../types';
+import { EntityActionTypes, EntityChange, EntityInstanceState, EntityType } from '../types';
 import { EntityActions } from '../actions';
 import { omit } from 'lodash';
 import { merge as mergeFn } from '../../utils';
 import { DeepPartial } from '../../system-types';
 
-const createUnstableChange = <T>(
+const createEntityChange = <T>(
     patch: DeepPartial<T>,
     stable = false,
     merge = true,
     id?: string,
-): UnstableChange<T> => ({ patch, stable, merge, id });
+): EntityChange<T> => ({ patch, stable, merge, id });
 
-export const mergeStableChanges = <T>(
+export const getMergedChanges = <T>(
     state: EntityInstanceState<T>,
-    mergeAll?: boolean,
+    onlyStable?: boolean,
 ): EntityInstanceState<T> => {
-    let { actual, unstableChanges = [] } = state;
-    if (unstableChanges.length === 0) return state;
-    let change: UnstableChange<T> | undefined;
+    let { actual, changes = [] } = state;
+    if (changes.length === 0) return state;
+    let change: EntityChange<T> | undefined;
 
-    while ((change = unstableChanges[0])) {
-        if (!change.stable && !mergeAll) break;
-        unstableChanges = unstableChanges.slice(1);
+    while ((change = changes[0])) {
+        if (onlyStable && !change.stable) break;
+        changes = changes.slice(1);
         const { merge, patch } = change;
         actual = merge ? mergeFn(actual, patch) : patch;
     }
 
-    if (unstableChanges.length === 0) return { actual };
-    return { actual, unstableChanges };
+    if (changes.length === 0) return { actual };
+    return { actual, changes: changes };
 };
 
 export const createInstanceReducer = <T>(types: EntityActionTypes) => (
@@ -39,43 +39,56 @@ export const createInstanceReducer = <T>(types: EntityActionTypes) => (
             const { options, payload: { entity } } = action;
             let newState;
             if (options.merge && state) {
-                const { unstableChanges = [], actual } = state;
+                const { changes = [], actual } = state;
                 const patch = omit(entity, 'id');
-                const change = createUnstableChange<T>(patch, true, true);
-                newState = { actual, unstableChanges: unstableChanges.concat(change) };
+                const change = createEntityChange<T>(patch, true, true);
+                newState = { actual, changes: changes.concat(change) };
             } else {
                 newState = { actual: entity as EntityType<T> };
             }
-            return mergeStableChanges(newState);
+            return getMergedChanges(newState, true);
         }
         case types.CHANGE: {
-            // FIXME(egorgrushin): add support ifNotExist flag
-            if (!state) return state;
-            const { options: { optimistic, merge }, payload: { id, patch, changeId } } = action;
-            const { unstableChanges = [], actual } = state;
-            const resultPatch = merge ? patch : { id, ...patch };
-            const change = createUnstableChange<T>(resultPatch, !optimistic, merge, changeId);
-            const newState = { actual, unstableChanges: unstableChanges.concat(change) };
-            return mergeStableChanges(newState);
+            const {
+                options: {
+                    optimistic,
+                    merge,
+                    ifNotExist,
+                }, payload: {
+                    id,
+                    patch,
+                    changeId,
+                },
+            } = action;
+            const patchWithId = { id, ...patch };
+            if (!state) {
+                if (!ifNotExist) return state;
+                return { actual: patchWithId as EntityType<T> };
+            }
+            const { changes = [], actual } = state || {};
+            const resultPatch = merge ? patch : patchWithId;
+            const change = createEntityChange<T>(resultPatch, !optimistic, merge, changeId);
+            const newState = { actual, changes: changes.concat(change) };
+            return getMergedChanges(newState, true);
         }
         case types.RESOLVE_CHANGE: {
             if (!state) return state;
             const { payload: { success, changeId, remotePatch }, options: { merge } } = action;
-            let unstableChanges = state.unstableChanges ?? [];
+            let changes = state.changes ?? [];
             if (remotePatch) {
-                const change = createUnstableChange<T>(remotePatch, true, merge, changeId);
-                unstableChanges = unstableChanges.concat(change);
+                const change = createEntityChange<T>(remotePatch, true, merge, changeId);
+                changes = changes.concat(change);
             }
             if (success) {
-                unstableChanges = unstableChanges.map((change) => {
+                changes = changes.map((change) => {
                     if (change.id === changeId) return { ...change, stable: true };
                     return change;
                 });
             } else {
-                unstableChanges = unstableChanges.filter((change) => change.id === changeId);
+                changes = changes.filter((change) => change.id === changeId);
             }
-            const newState = { ...state, unstableChanges };
-            return mergeStableChanges(newState);
+            const newState = { ...state, changes };
+            return getMergedChanges(newState, true);
         }
         case types.REMOVE: {
             if (!state) return state;

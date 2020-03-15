@@ -38,8 +38,10 @@ export const createDictionaryReducer = <T>(
             }
             case types.CHANGE:
             case types.RESOLVE_CHANGE: {
-                const { payload: { id } } = action;
-                const instance = instanceReducer(state[id], action) as EntityInstanceState<T>;
+                const { payload: { id }, options: { ifNotExist } } = action;
+                const instanceState = state[id];
+                if (instanceState === undefined && !ifNotExist) return state;
+                const instance = instanceReducer(instanceState, action) as EntityInstanceState<T>;
                 return { ...state, [id]: instance };
             }
             case types.REMOVE: {
