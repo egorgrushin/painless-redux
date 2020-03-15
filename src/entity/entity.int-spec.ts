@@ -30,7 +30,7 @@ describe('[Integration] Entity', () => {
 
     describe('#get$', () => {
 
-        test('should emit created instance earlier', () => {
+        test('should emit created earlier instance ', () => {
             // arrange
             entity.create(user);
             const expected$ = cold('a', { a: [user] });
@@ -50,6 +50,71 @@ describe('[Integration] Entity', () => {
             expect(actual$).toBeObservable(expected$);
         });
 
+        test('should not load instance if exist with single option ', () => {
+            // arrange
+            entity.create(user);
+            const remote$ = cold('  --a', { a: [user] });
+            const expected$ = cold('a   ', { a: [user] });
+            // act
+            const actual$ = entity.get$(filter, remote$, { single: true });
+            // assert
+            expect(actual$).toBeObservable(expected$);
+        });
+
+        test('should not subscribe to remote$ if exist with single option ', () => {
+            // arrange
+            entity.create(user);
+            const remote$ = cold('  --a', { a: [user] });
+            // act
+            entity.get$(filter, remote$, { single: true }).subscribe();
+            // assert
+            expect(remote$).toHaveNoSubscriptions();
+        });
+
+    });
+
+    describe('getById$', () => {
+
+        test('should emit created earlier instance ', () => {
+            // arrange
+            entity.create(user);
+            const expected$ = cold('a', { a: user });
+            // act
+            const actual$ = entity.getById$(user.id);
+            // assert
+            expect(actual$).toBeObservable(expected$);
+        });
+
+        test('should emit instance after response', () => {
+            // arrange
+            const remote$ = cold('  --a', { a: user });
+            const expected$ = cold('a-b   ', { a: undefined, b: user });
+            // act
+            const actual$ = entity.getById$(user.id, remote$);
+            // assert
+            expect(actual$).toBeObservable(expected$);
+        });
+
+        test('should not load instance if exist with single option ', () => {
+            // arrange
+            entity.create(user);
+            const remote$ = cold('  --a', { a: user });
+            const expected$ = cold('a   ', { a: user });
+            // act
+            const actual$ = entity.getById$(user.id, remote$, { single: true });
+            // assert
+            expect(actual$).toBeObservable(expected$);
+        });
+
+        test('should not subscribe to remote$ if exist with single option ', () => {
+            // arrange
+            entity.create(user);
+            const remote$ = cold('  --a', { a: user });
+            // act
+            entity.getById$(user.id, remote$, { single: true }).subscribe();
+            // assert
+            expect(remote$).toHaveNoSubscriptions();
+        });
     });
 
     describe('#changeRemote$', () => {

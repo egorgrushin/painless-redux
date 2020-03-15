@@ -1,21 +1,12 @@
 import { createIdsReducer } from './ids';
-import { EntityActionTypes } from '../types';
-import { createEntityActionCreators } from '../action-creators';
+import { createTestHelpers } from '../../testing/helpers';
 
-const types: EntityActionTypes = {
-    ADD: 'ADD',
-    ADD_LIST: 'ADD_LIST',
-    REMOVE: 'REMOVE',
-    CHANGE: 'CHANGE',
-    RESOLVE_CHANGE: 'RESOLVE_CHANGE',
-    SET_STATE: 'SET_STATE',
-    CREATE: 'CREATE',
-};
+const {
+    reducer,
+    actionCreators,
+} = createTestHelpers(createIdsReducer);
 
 describe('ids', () => {
-
-    const reducer = createIdsReducer(types);
-    const actionCreators = createEntityActionCreators(types);
 
     describe('#ADD', () => {
         test('should add entity id', () => {

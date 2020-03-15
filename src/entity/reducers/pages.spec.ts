@@ -1,23 +1,15 @@
-import { EntityActionTypes } from '../types';
 import { createPagesReducer } from './pages';
 import { EntityActions } from '../actions';
-import { createEntityActionCreators } from '../action-creators';
+import { createTestHelpers } from '../../testing/helpers';
 
 jest.mock('../utils');
 
-const types: EntityActionTypes = {
-    ADD: 'ADD',
-    ADD_LIST: 'ADD_LIST',
-    REMOVE: 'REMOVE',
-    CHANGE: 'CHANGE',
-    RESOLVE_CHANGE: 'RESOLVE_CHANGE',
-    SET_STATE: 'SET_STATE',
-    CREATE: 'CREATE',
-};
+const {
+    reducer,
+    actionCreators,
+} = createTestHelpers(createPagesReducer);
 
 describe('pages', () => {
-    const reducer = createPagesReducer(types);
-    const actionCreators = createEntityActionCreators(types);
 
     test('should return default value', () => {
         // act
