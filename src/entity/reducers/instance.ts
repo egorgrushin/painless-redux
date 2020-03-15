@@ -1,6 +1,5 @@
 import { EntityActionTypes, EntityChange, EntityInstanceState, EntityType } from '../types';
 import { EntityActions } from '../actions';
-import { omit } from 'lodash';
 import { merge as mergeFn } from '../../utils';
 import { DeepPartial } from '../../system-types';
 
@@ -38,10 +37,10 @@ export const createInstanceReducer = <T>(types: EntityActionTypes) => (
         case types.ADD: {
             const { options, payload: { entity } } = action;
             let newState;
-            if (options.merge && state) {
+            if (state) {
                 const { changes = [], actual } = state;
-                const patch = omit(entity, 'id');
-                const change = createEntityChange<T>(patch, true, true);
+                const patch = entity as any;
+                const change = createEntityChange<T>(patch, true, options.merge);
                 newState = { actual, changes: changes.concat(change) };
             } else {
                 newState = { actual: entity as EntityType<T> };

@@ -24,7 +24,11 @@ export interface EntitySchema<T> {
     id?(data: T): Id;
 }
 
-export interface EntityGetOptions {
+export interface EntityLoadOptions {
+
+}
+
+export interface EntityGetOptions extends EntityLoadOptions, EntityAddOptions {
 
 }
 
@@ -33,10 +37,6 @@ export interface EntityGetListOptions extends EntityLoadListOptions {
 
 export interface EntityLoadListOptions extends EntityAddListOptions {
     pageSize?: number;
-}
-
-export interface EntityLoadOptions extends EntityGetOptions, EntityAddOptions {
-
 }
 
 export interface EntityAddOptions extends EntityInsertOptions {
