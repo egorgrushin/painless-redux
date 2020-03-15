@@ -88,7 +88,7 @@ describe('dictionary', () => {
         const actual = reducer({
             [entity.id]: {
                 actual: entity,
-                unstableChanges: [],
+                changes: [],
             },
         }, action);
         // assert
@@ -97,29 +97,29 @@ describe('dictionary', () => {
     });
 
     describe('#CHANGE', () => {
-        test.each`	
-		    options
-		    ${{ merge: true }}
-		    ${{ merge: false }}
-		`('should override entity when no merge option passed and merge otherwise ($options)', ({ options }) => {
-            // arrange
-            const entity: TestEntity = { id: 1, profile: { image: '1.png' } };
-            const patch = { profile: { age: 18 } };
-            const action = actionCreators.CHANGE(entity.id, patch, undefined, options);
-            // act
-            const instances = reducer({
-                [entity.id]: {
-                    actual: entity,
-                    unstableChanges: [],
-                },
-            }, action);
-            // assert
-            const expected = options.merge ? { image: '1.png', age: 18 } : { age: 18 };
-            const actual = instances[entity.id].actual.profile;
-            expect(actual).toEqual(expected);
-        });
+        // test.each`
+        //     options
+        //     ${{ merge: true }}
+        //     ${{ merge: false }}
+        // `('should override entity when no merge option passed and merge otherwise ($options)', ({ options }) => {
+        //     // arrange
+        //     const entity: TestEntity = { id: 1, profile: { image: '1.png' } };
+        //     const patch = { profile: { age: 18 } };
+        //     const action = actionCreators.CHANGE(entity.id, patch, undefined, options);
+        //     // act
+        //     const instances = reducer({
+        //         [entity.id]: {
+        //             actual: entity,
+        //             changes: [],
+        //         },
+        //     }, action);
+        //     // assert
+        //     const expected = options.merge ? { image: '1.png', age: 18 } : { age: 18 };
+        //     const actual = instances[entity.id].actual.profile;
+        //     expect(actual).toEqual(expected);
+        // });
 
-        xtest.each`
+        test.each`
 			ifNotExist
 			${undefined}
 			${true}
@@ -127,17 +127,17 @@ describe('dictionary', () => {
             'should either create entity or ignore based on options.ifNotExist=$ifNotExist',
             ({ ifNotExist }) => {
                 // arrange
+                const id = 1;
                 const patch = { profile: { age: 18 } };
-                const action = actionCreators.CHANGE(1, patch);
+                const action = actionCreators.CHANGE(id, patch, undefined, { ifNotExist });
                 // act
                 const actual = reducer(undefined, action);
                 // assert
                 const expected = ifNotExist ? {
-                    [action.payload.id]: {
-                        id: action.payload.id,
-                        profile: { age: 18 },
-                    },
+                    [id]: { actual: { id, profile: { age: 18 } } },
                 } : {};
+                const expectedKeys = ifNotExist ? [id.toString()] : [];
+                expect(Object.keys(actual)).toEqual(expectedKeys);
                 expect(actual).toEqual(expected);
             },
         );
