@@ -50,7 +50,6 @@ const createCreateLoadingStateById = <T>(
 export const createBaseEntitySelectors = <T>(
     selector: Selector<PainlessReduxState, EntityState<T>>,
 ): BaseEntitySelectors<T> => {
-
     const ids = createIdsSelector(selector);
     const dictionary = createDictionarySelector(selector);
     const pages = createPagesSelector(selector);
@@ -165,8 +164,8 @@ export const createEntitySelectors = <T>(
         ids,
         createLoadingStateById,
     } = createBaseEntitySelectors<T>(selector);
-    const createSelectorIdsList = createListSelector(dictionary);
-    const all = createSelectorIdsList(ids);
+    const createListSelectorByIds = createListSelector(dictionary);
+    const all = createListSelectorByIds(ids);
 
     const createActual = createCreateActualSelector(dictionary);
     const createPageIds = createCreatePageIdsSelector(pages);
@@ -176,7 +175,7 @@ export const createEntitySelectors = <T>(
 
     const createPageListByConfig = (config: any) => {
         const pageIdsSelector = createPageIdsByConfig(config);
-        return createSelectorIdsList(pageIdsSelector);
+        return createListSelectorByIds(pageIdsSelector);
     };
 
     return {
@@ -189,7 +188,7 @@ export const createEntitySelectors = <T>(
         createActual,
         createPageIds,
         createPageIdsByConfig,
-        createSelectorIdsList,
+        createListSelectorByIds,
         createPageListByConfig,
         createPage,
         createPageLoadingState,

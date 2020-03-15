@@ -23,7 +23,8 @@ export const createDictionaryReducer = <T>(
         switch (action.type) {
             case types.ADD: {
                 const entity = action.payload.entity;
-                const instance = instanceReducer(state[entity.id], action);
+                const instanceState = state[entity.id];
+                const instance = instanceReducer(instanceState, action);
                 if (!instance) return state;
                 return addInstances(state, [instance]);
             }
@@ -32,7 +33,8 @@ export const createDictionaryReducer = <T>(
                 const add = createAddByHash(types);
                 const instances = entities.map((entity) => {
                     const action = add(entity, configHash, options);
-                    return instanceReducer(state[entity.id], action) as EntityInstanceState<T>;
+                    const instanceState = state[entity.id];
+                    return instanceReducer(instanceState, action) as EntityInstanceState<T>;
                 });
                 return addInstances(state, instances);
             }
@@ -46,7 +48,8 @@ export const createDictionaryReducer = <T>(
             }
             case types.REMOVE: {
                 const { payload: { id } } = action;
-                const instance = instanceReducer(state[id], action);
+                const instanceState = state[id];
+                const instance = instanceReducer(instanceState, action);
                 if (instance) return { ...state, [id]: instance };
                 const { [id]: deleted, ...rest } = state;
                 return rest;
