@@ -131,7 +131,7 @@ describe('Entity', () => {
             // arrange
             const options: EntityChangeOptions = { useResponsePatch };
             const id = user.id;
-            const remote$ = cold(' --a| ', { a: { data: responsePatch } });
+            const remote$ = cold(' --a| ', { a: responsePatch });
             const resolvePatch = useResponsePatch ? responsePatch : patch;
             const changeAction = entity.actionCreators.CHANGE(id, resolvePatch, changeId, options);
             const actions$ = cold('a-(bc)', {
@@ -152,7 +152,7 @@ describe('Entity', () => {
 		        ${true}
 	            `('should change entity remotely with useResponsePatch: $useResponsePatch', ({ useResponsePatch }) => {
                 const options: EntityChangeOptions = { optimistic: true, useResponsePatch };
-                const remote$ = cold(' --a| ', { a: { data: responsePatch } });
+                const remote$ = cold(' --a| ', { a: responsePatch });
                 const id = user.id;
                 const changeAction = entity.actionCreators.CHANGE(id, patch, changeId, options);
                 const resolvePatch = useResponsePatch ? responsePatch : undefined;
@@ -261,8 +261,7 @@ describe('Entity', () => {
 
         test('should remote create entity', () => {
             // arrange
-            const response = { data: user };
-            const remote$ = cold('--a|', { a: response });
+            const remote$ = cold('--a|', { a: user });
             const createAction = entity.actionCreators.CREATE(user);
             const actions$ = cold('a-(bc)', {
                 a: setStateActionFactory({ isLoading: true }),
@@ -289,7 +288,7 @@ describe('Entity', () => {
 
         test('should load entity', () => {
             // arrange
-            const remote$ = cold('--a|', { a: { data: user } });
+            const remote$ = cold('--a|', { a: user });
             const addAction = entity.actionCreators.ADD(user);
             const actions$ = cold('a-(bc)', {
                 a: setStateActionFactory({ isLoading: true }, user.id),
@@ -305,9 +304,7 @@ describe('Entity', () => {
         test('should load entity with tuple id', () => {
             // arrange
             const data = { objectId: '23a4123', type: 5, title: 'Some object 1' };
-            const remote$ = cold('--a|', {
-                a: { data },
-            });
+            const remote$ = cold('--a|', { a: data });
             const id = [data.objectId, data.type].toString();
             const addAction = entity.actionCreators.ADD({ id, ...data });
             const actions$ = cold('a-(bc)', {
@@ -336,7 +333,7 @@ describe('Entity', () => {
         test('should load entities', () => {
             // arrange
             const users = [user];
-            const remote$ = cold('--a|', { a: { data: users } });
+            const remote$ = cold('--a|', { a: users });
             const filter = null;
             const addAction = entity.actionCreators.ADD_LIST(users, filter, true, false);
             const actions$ = cold('a-(bc)', {
@@ -385,8 +382,8 @@ describe('Entity', () => {
             const users1 = [user, user2];
             const users2 = [user3];
             const remote$ = (value: Pagination) => {
-                const data = value.index ? users2 : users1;
-                return cold('--a|', { a: { data } });
+                const users = value.index ? users2 : users1;
+                return cold('--a|', { a: users });
             };
             const addAction = entity.actionCreators.ADD_LIST(users1, filter, true, true);
             const addAction2 = entity.actionCreators.ADD_LIST(users2, filter);

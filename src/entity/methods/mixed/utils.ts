@@ -2,7 +2,6 @@ import { BehaviorSubject, EMPTY, merge, Observable, of, OperatorFunction } from 
 import {
     EntityChangeOptions,
     EntityGetListOptions,
-    EntityResponse,
     EntitySchema,
     ObservableOrFactory,
     Page,
@@ -122,20 +121,20 @@ export const createMixedEntityMethodsUtils = <T>(
 
     const getPatchByOptions = (
         patch: DeepPartial<T>,
-        response: EntityResponse<DeepPartial<T>> | undefined,
+        response: DeepPartial<T> | undefined,
         options?: EntityChangeOptions,
     ): DeepPartial<T> => {
         if (options?.optimistic) return patch;
-        if (options?.useResponsePatch) return response?.data ?? {};
+        if (options?.useResponsePatch) return response ?? {};
         return patch;
     };
 
     const getResolvePatchByOptions = (
         patch: DeepPartial<T>,
-        response: EntityResponse<DeepPartial<T>> | undefined,
+        response: DeepPartial<T> | undefined,
         options?: EntityChangeOptions,
     ): DeepPartial<T> | undefined => {
-        if (options?.useResponsePatch) return response?.data;
+        if (options?.useResponsePatch) return response;
     };
 
     return { getRemotePipe, getPaginator, tryInvoke, getPatchByOptions, getResolvePatchByOptions };

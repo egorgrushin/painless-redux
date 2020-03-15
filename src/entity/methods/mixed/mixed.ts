@@ -6,11 +6,9 @@ import {
     EntityLoadListOptions,
     EntityLoadOptions,
     EntityRemoveOptions,
-    EntityResponse,
     EntitySchema,
     PaginatedResponse,
     Pagination,
-    Response$,
     Response$Factory,
 } from '../../types';
 import { BehaviorSubject, merge, Observable, of } from 'rxjs';
@@ -40,7 +38,7 @@ export const createMixedEntityMethods = <T>(
 
     const loadList$ = (
         config: any,
-        dataSource: Response$<T[]> | Response$Factory<T[]>,
+        dataSource: Observable<T[]> | Response$Factory<T[]>,
         options?: EntityLoadListOptions,
         paginatorSubj?: BehaviorSubject<boolean>,
     ): Observable<never> => {
@@ -53,7 +51,7 @@ export const createMixedEntityMethods = <T>(
                 success: (result) => {
                     if (!result) return;
                     const { index, size, response } = result;
-                    const data = response.data || [];
+                    const data = response || [];
                     const isReplace = index === 0;
                     const hasMore = data.length >= size;
                     return dispatchMethods.addList(data, config, isReplace, hasMore, options);
@@ -65,11 +63,11 @@ export const createMixedEntityMethods = <T>(
 
     const loadById$ = (
         id: Id,
-        dataSource$: Response$<T>,
+        dataSource$: Observable<T>,
         options?: EntityLoadOptions,
     ): Observable<never> => {
         const store$ = selectMethods.getById$(id);
-        const sourcePipe = getRemotePipe<LoadingState | undefined, EntityResponse<T>, never>({
+        const sourcePipe = getRemotePipe<LoadingState | undefined, T, never>({
             id,
             options,
             store$,
@@ -77,7 +75,7 @@ export const createMixedEntityMethods = <T>(
             success: (response) => {
                 if (!response) return;
                 return dispatchMethods.add({
-                    ...response.data,
+                    ...response,
                     id,
                 }, null, options);
             },
@@ -89,11 +87,11 @@ export const createMixedEntityMethods = <T>(
     const tryInvokeList$ = (
         store$: Observable<any>,
         config: any,
-        dataSource?: Response$<T[]> | Response$Factory<T[]>,
+        dataSource?: Observable<T[]> | Response$Factory<T[]>,
         options?: EntityGetListOptions,
         paginatorSubj?: BehaviorSubject<boolean>,
     ) => {
-        const invoker = (ds: Response$<T[]> | Response$Factory<T[]>) => loadList$(
+        const invoker = (ds: Observable<T[]> | Response$Factory<T[]>) => loadList$(
             config,
             ds,
             options,
@@ -104,7 +102,7 @@ export const createMixedEntityMethods = <T>(
 
     const get$ = (
         config: any,
-        dataSource?: Response$<T[]> | Response$Factory<T[]>,
+        dataSource?: Observable<T[]> | Response$Factory<T[]>,
         options?: EntityGetListOptions,
         paginatorSubj?: BehaviorSubject<boolean>,
     ): Observable<T[] | undefined> => {
@@ -120,7 +118,7 @@ export const createMixedEntityMethods = <T>(
 
     const getDictionary$ = (
         config: any,
-        dataSource?: Response$<T[]> | Response$Factory<T[]>,
+        dataSource?: Observable<T[]> | Response$Factory<T[]>,
         options?: EntityGetListOptions,
         paginatorSubj?: BehaviorSubject<boolean>,
     ): Observable<Dictionary<T>> => {
@@ -136,7 +134,7 @@ export const createMixedEntityMethods = <T>(
 
     const getById$ = (
         id: Id,
-        dataSource?: Response$<T>,
+        dataSource?: Observable<T>,
         options?: EntityGetOptions,
     ): Observable<T | undefined> => {
         const store$ = selectMethods.getById$(id);
@@ -149,16 +147,16 @@ export const createMixedEntityMethods = <T>(
 
     const createRemote$ = (
         config: any,
-        dataSource$: Response$<T>,
+        dataSource$: Observable<T>,
         options?: EntityAddOptions,
-    ): Response$<T> => {
-        const sourcePipe = getRemotePipe<null, EntityResponse<T>>({
+    ): Observable<T> => {
+        const sourcePipe = getRemotePipe<null, T>({
             config,
             options,
             remoteObsOrFactory: dataSource$,
             success: (result) => {
                 if (!result) return;
-                return dispatchMethods.create(result.data, config, options);
+                return dispatchMethods.create(result, config, options);
             },
             emitOnSuccess: true,
         });
@@ -170,17 +168,17 @@ export const createMixedEntityMethods = <T>(
         patch: DeepPartial<T>,
         dataSource$: Observable<any>,
         options?: EntityChangeOptions,
-    ): Response$<DeepPartial<T>> => {
+    ): Observable<DeepPartial<T>> => {
         const changeId = v4();
         const { changeWithId, resolveChange } = dispatchMethods;
         const { getLoadingStateById$ } = selectMethods;
 
-        const sourcePipe = getRemotePipe<LoadingState | undefined, EntityResponse<DeepPartial<T>>>({
+        const sourcePipe = getRemotePipe<LoadingState | undefined, DeepPartial<T>>({
             id,
             options,
             remoteObsOrFactory: dataSource$,
             success: (
-                response?: EntityResponse<DeepPartial<T>>,
+                response?: DeepPartial<T>,
             ) => {
                 const patchToApply = getPatchByOptions(patch, response, options) ?? {};
                 return changeWithId(id, patchToApply, changeId, options);
@@ -189,7 +187,7 @@ export const createMixedEntityMethods = <T>(
             optimistic: options?.optimistic,
             optimisticResolve: (
                 success: boolean,
-                response?: EntityResponse<DeepPartial<T>>,
+                response?: DeepPartial<T>,
             ) => {
                 const patchToApply = getResolvePatchByOptions(patch, response, options);
                 return resolveChange(id, changeId, success, patchToApply, options);
@@ -201,10 +199,10 @@ export const createMixedEntityMethods = <T>(
 
     const removeRemote$ = (
         id: Id,
-        observable: Observable<EntityResponse>,
+        observable: Observable<T>,
         options?: EntityRemoveOptions,
-    ): Observable<EntityResponse> => {
-        const sourcePipe = getRemotePipe<LoadingState | undefined, EntityResponse>({
+    ): Observable<T> => {
+        const sourcePipe = getRemotePipe<LoadingState | undefined, T>({
             id,
             options,
             remoteObsOrFactory: observable,

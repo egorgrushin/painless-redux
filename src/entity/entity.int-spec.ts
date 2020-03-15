@@ -42,7 +42,7 @@ describe('[Integration] Entity', () => {
 
         test('should emit instance after response', () => {
             // arrange
-            const remote$ = cold('  --a', { a: { data: [user] } });
+            const remote$ = cold('  --a', { a: [user] });
             const expected$ = cold('a-b   ', { a: undefined, b: [user] });
             // act
             const actual$ = entity.get$(filter, remote$);
@@ -69,7 +69,7 @@ describe('[Integration] Entity', () => {
             ({ useResponsePatch }) => {
                 // arrange
                 const resultPatch = useResponsePatch ? remotePatch : patch;
-                const remote$ = cold('  --a', { a: { data: remotePatch } });
+                const remote$ = cold('  --a', { a: remotePatch });
                 const expected$ = cold('a-b   ', { a: [user], b: [{ ...user, ...resultPatch }] });
                 const actual$ = entity.get$(filter);
                 const options = { useResponsePatch };
@@ -102,7 +102,7 @@ describe('[Integration] Entity', () => {
                 const remoteMarble = '    --a';
                 const expectedMarble = 'a-b-c';
                 const actMarble = '     --a';
-                const remote$ = cold(remoteMarble, { a: { data: remotePatch } });
+                const remote$ = cold(remoteMarble, { a: remotePatch });
                 const patched = { ...user, ...patch };
                 const resultPatched = useResponsePatch ? { ...patched, ...remotePatch } : patched;
                 const expected$ = cold(expectedMarble, {
