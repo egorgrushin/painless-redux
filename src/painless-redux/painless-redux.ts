@@ -3,12 +3,11 @@ import { ActionCreator, AnyAction, Reducer, RxStore, SameShaped } from '../syste
 import { createDispatcher } from '../dispatcher/dispatcher';
 import { typedDefaultsDeep } from '../utils';
 import { createSlotSelector, createSlotsSelector } from './selectors';
-import { getUndoableReducer } from './reducers';
+import { getWrappedReducer } from './reducers';
 import { createSelectManager } from '../select-manager/select-manager';
 import { createRegister } from './register';
 import { createSelector } from 'reselect';
 import { createSystemActionTypes } from './utils';
-import { createSystemActionCreators } from './action-creators';
 
 export const createPainlessRedux = (
     rxStore: RxStore,
@@ -28,10 +27,9 @@ export const createPainlessRedux = (
     const selector = createSelector(fullSchema.selector, (state: any) => state[domainName]);
     const slotsSelector = createSlotsSelector(fullSchema, selector);
     const systemActionTypes = createSystemActionTypes(domainName);
-    const systemActionCreators = createSystemActionCreators(systemActionTypes);
 
     const { value: register, checkSlotUniq, addNewSlotToRegister } = createRegister();
-    const getReducer = () => getUndoableReducer(fullSchema, register, systemActionTypes, initialValue);
+    const getReducer = () => getWrappedReducer(fullSchema, register, systemActionTypes, initialValue);
 
     const registerSlotReducer = <TState, TActions extends AnyAction>(
         type: SlotTypes,
@@ -50,7 +48,7 @@ export const createPainlessRedux = (
         reducer: Reducer<TState, TActions>,
         actionCreators: SameShaped<TActionTypes, ActionCreator<TActionTypes, TActions>>,
     ) => {
-        const dispatcher = createDispatcher<TActionTypes, TActions>(rxStore, actionCreators, systemActionCreators);
+        const dispatcher = createDispatcher<TActionTypes, TActions>(rxStore, actionCreators);
         const selectManager = createSelectManager(rxStore);
         const currentSlotsSelector = slotsSelector<TState>(type);
         const selector = createSlotSelector<TState>(currentSlotsSelector, name);

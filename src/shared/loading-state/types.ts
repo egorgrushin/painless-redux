@@ -15,7 +15,6 @@ export interface LoadingStateActionTypes {
 
 export type LoadingStateSelector<T> = Selector<T, LoadingState | undefined>
 
-
 export interface LoadingStateSelectors<T> {
     loadingState: LoadingStateSelector<T>;
 }

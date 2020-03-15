@@ -6,6 +6,7 @@ const {
     reducer,
     actionCreators,
 } = createTestHelpers(createInstanceReducer);
+
 describe('instance', () => {
 
     test('should return default state', () => {
@@ -16,7 +17,6 @@ describe('instance', () => {
     });
 
     describe('#ADD', () => {
-
         test.each`
             merge
             ${true}
