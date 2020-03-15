@@ -16,10 +16,6 @@ import { EntityActionCreators } from './action-creators';
 
 export type EntityType<T> = T & { id: Id };
 
-export interface EntityResponse<T = any> {
-    data: T;
-}
-
 export interface EntitySchema<T> {
     name: string;
     hashFn: HashFn;
@@ -84,11 +80,10 @@ export interface Pagination {
 }
 
 export interface PaginatedResponse<T> extends Pagination {
-    response: EntityResponse<T[]>;
+    response: T[];
 }
 
-export type Response$<T> = Observable<EntityResponse<T>>;
-export type Response$Factory<T> = (pagination: Pagination) => Response$<T>;
+export type Response$Factory<T> = (pagination: Pagination) => Observable<T>;
 export type ObservableOrFactory<S, R> = (Observable<R>) | ((value: S) => Observable<R>);
 
 export interface RemotePipeConfig<S, R> {
