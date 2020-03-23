@@ -46,7 +46,8 @@ export const createDictionaryReducer = <T>(
                 const instance = instanceReducer(instanceState, action) as EntityInstanceState<T>;
                 return { ...state, [id]: instance };
             }
-            case types.REMOVE: {
+            case types.REMOVE:
+            case types.RESOLVE_REMOVE: {
                 const { payload: { id } } = action;
                 const instanceState = state[id];
                 const instance = instanceReducer(instanceState, action);

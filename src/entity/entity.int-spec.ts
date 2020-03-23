@@ -1,5 +1,5 @@
 import { Id } from '../system-types';
-import { Entity } from './types';
+import { Entity, EntityRemoveOptions } from './types';
 import { createEntity } from './entity';
 import { PainlessRedux } from '../painless-redux/types';
 import { createPainlessRedux } from '../painless-redux/painless-redux';
@@ -264,6 +264,32 @@ describe('[Integration] Entity', () => {
                 expect(actual$).toBeObservable(expected$);
             },
         );
+
+    });
+
+    describe('#removeRemote', () => {
+
+        beforeEach(() => {
+            entity.add(user);
+        });
+
+        test('should optimistic remove', () => {
+            // arrange
+            const idleMarble = '    --a  ';
+            const remoteMarble = '    --a';
+            const expectedMarble = 'a-b-b';
+            const remote$ = cold(remoteMarble, { a: null });
+            const expected$ = cold(expectedMarble, { a: [user], b: [] });
+            const actual$ = entity.get$(filter);
+            const options: EntityRemoveOptions = { optimistic: true };
+            // act
+            cold(idleMarble, { a: null }).pipe(
+                switchMap(() => entity.removeRemote$(user.id, remote$, options)),
+            ).subscribe();
+            // assert
+            expect(actual$).toBeObservable(expected$);
+
+        });
 
     });
 

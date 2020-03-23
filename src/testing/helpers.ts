@@ -68,6 +68,7 @@ export const createTestHelpers = <T>(
         SET_STATE: 'SET_STATE',
         CREATE: 'CREATE',
         RESOLVE_CHANGE: 'RESOLVE_CHANGE',
+        RESOLVE_REMOVE: 'RESOLVE_REMOVE',
     };
 
     const actionCreators = createEntityActionCreators<T>(types);

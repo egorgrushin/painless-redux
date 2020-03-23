@@ -1,6 +1,8 @@
-import { createActionTypes, hashIt, typedDefaultsDeep } from '../utils';
+import { createActionTypes, hashIt, merge as mergeFn, typedDefaultsDeep } from '../utils';
 import {
     EntityActionTypes,
+    EntityChange,
+    EntityInstanceState,
     EntityRemoteOptions,
     EntitySchema,
     EntityType,
@@ -13,7 +15,7 @@ import { isNil } from 'lodash';
 import { DEFAULT_PAGE_SIZE, ENTITY_TYPE_NAMES } from './constants';
 import { v4 } from 'uuid';
 import { MonoTypeOperatorFunction, Observable } from 'rxjs';
-import { LoadingState } from '../system-types';
+import { DeepPartial, LoadingState } from '../system-types';
 import { filter, first, map } from 'rxjs/operators';
 
 export const getHash = (config: any): string => hashIt(config);
@@ -66,3 +68,29 @@ export const getPaginated$ = <T>(
 ): Observable<PaginatedResponse<T>> => getObservable$(dataSource, pagination).pipe(
     map((response) => ({ ...pagination, response })),
 );
+
+export const getMergedChanges = <T>(
+    state: EntityInstanceState<T>,
+    onlyStable?: boolean,
+): EntityInstanceState<T> => {
+    let { actual, changes = [] } = state;
+    if (changes.length === 0) return state;
+    let change: EntityChange<T> | undefined;
+
+    while ((change = changes[0])) {
+        if (onlyStable && !change.stable) break;
+        changes = changes.slice(1);
+        const { merge, patch } = change;
+        actual = merge ? mergeFn(actual, patch) : patch;
+    }
+
+    if (changes.length === 0) return { actual };
+    return { actual, changes: changes };
+};
+
+export const createEntityChange = <T>(
+    patch: DeepPartial<T>,
+    stable = false,
+    merge = true,
+    id?: string,
+): EntityChange<T> => ({ patch, stable, merge, id });
