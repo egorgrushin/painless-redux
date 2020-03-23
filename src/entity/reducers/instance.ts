@@ -79,13 +79,6 @@ export const createInstanceReducer = <T>(types: EntityActionTypes) => {
                 if (!state) return state;
                 return { ...state, removed: false };
             }
-            case types.SET_STATE: {
-                if (!state) return state;
-                return {
-                    ...state,
-                    loadingState: loadingStateReducer(state.loadingState, action),
-                };
-            }
             default:
                 return state;
         }
