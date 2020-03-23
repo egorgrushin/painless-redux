@@ -88,10 +88,7 @@ export const createListSelector = <T>(
 ): ListSelector<T> => createSelector(
     idsSelector,
     dictionarySelector,
-    (
-        ids,
-        dict,
-    ) => {
+    (ids, dict) => {
         if (!ids) return undefined;
         return ids.map(id => getActual(dict[id]))
             .filter((actual) => !isNil(actual)) as T[];

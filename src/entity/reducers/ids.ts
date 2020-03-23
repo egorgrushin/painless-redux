@@ -48,9 +48,14 @@ export const createIdsReducer = (
             const ids = entities.map((e) => e.id);
             return addIds(state, ids, action.options);
         }
+        case types.REMOVE: {
+            const { payload: { id }, options: { safe, optimistic } } = action;
+            if (optimistic || safe) return state;
+            return state.filter(existId => existId !== id);
+        }
         case types.RESOLVE_REMOVE: {
-            const { payload: { success, id } } = action;
-            if (!success) return state;
+            const { payload: { success, id }, options: { safe } } = action;
+            if (!success || safe) return state;
             return state.filter(existId => existId !== id);
         }
         default:

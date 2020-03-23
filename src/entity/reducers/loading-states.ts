@@ -19,10 +19,17 @@ export const createByIdLoadingStatesReducer = (
                 const byId = entityLoadingStateReducer(state[id], action) as LoadingState;
                 return { ...state, [id]: byId };
             }
-            case types.RESOLVE_REMOVE: {
-                const { payload: { success, id } } = action;
+            case types.REMOVE: {
+                const { payload: { id }, options: { safe, optimistic } } = action;
                 if (isNil(id)) return state;
-                if (!success) return state;
+                if (optimistic || safe) return state;
+                const { [id]: deleted, ...rest } = state;
+                return rest;
+            }
+            case types.RESOLVE_REMOVE: {
+                const { payload: { success, id }, options: { safe } } = action;
+                if (isNil(id)) return state;
+                if (!success || safe) return state;
                 const { [id]: deleted, ...rest } = state;
                 return rest;
             }

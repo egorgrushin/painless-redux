@@ -67,6 +67,13 @@ export const createDispatchEntityMethods = <T>(
         return dispatcher.createAndDispatch('RESOLVE_CHANGE', [id, changeId, success, remotePatch], options);
     };
 
+    const remove = (
+        id: Id,
+        options?: EntityRemoveOptions,
+    ) => {
+        return dispatcher.createAndDispatch('REMOVE', [id], options);
+    };
+
     const resolveRemove = (
         id: Id,
         success: boolean,
@@ -75,11 +82,10 @@ export const createDispatchEntityMethods = <T>(
         return dispatcher.createAndDispatch('RESOLVE_REMOVE', [id, success], options);
     };
 
-    const remove = (
+    const restoreRemoved = (
         id: Id,
-        options?: EntityRemoveOptions,
     ) => {
-        return dispatcher.createAndDispatch('REMOVE', [id], options);
+        return dispatcher.createAndDispatch('RESTORE_REMOVED', [id]);
     };
 
     const setState = (
@@ -170,6 +176,7 @@ export const createDispatchEntityMethods = <T>(
         resolveChange,
         remove,
         resolveRemove,
+        restoreRemoved,
         setState,
         setStateBus,
         setStateById,

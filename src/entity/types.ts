@@ -165,6 +165,7 @@ export interface EntityActionTypes {
     CHANGE: 'CHANGE';
     RESOLVE_CHANGE: 'RESOLVE_CHANGE';
     RESOLVE_REMOVE: 'RESOLVE_REMOVE';
+    RESTORE_REMOVED: 'RESTORE_REMOVED';
 }
 
 export type Entity<T> = {
