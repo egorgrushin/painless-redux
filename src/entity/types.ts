@@ -119,7 +119,6 @@ export interface EntityInstanceState<T> {
     actual: EntityType<T>;
     changes?: EntityChange<T>[];
     removed?: boolean;
-    loadingState?: LoadingState;
 }
 
 export interface EntityState<T> extends LoadingStateState {
