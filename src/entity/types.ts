@@ -164,6 +164,7 @@ export interface EntityActionTypes {
     SET_STATE: LoadingStateActionTypes['SET_STATE'];
     CHANGE: 'CHANGE';
     RESOLVE_CHANGE: 'RESOLVE_CHANGE';
+    RESOLVE_REMOVE: 'RESOLVE_REMOVE';
 }
 
 export type Entity<T> = {

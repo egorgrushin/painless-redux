@@ -52,6 +52,12 @@ export interface DispatchEntityMethods<T> {
         options?: EntityChangeOptions,
     ): EntityActions;
 
+    resolveRemove(
+        id: Id,
+        success: boolean,
+        options?: EntityRemoveOptions,
+    ): EntityActions;
+
     remove(
         id: Id,
         options?: EntityRemoveOptions,

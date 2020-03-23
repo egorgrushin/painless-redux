@@ -1,34 +1,7 @@
-import { EntityActionTypes, EntityChange, EntityInstanceState, EntityType } from '../types';
+import { EntityActionTypes, EntityInstanceState, EntityType } from '../types';
 import { EntityActions } from '../actions';
-import { merge as mergeFn } from '../../utils';
-import { DeepPartial } from '../../system-types';
 import { createLoadingStateReducer } from '../../shared/loading-state/reducers';
-
-const createEntityChange = <T>(
-    patch: DeepPartial<T>,
-    stable = false,
-    merge = true,
-    id?: string,
-): EntityChange<T> => ({ patch, stable, merge, id });
-
-export const getMergedChanges = <T>(
-    state: EntityInstanceState<T>,
-    onlyStable?: boolean,
-): EntityInstanceState<T> => {
-    let { actual, changes = [] } = state;
-    if (changes.length === 0) return state;
-    let change: EntityChange<T> | undefined;
-
-    while ((change = changes[0])) {
-        if (onlyStable && !change.stable) break;
-        changes = changes.slice(1);
-        const { merge, patch } = change;
-        actual = merge ? mergeFn(actual, patch) : patch;
-    }
-
-    if (changes.length === 0) return { actual };
-    return { actual, changes: changes };
-};
+import { createEntityChange, getMergedChanges } from '../utils';
 
 export const createInstanceReducer = <T>(types: EntityActionTypes) => {
 
@@ -53,15 +26,8 @@ export const createInstanceReducer = <T>(types: EntityActionTypes) => {
             }
             case types.CHANGE: {
                 const {
-                    options: {
-                        optimistic,
-                        merge,
-                        ifNotExist,
-                    }, payload: {
-                        id,
-                        patch,
-                        changeId,
-                    },
+                    options: { optimistic, merge, ifNotExist },
+                    payload: { id, patch, changeId },
                 } = action;
                 const patchWithId = { id, ...patch };
                 if (!state) {
@@ -98,6 +64,16 @@ export const createInstanceReducer = <T>(types: EntityActionTypes) => {
                 const { options: { optimistic, safe } } = action;
                 if (safe || optimistic) return { ...state, removed: true };
                 return undefined;
+            }
+            case types.RESOLVE_REMOVE: {
+                if (!state) return state;
+                const {
+                    payload: { success },
+                    options: { safe },
+                } = action;
+                if (safe) return state;
+                if (success) return undefined;
+                return { ...state, removed: false };
             }
             case types.SET_STATE: {
                 if (!state) return state;

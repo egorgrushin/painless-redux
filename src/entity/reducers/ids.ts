@@ -3,12 +3,18 @@ import { EntityActions } from '../actions';
 import { Id } from '../../system-types';
 import { isNil } from 'lodash';
 
-
-const getOnlyNewIds = (state: Id[], ids: Id[]): Id[] => {
+const getOnlyNewIds = (
+    state: Id[],
+    ids: Id[],
+): Id[] => {
     return ids.filter((id: Id) => !state.includes(id));
 };
 
-const addIds = (state: Id[], ids: Id[], options?: EntityInsertOptions): Id[] => {
+const addIds = (
+    state: Id[],
+    ids: Id[],
+    options?: EntityInsertOptions,
+): Id[] => {
     const newIds = getOnlyNewIds(state, ids);
     if (options && !isNil(options.pasteIndex)) {
         const pre = state.slice(0, options.pasteIndex);
@@ -42,8 +48,10 @@ export const createIdsReducer = (
             const ids = entities.map((e) => e.id);
             return addIds(state, ids, action.options);
         }
-        case types.REMOVE: {
-            return state.filter(id => id !== action.payload.id);
+        case types.RESOLVE_REMOVE: {
+            const { payload: { success, id } } = action;
+            if (!success) return state;
+            return state.filter(existId => existId !== id);
         }
         default:
             return state;
