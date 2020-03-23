@@ -71,8 +71,12 @@ export const createInstanceReducer = <T>(types: EntityActionTypes) => {
                     payload: { success },
                     options: { safe },
                 } = action;
-                if (safe) return state;
+                if (safe || state.removed === false) return state;
                 if (success) return undefined;
+                return { ...state, removed: false };
+            }
+            case types.RESTORE_REMOVED: {
+                if (!state) return state;
                 return { ...state, removed: false };
             }
             case types.SET_STATE: {

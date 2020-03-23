@@ -69,6 +69,7 @@ export const createTestHelpers = <T>(
         CREATE: 'CREATE',
         RESOLVE_CHANGE: 'RESOLVE_CHANGE',
         RESOLVE_REMOVE: 'RESOLVE_REMOVE',
+        RESTORE_REMOVED: 'RESTORE_REMOVED',
     };
 
     const actionCreators = createEntityActionCreators<T>(types);
