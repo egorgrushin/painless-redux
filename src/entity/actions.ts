@@ -120,6 +120,15 @@ export const createRestoreRemoved = <T>(types: EntityActionTypes) => (
     return { type: types.RESTORE_REMOVED, payload: { id } } as const;
 };
 
+export const createClear = (types: EntityActionTypes) => (config: any) => {
+    const configHash = getHash(config);
+    return { type: types.CLEAR, payload: { configHash } } as const;
+};
+
+export const createClearAll = (types: EntityActionTypes) => () => {
+    return { type: types.CLEAR_ALL } as const;
+};
+
 type SelfActionCreators = ReturnType<typeof createAdd>
     | ReturnType<typeof createResolveAdd>
     | ReturnType<typeof createAddList>
@@ -129,6 +138,8 @@ type SelfActionCreators = ReturnType<typeof createAdd>
     | ReturnType<typeof createResolveChange>
     | ReturnType<typeof createResolveRemove>
     | ReturnType<typeof createRestoreRemoved>
+    | ReturnType<typeof createClear>
+    | ReturnType<typeof createClearAll>
 
 export type EntityActions = ReturnType<SelfActionCreators>;
 

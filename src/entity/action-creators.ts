@@ -3,6 +3,8 @@ import {
     createAdd,
     createAddList,
     createChange,
+    createClear,
+    createClearAll,
     createRemove,
     createResolveAdd,
     createResolveChange,
@@ -23,6 +25,8 @@ export const createEntityActionCreators = <T>(
     RESOLVE_REMOVE: createResolveRemove<T>(actionTypes),
     RESTORE_REMOVED: createRestoreRemoved<T>(actionTypes),
     SET_STATE: createSetState(actionTypes),
+    CLEAR: createClear(actionTypes),
+    CLEAR_ALL: createClearAll(actionTypes),
 });
 
 export type EntityActionCreators = ReturnType<typeof createEntityActionCreators>;
