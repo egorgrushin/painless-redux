@@ -29,6 +29,25 @@ export const createDispatchEntityMethods = <T>(
         return dispatcher.createAndDispatch('ADD', [entity, config], options);
     };
 
+    const addWithId = (
+        entity: T,
+        tempId: string,
+        config?: any,
+        options?: EntityAddOptions,
+    ) => {
+        return dispatcher.createAndDispatch('ADD', [entity, config, tempId], options);
+    };
+
+    const resolveAdd = (
+        result: T,
+        success: boolean,
+        tempId: string,
+        config?: any,
+        options?: EntityAddOptions,
+    ) => {
+        return dispatcher.createAndDispatch('RESOLVE_ADD', [result, success, tempId, config], options);
+    };
+
     const addList = (
         entities: T[],
         config?: any,
@@ -169,11 +188,12 @@ export const createDispatchEntityMethods = <T>(
 
     return {
         add,
+        addWithId,
         addList,
-        create: add,
         change,
         changeWithId,
         resolveChange,
+        resolveAdd,
         remove,
         resolveRemove,
         restoreRemoved,

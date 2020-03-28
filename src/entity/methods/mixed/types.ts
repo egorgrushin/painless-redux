@@ -45,7 +45,8 @@ export interface MixedEntityMethods<T> {
         options?: EntityGetOptions,
     ): Observable<T | undefined>;
 
-    createRemote$(
+    addRemote$(
+        entity: T,
         config: any,
         dataSource$: Observable<T>,
         options?: EntityAddOptions,

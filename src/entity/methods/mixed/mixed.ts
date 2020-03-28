@@ -74,10 +74,8 @@ export const createMixedEntityMethods = <T>(
             remoteObsOrFactory: dataSource$,
             success: (response) => {
                 if (!response) return;
-                return dispatchMethods.add({
-                    ...response,
-                    id,
-                }, undefined, options);
+                const entity = { ...response, id };
+                return dispatchMethods.add(entity, undefined, options);
             },
         });
         const loadingState$ = selectMethods.getLoadingStateById$(id, prSchema.useAsapSchedulerInLoadingGuards);
@@ -145,20 +143,26 @@ export const createMixedEntityMethods = <T>(
         return store$;
     };
 
-    const createRemote$ = (
+    const addRemote$ = (
+        entity: T,
         config: any,
         dataSource$: Observable<T>,
         options?: EntityAddOptions,
     ): Observable<T> => {
+        const tempId = v4();
+        const { addWithId, resolveAdd } = dispatchMethods;
         const sourcePipe = getRemotePipe<null, T>({
             config,
             options,
             remoteObsOrFactory: dataSource$,
             success: (result) => {
-                if (!result) return;
-                return dispatchMethods.create(result, config, options);
+                const newEntity = options?.optimistic ? entity : result;
+                if (!newEntity) return;
+                return addWithId(newEntity, tempId, config, options);
             },
             emitOnSuccess: true,
+            optimistic: options?.optimistic,
+            optimisticResolve: (success, result) => resolveAdd(result, success, tempId, config, options),
         });
         return of(null).pipe(sourcePipe);
     };
@@ -223,7 +227,7 @@ export const createMixedEntityMethods = <T>(
         get$,
         getDictionary$,
         getById$,
-        createRemote$,
+        addRemote$,
         changeRemote$,
         removeRemote$,
     };

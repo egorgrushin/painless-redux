@@ -15,20 +15,38 @@ import * as loadingStateActions from '../shared/loading-state/actions';
 export const createAddByHash = <T>(types: EntityActionTypes) => (
     entity: EntityType<T>,
     configHash: string,
+    tempId?: string,
     options?: EntityAddOptions,
 ) => {
     options = typedDefaultsDeep(options, { merge: true });
-    const payload = { entity, configHash };
+    const payload = { entity, configHash, tempId };
     return { type: types.ADD, payload, options } as const;
 };
 
 export const createAdd = <T>(types: EntityActionTypes) => (
     entity: EntityType<T>,
     config?: any,
+    tempId?: string,
     options?: EntityAddOptions,
 ) => {
     const configHash = getHash(config);
-    return createAddByHash(types)(entity, configHash, options);
+    options = typedDefaultsDeep(options);
+    tempId = options.optimistic ? tempId : undefined;
+    entity = options.optimistic ? { ...entity, id: tempId as string } : entity;
+    return createAddByHash(types)(entity, configHash, tempId, options);
+};
+
+export const createResolveAdd = <T>(types: EntityActionTypes) => (
+    result: EntityType<T>,
+    success: boolean,
+    tempId: string,
+    config?: any,
+    options?: EntityAddOptions,
+) => {
+    const configHash = getHash(config);
+    options = typedDefaultsDeep(options, { merge: true });
+    const payload = { result, configHash, tempId, success };
+    return { type: types.RESOLVE_ADD, payload, options } as const;
 };
 
 export const createAddList = <T>(types: EntityActionTypes) => (
@@ -43,8 +61,6 @@ export const createAddList = <T>(types: EntityActionTypes) => (
     const payload = { entities, configHash, isReplace, hasMore };
     return { type: types.ADD_LIST, payload, options } as const;
 };
-
-export const createCreate = createAdd;
 
 export const createRemove = (types: EntityActionTypes) => (
     id: Id,
@@ -105,8 +121,8 @@ export const createRestoreRemoved = <T>(types: EntityActionTypes) => (
 };
 
 type SelfActionCreators = ReturnType<typeof createAdd>
+    | ReturnType<typeof createResolveAdd>
     | ReturnType<typeof createAddList>
-    | ReturnType<typeof createCreate>
     | ReturnType<typeof createRemove>
     | ReturnType<typeof createSetState>
     | ReturnType<typeof createChange>

@@ -39,9 +39,7 @@ export interface EntityLoadListOptions extends EntityAddListOptions {
     pageSize?: number;
 }
 
-export interface EntityAddOptions extends EntityInsertOptions {
-
-}
+export interface EntityAddOptions extends EntityOptimisticOptions, EntityInsertOptions {}
 
 export interface EntityOptimisticOptions {
     optimistic?: boolean;
@@ -156,13 +154,13 @@ export interface EntitySelectors<T> extends BaseEntitySelectors<T> {
 }
 
 export interface EntityActionTypes {
-    REMOVE: 'REMOVE';
     ADD: 'ADD';
-    CREATE: 'CREATE';
+    RESOLVE_ADD: 'RESOLVE_ADD';
     ADD_LIST: 'ADD_LIST';
     SET_STATE: LoadingStateActionTypes['SET_STATE'];
     CHANGE: 'CHANGE';
     RESOLVE_CHANGE: 'RESOLVE_CHANGE';
+    REMOVE: 'REMOVE';
     RESOLVE_REMOVE: 'RESOLVE_REMOVE';
     RESTORE_REMOVED: 'RESTORE_REMOVED';
 }

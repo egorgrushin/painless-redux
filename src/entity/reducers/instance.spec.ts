@@ -24,7 +24,7 @@ describe('instance', () => {
         `('should add entity as stable change (without id) and merge=$merge if there are changes', ({ merge }) => {
             // arrange
             const entity: EntityType<any> = { id: 1 };
-            const action = actionCreators.ADD(entity, undefined, { merge });
+            const action = actionCreators.ADD(entity, undefined, undefined, { merge });
             const existChange = { stable: false, patch: {}, merge: false };
             const state: EntityInstanceState<any> = {
                 actual: entity, changes: [existChange],
