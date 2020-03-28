@@ -4,7 +4,11 @@ import {
     EntityAddListOptions,
     EntityAddOptions,
     EntityChangeOptions,
+    EntityInternalAddListOptions,
+    EntityInternalAddOptions,
+    EntityInternalSetStateOptions,
     EntityRemoveOptions,
+    EntitySchema,
     EntitySetStateOptions,
     EntityType,
 } from '../../types';
@@ -18,6 +22,7 @@ import { ChangeOptions } from '../../../shared/change/types';
 export const createDispatchEntityMethods = <T>(
     dispatcher: Dispatcher<EntityActionTypes, EntityActions>,
     idResolver: (data: T) => EntityType<T>,
+    schema: EntitySchema<T>,
 ): DispatchEntityMethods<T> => {
 
     const add = (
@@ -26,7 +31,11 @@ export const createDispatchEntityMethods = <T>(
         options?: EntityAddOptions,
     ) => {
         entity = idResolver(entity);
-        return dispatcher.createAndDispatch('ADD', [entity, config], options);
+        const internalOptions: EntityInternalAddOptions = {
+            ...options,
+            maxPagesCount: schema.maxPagesCount,
+        };
+        return dispatcher.createAndDispatch('ADD', [entity, config, undefined], internalOptions);
     };
 
     const addWithId = (
@@ -35,7 +44,11 @@ export const createDispatchEntityMethods = <T>(
         config?: any,
         options?: EntityAddOptions,
     ) => {
-        return dispatcher.createAndDispatch('ADD', [entity, config, tempId], options);
+        const internalOptions: EntityInternalAddOptions = {
+            ...options,
+            maxPagesCount: schema.maxPagesCount,
+        };
+        return dispatcher.createAndDispatch('ADD', [entity, config, tempId], internalOptions);
     };
 
     const resolveAdd = (
@@ -55,8 +68,12 @@ export const createDispatchEntityMethods = <T>(
         hasMore: boolean = false,
         options?: EntityAddListOptions,
     ) => {
+        const internalOptions: EntityInternalAddListOptions = {
+            ...options,
+            maxPagesCount: schema.maxPagesCount,
+        };
         entities = entities.map((entity) => idResolver(entity));
-        return dispatcher.createAndDispatch('ADD_LIST', [entities, config, isReplace, hasMore], options);
+        return dispatcher.createAndDispatch('ADD_LIST', [entities, config, isReplace, hasMore], internalOptions);
     };
 
     const change = (
@@ -64,7 +81,7 @@ export const createDispatchEntityMethods = <T>(
         patch: DeepPartial<T>,
         options?: ChangeOptions,
     ) => {
-        return dispatcher.createAndDispatch('CHANGE', [id, patch], options);
+        return dispatcher.createAndDispatch('CHANGE', [id, patch, undefined], options);
     };
 
     const changeWithId = (
@@ -112,7 +129,11 @@ export const createDispatchEntityMethods = <T>(
         config?: any,
         options?: EntitySetStateOptions,
     ) => {
-        return dispatcher.createAndDispatch('SET_STATE', [state, config], options);
+        const internalOptions: EntityInternalSetStateOptions = {
+            ...options,
+            maxPagesCount: schema.maxPagesCount,
+        };
+        return dispatcher.createAndDispatch('SET_STATE', [state, config, undefined, undefined], internalOptions);
     };
 
     const setStateById = (
@@ -120,7 +141,11 @@ export const createDispatchEntityMethods = <T>(
         state: LoadingState,
         options?: EntitySetStateOptions,
     ) => {
-        return dispatcher.createAndDispatch('SET_STATE', [state, undefined, id], options);
+        const internalOptions: EntityInternalSetStateOptions = {
+            ...options,
+            maxPagesCount: schema.maxPagesCount,
+        };
+        return dispatcher.createAndDispatch('SET_STATE', [state, undefined, id, undefined], internalOptions);
     };
 
     const setStateForKey = (
@@ -129,7 +154,11 @@ export const createDispatchEntityMethods = <T>(
         state: LoadingState,
         options?: EntitySetStateOptions,
     ) => {
-        return dispatcher.createAndDispatch('SET_STATE', [state, undefined, id, key], options);
+        const internalOptions: EntityInternalSetStateOptions = {
+            ...options,
+            maxPagesCount: schema.maxPagesCount,
+        };
+        return dispatcher.createAndDispatch('SET_STATE', [state, undefined, id, key], internalOptions);
     };
 
     const clear = (config: any) => {

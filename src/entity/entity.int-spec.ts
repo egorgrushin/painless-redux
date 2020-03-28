@@ -1,5 +1,5 @@
 import { Id } from '../system-types';
-import { Entity, EntityAddOptions, EntityRemoveOptions } from './types';
+import { Entity, EntityAddOptions, EntityRemoveOptions, Page } from './types';
 import { createEntity } from './entity';
 import { PainlessRedux } from '../painless-redux/types';
 import { createPainlessRedux } from '../painless-redux/painless-redux';
@@ -29,7 +29,7 @@ describe('[Integration] Entity', () => {
     beforeEach(() => {
         store = new TestStore({}, (state) => state);
         pr = createPainlessRedux(store, { useAsapSchedulerInLoadingGuards: false });
-        entity = createEntity<TestEntity>(pr, { name: 'test' });
+        entity = createEntity<TestEntity>(pr, { name: 'test', maxPagesCount: 2 });
     });
 
     describe('#get$', () => {
@@ -378,6 +378,34 @@ describe('[Integration] Entity', () => {
             // act
             cold(actMarble).subscribe(() => {
                 entity.clearAll();
+            });
+            // assert
+            expect(actual$).toBeObservable(expected$);
+        });
+    });
+
+    describe('#maxPagesCount', () => {
+        test('should shift all pages order and remove first', () => {
+            // arrange
+            const user1 = { id: 1, name: 'User 1' };
+            const user2 = { id: 2, name: 'User 2' };
+            const user3 = { id: 3, name: 'User 2' };
+            entity.add(user1, Math.random());
+            entity.add(user2, Math.random());
+            const actual$ = entity.getPages$();
+            const actMarble = '     --a';
+            const expectedMarble = 'a-b';
+            const page1: Page = { ids: [user1.id], order: 0 };
+            const page2: Page = { ids: [user2.id], order: 1 };
+            const page3: Page = { ids: [user3.id] };
+
+            const expected$ = cold(expectedMarble, {
+                a: [page1, page2],
+                b: [{ ...page2, order: 0 }, { ...page3, order: 1 }],
+            });
+            // act
+            cold(actMarble).subscribe(() => {
+                entity.add(user3, Math.random());
             });
             // assert
             expect(actual$).toBeObservable(expected$);

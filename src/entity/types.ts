@@ -20,6 +20,7 @@ export interface EntitySchema<T> {
     name: string;
     hashFn: HashFn;
     pageSize: number;
+    maxPagesCount: number;
 
     id?(data: T): Id;
 }
@@ -41,6 +42,14 @@ export interface EntityLoadListOptions extends EntityAddListOptions {
 
 export interface EntityAddOptions extends EntityOptimisticOptions, EntityInsertOptions {}
 
+interface EntityInternalOptions {
+    maxPagesCount?: number;
+}
+
+export interface EntityInternalAddOptions extends EntityAddOptions, EntityInternalOptions {}
+
+export interface EntityInternalAddListOptions extends EntityAddListOptions, EntityInternalOptions {}
+
 export interface EntityOptimisticOptions {
     optimistic?: boolean;
 }
@@ -57,9 +66,9 @@ export interface EntityChangeOptions extends EntityOptimisticOptions, ChangeOpti
     useResponsePatch?: boolean;
 }
 
-export interface EntitySetStateOptions extends LoadingStateSetOptions {
+export interface EntitySetStateOptions extends LoadingStateSetOptions {}
 
-}
+export interface EntityInternalSetStateOptions extends EntitySetStateOptions, EntityInternalOptions {}
 
 export interface EntityInsertOptions {
     pasteIndex?: number;
@@ -101,7 +110,8 @@ export interface RemotePipeConfig<S, R> {
 }
 
 export interface Page {
-    ids?: Id[];
+    ids: Id[] | undefined;
+    order?: number;
     hasMore?: boolean;
     loadingState?: LoadingState;
 }
@@ -129,6 +139,7 @@ export interface EntityState<T> extends LoadingStateState {
 export type IdsSelector<T> = Selector<EntityState<T>, Id[] | undefined>;
 export type DictionarySelector<T> = Selector<EntityState<T>, Dictionary<EntityInstanceState<T>>>;
 export type PagesSelector<T> = Selector<EntityState<T>, Dictionary<Page>>;
+export type PagesListSelector<T> = Selector<EntityState<T>, Page[]>;
 export type PageSelector<T> = Selector<EntityState<T>, Page | undefined>;
 export type LoadingStatesSelector<T> = Selector<EntityState<T>, Dictionary<LoadingState>>;
 export type ActualSelector<T> = Selector<EntityState<T>, T | undefined>;
@@ -148,9 +159,10 @@ export interface EntitySelectors<T> extends BaseEntitySelectors<T> {
     createPageIds: (hash: string) => IdsSelector<T>;
     createPageLoadingState: (config: any) => LoadingStateSelector<EntityState<T>>;
     createPageIdsByConfig: (config: any) => IdsSelector<T>;
-    all: ListSelector<T>;
     createListSelectorByIds: (idsSelector: IdsSelector<T>) => ListSelector<T>;
     createPageListByConfig: (config: any) => ListSelector<T>;
+    allPages: PagesListSelector<T>;
+    all: ListSelector<T>;
 }
 
 export interface EntityActionTypes {
@@ -172,6 +184,7 @@ export type Entity<T> = {
     getPageLoadingState$: SelectEntityMethods<T>['getPageLoadingState$'];
     getLoadingStateById$: SelectEntityMethods<T>['getLoadingStateById$'];
     getAll$: SelectEntityMethods<T>['getAll$'];
+    getPages$: SelectEntityMethods<T>['getPages$'];
     getLoadingState$: SelectEntityMethods<T>['getLoadingState$'];
     getLoadingStates$: SelectEntityMethods<T>['getLoadingStates$'];
     actionCreators: EntityActionCreators;
