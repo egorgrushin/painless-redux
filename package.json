@@ -41,7 +41,7 @@
     "@typescript-eslint/eslint-plugin": "^2.20.0",
     "@typescript-eslint/parser": "^2.20.0",
     "eslint": "^6.8.0",
-    "jest": "^24.9.0",
+    "jest": "^25.2.3",
     "jest-marbles": "^2.5.0",
     "rimraf": "^2.6.3",
     "rxjs": "^6.5.3",
