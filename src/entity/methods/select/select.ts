@@ -37,6 +37,13 @@ export const createSelectEntityMethods = <T>(
         return selectManager.select$(selector, isAsap);
     };
 
+    const getPages$ = (
+        isAsap: boolean = false,
+    ) => {
+        const selector = selectors.allPages;
+        return selectManager.select$(selector, isAsap);
+    };
+
     const getPageLoadingState$ = (
         config: any,
         isAsap: boolean = false,
@@ -71,6 +78,7 @@ export const createSelectEntityMethods = <T>(
         getPageLoadingState$,
         getLoadingStateById$,
         getAll$,
+        getPages$,
         getLoadingState$,
         getLoadingStates$,
     };

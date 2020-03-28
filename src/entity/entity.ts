@@ -30,7 +30,7 @@ export const createEntity = <T>(
     const selectors = createEntitySelectors<T>(selector, fullSchema.hashFn);
     const idResolver = createIdResolver<T>(fullSchema);
 
-    const dispatchMethods = createDispatchEntityMethods<T>(dispatcher, idResolver);
+    const dispatchMethods = createDispatchEntityMethods<T>(dispatcher, idResolver, fullSchema);
     const selectMethods = createSelectEntityMethods<T>(selectManager, selectors);
     const mixedMethods = createMixedEntityMethods<T>(dispatchMethods, selectMethods, fullSchema, pr.schema);
 

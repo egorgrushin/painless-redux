@@ -1,6 +1,7 @@
 import { EntityActionTypes } from './types';
 
 export const DEFAULT_PAGE_SIZE = 300;
+export const MAX_PAGES_COUNT = Infinity;
 export const ENTITY_TYPE_NAMES: Array<keyof EntityActionTypes> = [
     'ADD',
     'RESOLVE_ADD',

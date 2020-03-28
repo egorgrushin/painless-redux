@@ -12,7 +12,7 @@ import {
     Response$Factory,
 } from './types';
 import { isNil } from 'lodash';
-import { DEFAULT_PAGE_SIZE, ENTITY_TYPE_NAMES } from './constants';
+import { DEFAULT_PAGE_SIZE, ENTITY_TYPE_NAMES, MAX_PAGES_COUNT } from './constants';
 import { v4 } from 'uuid';
 import { MonoTypeOperatorFunction, Observable } from 'rxjs';
 import { DeepPartial, LoadingState } from '../system-types';
@@ -26,6 +26,7 @@ export const getFullEntitySchema = <T>(
     name: '',
     hashFn: getHash,
     pageSize: DEFAULT_PAGE_SIZE,
+    maxPagesCount: MAX_PAGES_COUNT,
 }) as EntitySchema<T>;
 
 export const createIdResolver = <T>(

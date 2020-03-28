@@ -29,4 +29,6 @@ export interface SelectEntityMethods<T> {
     ): Observable<LoadingState | undefined>;
 
     getAll$(): Observable<T[] | undefined>;
+
+    getPages$(): Observable<Page[]>;
 }
