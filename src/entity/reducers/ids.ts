@@ -66,6 +66,9 @@ export const createIdsReducer = (
                 return id;
             });
         }
+        case types.CLEAR_ALL: {
+            return [];
+        }
         default:
             return state;
     }
