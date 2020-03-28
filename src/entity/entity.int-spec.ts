@@ -324,4 +324,22 @@ describe('[Integration] Entity', () => {
         });
     });
 
+    describe('#getAll$', () => {
+        test('should return all entities', () => {
+            // arrange
+            const user1 = { id: 1, name: 'User 1' };
+            const user2 = { id: 2, name: 'User 2' };
+            const actual$ = entity.getAll$();
+            const actMarble = '     -a-b';
+            const expectedMarble = 'ab-c';
+            const expected$ = cold(expectedMarble, { a: [], b: [user1], c: [user1, user2] });
+            // act
+            cold(actMarble, { a: user1, b: user2 }).subscribe((value) => {
+                entity.add(value, Math.random());
+            });
+            // assert
+            expect(actual$).toBeObservable(expected$);
+        });
+    });
+
 });
