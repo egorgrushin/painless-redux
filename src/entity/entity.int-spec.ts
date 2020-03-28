@@ -342,4 +342,24 @@ describe('[Integration] Entity', () => {
         });
     });
 
+    describe('#clearAll', () => {
+        test('should clear all entities', () => {
+            // arrange
+            const user1 = { id: 1, name: 'User 1' };
+            const user2 = { id: 2, name: 'User 2' };
+            entity.add(user1, Math.random());
+            entity.add(user2, Math.random());
+            const actual$ = entity.getAll$();
+            const actMarble = '     --a';
+            const expectedMarble = 'a-b';
+            const expected$ = cold(expectedMarble, { a: [user1, user2], b: [] });
+            // act
+            cold(actMarble).subscribe(() => {
+                entity.clearAll();
+            });
+            // assert
+            expect(actual$).toBeObservable(expected$);
+        });
+    });
+
 });
