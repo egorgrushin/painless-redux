@@ -70,9 +70,10 @@ export const getPaginated$ = <T>(
 );
 
 export const getMergedChanges = <T>(
-    state: EntityInstanceState<T>,
+    state: EntityInstanceState<T> | undefined,
     onlyStable?: boolean,
-): EntityInstanceState<T> => {
+): EntityInstanceState<T> | undefined => {
+    if (!state) return state;
     let { actual, changes = [] } = state;
     if (changes.length === 0) return state;
     let change: EntityChange<T> | undefined;
@@ -94,3 +95,32 @@ export const createEntityChange = <T>(
     merge = true,
     id?: string,
 ): EntityChange<T> => ({ patch, stable, merge, id });
+
+export const createInstanceByChanges = <T>(
+    state: EntityInstanceState<T> | undefined,
+    patch: DeepPartial<T> | undefined,
+    merge: boolean = false,
+    success: boolean = false,
+    id: string | undefined,
+): EntityInstanceState<T> | undefined => {
+    if (!patch) return state;
+    const actual = state?.actual ?? patch as EntityType<T>;
+    const change = createEntityChange(patch, success, merge, id);
+    const changes = state?.changes ?? [];
+    return { actual, changes: changes.concat(change) };
+};
+
+export const resolveChanges = <T>(
+    changes: EntityChange<T>[] | undefined,
+    success: boolean,
+    id: string,
+): EntityChange<T>[] | undefined => {
+    if (!changes) return;
+    if (success) {
+        return changes.map((change) => {
+            if (change.id === id) return { ...change, stable: true };
+            return change;
+        });
+    }
+    return changes.filter((change) => change.id === id);
+};

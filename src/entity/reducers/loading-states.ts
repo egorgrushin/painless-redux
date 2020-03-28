@@ -1,8 +1,19 @@
 import { EntityActionTypes } from '../types';
-import { Dictionary, LoadingState } from '../../system-types';
+import { Dictionary, Id, LoadingState } from '../../system-types';
 import { EntityActions } from '../actions';
 import { createLoadingStateReducer } from '../../shared/loading-state/reducers';
 import { isNil } from 'lodash';
+
+const removeState = (
+    state: Dictionary<LoadingState>,
+    id: Id,
+    condition: boolean = true,
+): Dictionary<LoadingState> => {
+    if (isNil(id)) return state;
+    if (!condition) return state;
+    const { [id]: deleted, ...rest } = state;
+    return rest;
+};
 
 export const createByIdLoadingStatesReducer = (
     types: EntityActionTypes,
@@ -19,19 +30,17 @@ export const createByIdLoadingStatesReducer = (
                 const byId = entityLoadingStateReducer(state[id], action) as LoadingState;
                 return { ...state, [id]: byId };
             }
+            case types.RESOLVE_ADD: {
+                const { payload: { tempId } } = action;
+                return removeState(state, tempId);
+            }
             case types.REMOVE: {
-                const { payload: { id }, options: { safe, optimistic } } = action;
-                if (isNil(id)) return state;
-                if (optimistic || safe) return state;
-                const { [id]: deleted, ...rest } = state;
-                return rest;
+                const { payload: { id }, options: { optimistic } } = action;
+                return removeState(state, id, !optimistic);
             }
             case types.RESOLVE_REMOVE: {
-                const { payload: { success, id }, options: { safe } } = action;
-                if (isNil(id)) return state;
-                if (!success || safe) return state;
-                const { [id]: deleted, ...rest } = state;
-                return rest;
+                const { payload: { success, id } } = action;
+                return removeState(state, id, !success);
             }
             default:
                 return state;
