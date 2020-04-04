@@ -32,7 +32,7 @@ describe('Workspace', () => {
             color: { red: 0, green: 0, blue: 0 },
             values: [1, 2, 3],
         };
-        workspace = createWorkspace<TestWorkspace>(pr, { name: 'test', initialValue });
+        workspace = createWorkspace(pr, { name: 'test', initialValue });
         noLabel = '[Test] ';
         initStoreWithPr(store, pr);
     });

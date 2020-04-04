@@ -42,10 +42,10 @@
     "@typescript-eslint/parser": "^2.20.0",
     "eslint": "^6.8.0",
     "jest": "^25.2.3",
-    "jest-marbles": "^2.5.0",
+    "jest-marbles": "^2.5.1",
     "rimraf": "^2.6.3",
     "rxjs": "^6.5.3",
-    "ts-jest": "^24.1.0",
+    "ts-jest": "^25.2.1",
     "typescript": "^3.8.2"
   },
   "peerDependencies": {

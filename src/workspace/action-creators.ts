@@ -1,12 +1,13 @@
-import { ActionCreator, SameShaped } from '../system-types';
 import { WorkspaceActionTypes } from './types';
-import { createChange, WorkspaceActions } from './actions';
+import { createChange, createResolveChange } from './actions';
 import { createSetState } from '../shared/loading-state/actions';
 
-export type WorkspaceActionCreators = SameShaped<WorkspaceActionTypes, ActionCreator<WorkspaceActionTypes, WorkspaceActions>>;
-export const createWorkspaceActionCreators = (
+export const createWorkspaceActionCreators = <T>(
     actionTypes: WorkspaceActionTypes,
-): WorkspaceActionCreators => ({
-    CHANGE: createChange(actionTypes),
+) => ({
+    CHANGE: createChange<T>(actionTypes),
+    RESOLVE_CHANGE: createResolveChange<T>(actionTypes),
     SET_STATE: createSetState(actionTypes),
 });
+
+export type WorkspaceActionCreators = ReturnType<typeof createWorkspaceActionCreators>;

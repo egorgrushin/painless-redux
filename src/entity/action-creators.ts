@@ -16,9 +16,9 @@ import {
 export const createEntityActionCreators = <T>(
     actionTypes: EntityActionTypes,
 ) => ({
-    ADD: createAdd<T>(actionTypes),
-    RESOLVE_ADD: createResolveAdd<T>(actionTypes),
-    ADD_LIST: createAddList<T>(actionTypes),
+    ADD: createAdd(actionTypes),
+    RESOLVE_ADD: createResolveAdd(actionTypes),
+    ADD_LIST: createAddList(actionTypes),
     CHANGE: createChange<T>(actionTypes),
     RESOLVE_CHANGE: createResolveChange<T>(actionTypes),
     REMOVE: createRemove(actionTypes),

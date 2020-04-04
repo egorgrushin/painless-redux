@@ -1,17 +1,48 @@
-import { merge } from '../../utils';
-import { ChangeActionTypes } from './types';
+import { ChangeableState, ChangeActionTypes } from './types';
 import { ChangeActions } from './actions';
+import { createInstanceByChanges, getMergedChanges, resolveChanges } from './utils';
 
 export const createChangeReducer = <T>(
     types: ChangeActionTypes,
-    initialValue?: Partial<T>,
+    initialActual?: T,
 ) => (
-    state: Partial<T> | undefined = initialValue,
+    state: ChangeableState<T> | undefined,
     action: ChangeActions,
-): Partial<T> | undefined => {
+): ChangeableState<T> | undefined => {
+    if (!state && initialActual) {
+        state = { actual: initialActual };
+    }
     switch (action.type) {
         case types.CHANGE: {
-            return merge(state, action.payload.patch);
+            const {
+                payload: { patch, changeId },
+                options: { merge, optimistic },
+            } = action;
+            const instance = createInstanceByChanges<T>(
+                state,
+                patch,
+                merge,
+                !optimistic,
+                changeId,
+            );
+            return getMergedChanges(instance, true);
+        }
+        case types.RESOLVE_CHANGE: {
+            if (!state) return state;
+            const {
+                payload: { success, changeId, remotePatch },
+                options: { merge, optimistic },
+            } = action;
+            const instance = createInstanceByChanges<T>(
+                state,
+                remotePatch,
+                merge,
+                !optimistic,
+                changeId,
+            ) as ChangeableState<T>;
+            const changes = resolveChanges(instance?.changes, success, changeId);
+            const newState = { ...instance, changes };
+            return getMergedChanges(newState, true);
         }
         default:
             return state;

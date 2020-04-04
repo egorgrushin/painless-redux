@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 import { Selector } from 'reselect';
-import { AnyAction, DeepPartial, Dictionary, HashFn, Id, LoadingState } from '../system-types';
-import { ChangeOptions } from '../shared/change/types';
+import { Dictionary, HashFn, Id, LoadingState } from '../system-types';
+import { ChangeableState } from '../shared/change/types';
 import {
     LoadingStateActionTypes,
     LoadingStateSelector,
@@ -62,10 +62,6 @@ export interface EntityRemoveOptions extends EntityOptimisticOptions {
     safe?: boolean;
 }
 
-export interface EntityChangeOptions extends EntityOptimisticOptions, ChangeOptions {
-    useResponsePatch?: boolean;
-}
-
 export interface EntitySetStateOptions extends LoadingStateSetOptions {}
 
 export interface EntityInternalSetStateOptions extends EntitySetStateOptions, EntityInternalOptions {}
@@ -91,23 +87,6 @@ export interface PaginatedResponse<T> extends Pagination {
 }
 
 export type Response$Factory<T> = (pagination: Pagination) => Observable<T>;
-export type ObservableOrFactory<S, R> = (Observable<R>) | ((value: S) => Observable<R>);
-
-export interface RemotePipeConfig<S, R> {
-    config?: any;
-    id?: Id;
-    store$?: Observable<any>;
-    remoteObsOrFactory: ObservableOrFactory<S, R>;
-    options?: EntityRemoteOptions;
-    success: (result?: R) => AnyAction | undefined;
-    emitSuccessOutsideAffectState?: boolean;
-    emitOnSuccess?: boolean;
-    optimistic?: boolean;
-    optimisticResolve?: (
-        success: boolean,
-        result?: R,
-    ) => AnyAction | undefined;
-}
 
 export interface Page {
     ids: Id[] | undefined;
@@ -116,16 +95,7 @@ export interface Page {
     loadingState?: LoadingState;
 }
 
-export interface EntityChange<T> {
-    stable: boolean;
-    patch: DeepPartial<T>;
-    merge: boolean;
-    id?: string;
-}
-
-export interface EntityInstanceState<T> {
-    actual: EntityType<T>;
-    changes?: EntityChange<T>[];
+export interface EntityInstanceState<T> extends ChangeableState<EntityType<T>> {
     removed?: boolean;
 }
 
@@ -179,13 +149,9 @@ export interface EntityActionTypes {
     CLEAR_ALL: 'CLEAR_ALL';
 }
 
+export type PublicDispatchEntityMethods<T> = Omit<DispatchEntityMethods<T>, 'changeWithId' | 'resolveChange'>
+export type PublicSelectEntityMethods<T> = Omit<SelectEntityMethods<T>, 'get$' | 'getDictionary$' | 'getById$'>
+
 export type Entity<T> = {
-    getPage$: SelectEntityMethods<T>['getPage$'];
-    getPageLoadingState$: SelectEntityMethods<T>['getPageLoadingState$'];
-    getLoadingStateById$: SelectEntityMethods<T>['getLoadingStateById$'];
-    getAll$: SelectEntityMethods<T>['getAll$'];
-    getPages$: SelectEntityMethods<T>['getPages$'];
-    getLoadingState$: SelectEntityMethods<T>['getLoadingState$'];
-    getLoadingStates$: SelectEntityMethods<T>['getLoadingStates$'];
     actionCreators: EntityActionCreators;
-} & DispatchEntityMethods<T> & MixedEntityMethods<T>
+} & PublicSelectEntityMethods<T> & PublicDispatchEntityMethods<T> & MixedEntityMethods<T>

@@ -5,10 +5,11 @@ import { TestStore } from '../testing/store';
 import { createEntity } from './entity';
 import { createPainlessRedux } from '../painless-redux/painless-redux';
 import { PainlessRedux } from '../painless-redux/types';
-import { Entity, EntityChangeOptions, Pagination } from './types';
+import { Entity, Pagination } from './types';
 import { BehaviorSubject } from 'rxjs';
 import { mocked } from 'ts-jest/utils';
 import * as uuid from 'uuid';
+import { ChangeOptions } from '../shared/change/types';
 
 jest.mock('uuid');
 
@@ -35,7 +36,7 @@ describe('Entity', () => {
     beforeEach(() => {
         store = new TestStore(undefined, (state) => state);
         pr = createPainlessRedux(store, { useAsapSchedulerInLoadingGuards: false });
-        entity = createEntity<TestEntity>(pr, {
+        entity = createEntity(pr, {
             name: 'test',
             pageSize: 2,
             id: idFn,
@@ -129,7 +130,7 @@ describe('Entity', () => {
              ${true}
              `('should change entity remotely with useResponsePatch: $useResponsePatch', ({ useResponsePatch }) => {
             // arrange
-            const options: EntityChangeOptions = { useResponsePatch };
+            const options: ChangeOptions = { useResponsePatch };
             const id = user.id;
             const remote$ = cold(' --a| ', { a: responsePatch });
             const resolvePatch = useResponsePatch ? responsePatch : patch;
@@ -151,7 +152,7 @@ describe('Entity', () => {
 		        ${false}
 		        ${true}
 	            `('should change entity remotely with useResponsePatch: $useResponsePatch', ({ useResponsePatch }) => {
-                const options: EntityChangeOptions = { optimistic: true, useResponsePatch };
+                const options: ChangeOptions = { optimistic: true, useResponsePatch };
                 const remote$ = cold(' --a| ', { a: responsePatch });
                 const id = user.id;
                 const changeAction = entity.actionCreators.CHANGE(id, patch, changeId, options);
@@ -168,7 +169,7 @@ describe('Entity', () => {
             });
 
             test('should resolve unsuccessfully if response failed', () => {
-                const options: EntityChangeOptions = { optimistic: true };
+                const options: ChangeOptions = { optimistic: true };
                 const error = new Error();
                 const failedRemote$ = cold(' --#|', undefined, error);
                 const id = user.id;
