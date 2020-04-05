@@ -27,4 +27,7 @@ export interface DispatchWorkspaceMethods<T> {
         key?: string,
         options?: LoadingStateSetOptions,
     ) => WorkspaceActions;
+    batch: (
+        actions: WorkspaceActions[],
+    ) => WorkspaceActions;
 }

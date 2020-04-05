@@ -55,5 +55,11 @@ export const createDispatchWorkspaceMethods = <T>(
         return dispatcher.createAndDispatch('SET_STATE', [state], options);
     };
 
-    return { changeWithId, setState, change, resolveChange };
+    const batch = (
+        actions: WorkspaceActions[],
+    ) => {
+        return dispatcher.createAndDispatch('BATCH', [actions]);
+    };
+
+    return { changeWithId, setState, change, resolveChange, batch };
 };

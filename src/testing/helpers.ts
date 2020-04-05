@@ -72,6 +72,7 @@ export const createTestHelpers = <T>(
         RESTORE_REMOVED: 'RESTORE_REMOVED',
         CLEAR: 'CLEAR',
         CLEAR_ALL: 'CLEAR_ALL',
+        BATCH: 'BATCH',
     };
 
     const actionCreators = createEntityActionCreators<T>(types);

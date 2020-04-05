@@ -100,6 +100,10 @@ export interface DispatchEntityMethods<T> {
         key?: string,
     ): EntityActions;
 
+    batch(
+        actions: EntityActions[],
+    ): EntityActions;
+
     affectState(
         config?: unknown,
         key?: string,

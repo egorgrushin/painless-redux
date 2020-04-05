@@ -14,6 +14,7 @@ import * as loadingStateActions from '../shared/loading-state/actions';
 import * as changeActions from '../shared/change/actions';
 import { MAX_PAGES_COUNT } from './constants';
 import { ChangeOptions } from '../shared/change/types';
+import { SystemActions } from '../shared/system/actions';
 
 export const createAddByHash = <T>(types: EntityActionTypes) => (
     entity: EntityType<T>,
@@ -158,5 +159,5 @@ type SelfActionCreators = ReturnType<typeof createAdd>
     | ReturnType<typeof createClear>
     | ReturnType<typeof createClearAll>
 
-export type EntityActions = ReturnType<SelfActionCreators>;
+export type EntityActions = ReturnType<SelfActionCreators> | SystemActions;
 
