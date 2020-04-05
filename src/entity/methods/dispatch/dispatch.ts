@@ -26,7 +26,7 @@ export const createDispatchEntityMethods = <T>(
 
     const add = (
         entity: T,
-        config?: any,
+        config?: unknown,
         options?: EntityAddOptions,
     ) => {
         entity = idResolver(entity);
@@ -40,7 +40,7 @@ export const createDispatchEntityMethods = <T>(
     const addWithId = (
         entity: T,
         tempId: string,
-        config?: any,
+        config?: unknown,
         options?: EntityAddOptions,
     ) => {
         const internalOptions: EntityInternalAddOptions = {
@@ -54,7 +54,7 @@ export const createDispatchEntityMethods = <T>(
         result: T,
         success: boolean,
         tempId: string,
-        config?: any,
+        config?: unknown,
         options?: EntityAddOptions,
     ) => {
         return dispatcher.createAndDispatch('RESOLVE_ADD', [result, success, tempId, config], options);
@@ -62,7 +62,7 @@ export const createDispatchEntityMethods = <T>(
 
     const addList = (
         entities: T[],
-        config?: any,
+        config?: unknown,
         isReplace: boolean = false,
         hasMore: boolean = false,
         options?: EntityAddListOptions,
@@ -125,7 +125,7 @@ export const createDispatchEntityMethods = <T>(
 
     const setState = (
         state: LoadingState,
-        config?: any,
+        config?: unknown,
         options?: EntitySetStateOptions,
     ) => {
         const internalOptions: EntityInternalSetStateOptions = {
@@ -160,7 +160,7 @@ export const createDispatchEntityMethods = <T>(
         return dispatcher.createAndDispatch('SET_STATE', [state, undefined, id, key], internalOptions);
     };
 
-    const clear = (config: any) => {
+    const clear = (config: unknown) => {
         return dispatcher.createAndDispatch('CLEAR', [config]);
     };
     const clearAll = () => {
@@ -170,7 +170,7 @@ export const createDispatchEntityMethods = <T>(
     const setStateBus = (
         state: LoadingState,
         id?: Id,
-        config?: any,
+        config?: unknown,
         key?: string,
     ) => {
         if (!isNil(id)) {
@@ -188,7 +188,7 @@ export const createDispatchEntityMethods = <T>(
     };
 
     const affectState = (
-        config?: any,
+        config?: unknown,
         key?: string,
         rethrow?: boolean,
     ) => {
@@ -210,7 +210,7 @@ export const createDispatchEntityMethods = <T>(
     };
 
     const affectStateByConfigOrId = (
-        config?: any,
+        config?: unknown,
         id?: Id,
         key?: string,
         rethrow?: boolean,

@@ -129,7 +129,7 @@ export const createCreatePageIdsByConfigSelector = <T>(
     pagesSelector: PagesSelector<T>,
     hashFn: HashFn,
 ) => (
-    config: any,
+    config: unknown,
 ): IdsSelector<T> => {
     const hash = hashFn(config);
     return createCreatePageIdsSelector<T>(pagesSelector)(hash);
@@ -139,7 +139,7 @@ export const createCreatePageByConfigSelector = <T>(
     pagesSelector: PagesSelector<T>,
     hashFn: HashFn,
 ) => (
-    config: any,
+    config: unknown,
 ): PageSelector<T> => {
     const hash = hashFn(config);
     return createPageSelector<T>(pagesSelector, hash);
@@ -149,7 +149,7 @@ export const createCreatePageLoadingState = <T>(
     pagesSelector: PagesSelector<T>,
     hashFn: HashFn,
 ) => (
-    config: any,
+    config: unknown,
 ): LoadingStateSelector<EntityState<T>> => {
     const hash = hashFn(config);
     const pageSelector = createPageSelector<T>(pagesSelector, hash);
@@ -182,7 +182,7 @@ export const createEntitySelectors = <T>(
     const createPage = createCreatePageByConfigSelector(pages, hashFn);
     const createPageLoadingState = createCreatePageLoadingState(pages, hashFn);
 
-    const createPageListByConfig = (config: any) => {
+    const createPageListByConfig = (config: unknown) => {
         const pageIdsSelector = createPageIdsByConfig(config);
         return createListSelectorByIds(pageIdsSelector);
     };

@@ -6,7 +6,7 @@ const createCreateAction = <TActionTypes, TActions>(
 ) => (
     actionName: keyof TActionTypes,
     args: any[],
-    options?: any,
+    options?: unknown,
 ): TActions => {
     const actionCreator = actionCreators[actionName];
     return actionCreator(...args, options);
@@ -22,7 +22,7 @@ export const createDispatcher = <TActionTypes, TActions extends AnyAction>(
     const createAndDispatch = (
         actionName: keyof TActionTypes,
         args: any[],
-        options?: any,
+        options?: unknown,
     ): TActions => {
         const action = createAction(actionName, args, options);
         dispatch(action);

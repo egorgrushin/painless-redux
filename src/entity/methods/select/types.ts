@@ -3,9 +3,9 @@ import { Dictionary, Id, LoadingState } from '../../../system-types';
 import { Page } from '../../types';
 
 export interface SelectEntityMethods<T> {
-    get$(config: any): Observable<T[] | undefined>;
+    get$(config: unknown): Observable<T[] | undefined>;
 
-    getDictionary$(config: any): Observable<Dictionary<T>>;
+    getDictionary$(config: unknown): Observable<Dictionary<T>>;
 
     getById$(id: Id): Observable<T | undefined>;
 
@@ -19,12 +19,12 @@ export interface SelectEntityMethods<T> {
     ): Observable<LoadingState | undefined>;
 
     getPage$(
-        config: any,
+        config: unknown,
         isAsap?: boolean,
     ): Observable<Page | undefined>;
 
     getPageLoadingState$(
-        config: any,
+        config: unknown,
         isAsap?: boolean,
     ): Observable<LoadingState | undefined>;
 

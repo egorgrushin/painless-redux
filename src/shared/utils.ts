@@ -20,7 +20,7 @@ export const guardByOptions = <T>(
     filter((storeValue) => !options?.single || isNil(storeValue)),
 );
 
-export const getRemotePipe = <T, S, R, F = R>(
+export const getRemotePipe = <TSource, TStore, TResponse, TOutput>(
     {
         store$,
         remoteObsOrFactory,
@@ -31,15 +31,15 @@ export const getRemotePipe = <T, S, R, F = R>(
         optimistic,
         optimisticResolve,
         setState,
-    }: RemotePipeConfig<S, R>,
-): OperatorFunction<S, F> => {
-    const trailPipe: OperatorFunction<R, F> = emitOnSuccess
-        ? map((result: R) => result as unknown as F)
+    }: RemotePipeConfig<TSource, TStore, TResponse>,
+): OperatorFunction<TSource, TOutput> => {
+    const trailPipe: OperatorFunction<TResponse, TOutput> = emitOnSuccess
+        ? map((result: TResponse) => result as unknown as TOutput)
         : switchMap(() => EMPTY);
 
-    return (source: Observable<S>): Observable<F> => source.pipe(
-        switchMap((value: S) => {
-            const remote$ = getObservable$<S, R>(remoteObsOrFactory, value);
+    return (source: Observable<TSource>): Observable<TOutput> => source.pipe(
+        switchMap((value: TSource) => {
+            const remote$ = getObservable$(remoteObsOrFactory, value);
             if (optimistic) {
                 success();
                 return remote$.pipe(
@@ -51,8 +51,8 @@ export const getRemotePipe = <T, S, R, F = R>(
                     }),
                 );
             }
-            const successPipe = tap((result: R) => success(result));
-            const pipesToAffect: any = [
+            const successPipe = tap((result: TResponse) => success(result));
+            const pipesToAffect: OperatorFunction<any, any>[] = [
                 switchMap(() => remote$),
             ];
             const resultPipes: OperatorFunction<any, any>[] = [];
@@ -70,13 +70,15 @@ export const getRemotePipe = <T, S, R, F = R>(
             } else {
                 resultPipes.unshift(...pipesToAffect);
             }
+            if (store$) {
+                return (store$ as any).pipe(
+                    first(),
+                    guardByOptions<TSource>(options),
+                    ...resultPipes,
+                ) as Observable<TResponse>;
+            }
+            return (of(value) as any).pipe(...resultPipes) as Observable<TResponse>;
 
-            if (!store$) return (of(value) as any).pipe(...resultPipes) as Observable<R>;
-            return (store$ as any).pipe(
-                first(),
-                guardByOptions<T>(options),
-                ...resultPipes,
-            ) as Observable<R>;
         }),
         trailPipe,
     );

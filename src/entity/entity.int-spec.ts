@@ -8,6 +8,7 @@ import { cold } from 'jest-marbles';
 import { switchMap } from 'rxjs/operators';
 import { mocked } from 'ts-jest/utils';
 import * as uuid from 'uuid';
+import { ColdObservable } from 'rxjs/internal/testing/ColdObservable';
 
 jest.mock('uuid');
 
@@ -131,11 +132,11 @@ describe('[Integration] Entity', () => {
 
         test.each`
             actionName         | action
-            ${'get$'}          | ${(remote$: any) => entity.get$(filter, remote$)}
-            ${'getById$'}      | ${(remote$: any) => entity.getById$(user.id, remote$)}
-            ${'addRemote$'}    | ${(remote$: any) => entity.addRemote$(user, user.id, remote$)}
-            ${'changeRemote$'} | ${(remote$: any) => entity.changeRemote$(user.id, {}, remote$)}
-            ${'removeRemote$'} | ${(remote$: any) => entity.removeRemote$(user.id, remote$)}
+            ${'get$'}          | ${(remote$: ColdObservable<any>) => entity.get$(filter, remote$)}
+            ${'getById$'}      | ${(remote$: ColdObservable<any>) => entity.getById$(user.id, remote$)}
+            ${'addRemote$'}    | ${(remote$: ColdObservable<any>) => entity.addRemote$(user, user.id, remote$)}
+            ${'changeRemote$'} | ${(remote$: ColdObservable<any>) => entity.changeRemote$(user.id, {}, remote$)}
+            ${'removeRemote$'} | ${(remote$: ColdObservable<any>) => entity.removeRemote$(user.id, remote$)}
         `('should set loading state during remote$ for entity.$actionName', ({ action }) => {
             // arrange
             const remoteMarble = '      --a';
@@ -164,8 +165,8 @@ describe('[Integration] Entity', () => {
 
         test.each`
             actionName         | action
-            ${'getById$'}      | ${(remote$: any) => entity.getById$(user.id, remote$)}
-            ${'changeRemote$'} | ${(remote$: any) => entity.changeRemote$(user.id, {}, remote$)}
+            ${'getById$'}      | ${(remote$: ColdObservable<any>) => entity.getById$(user.id, remote$)}
+            ${'changeRemote$'} | ${(remote$: ColdObservable<any>) => entity.changeRemote$(user.id, {}, remote$)}
         `('should set loading state during remote$ for entity.$actionName', ({ action }) => {
             // arrange
             const remoteMarble = '      --a';

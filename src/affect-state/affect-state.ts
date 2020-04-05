@@ -2,13 +2,13 @@ import { EMPTY, Observable, of, OperatorFunction, throwError } from 'rxjs';
 import { catchError, finalize, switchMap, tap } from 'rxjs/operators';
 import { AffectStateSetter } from './types';
 
-export const affectStatePipeFactory = <T, E>(
+export const affectStateOperatorFactory = <T, E>(
     setter: AffectStateSetter<T, E>,
     rethrow: boolean = true,
 ) => (
     ...pipes: Array<OperatorFunction<any, any>>
 ): OperatorFunction<any, any> => (
-    source: Observable<any>,
+    source: Observable<T>,
 ) => {
     let stateCleared: boolean;
     return (source as any).pipe(
@@ -40,10 +40,11 @@ export const affectStateFactory = <T, E>(
     rethrow: boolean = true,
 ) => (
     ...pipes: Array<OperatorFunction<any, any> | Observable<T>>
-) => {
+): OperatorFunction<T, T> => {
     const obs = pipes[0];
     const isObs = obs instanceof Observable;
-    const pipeFactory = affectStatePipeFactory<T, E>(setter, rethrow);
-    if (!isObs) return (pipeFactory as any)(...pipes);
-    return of(null).pipe(pipeFactory(switchMap(() => obs)));
+    const operatorFactory = affectStateOperatorFactory<T, E>(setter, rethrow);
+    if (!isObs) return operatorFactory(...pipes as OperatorFunction<T, T>[]);
+    const operator = operatorFactory(switchMap(() => obs));
+    return (of(undefined) as any).pipe(operator);
 };

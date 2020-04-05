@@ -14,7 +14,7 @@ export const createMixedEntityMethodsUtils = <T>(
     prSchema: PainlessReduxSchema,
 ) => {
     const getPaginator = (
-        config: any,
+        config: unknown,
         paginatorSubj?: BehaviorSubject<boolean>,
         options?: EntityGetListOptions,
     ): Observable<Pagination> => {

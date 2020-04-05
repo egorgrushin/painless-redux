@@ -7,14 +7,14 @@ import { ChangeOptions } from '../../../shared/change/types';
 export interface DispatchEntityMethods<T> {
     add(
         data: T,
-        config?: any,
+        config?: unknown,
         options?: EntityAddOptions,
     ): EntityActions;
 
     addWithId(
         data: T,
         tempId: string,
-        config?: any,
+        config?: unknown,
         options?: EntityAddOptions,
     ): EntityActions;
 
@@ -22,13 +22,13 @@ export interface DispatchEntityMethods<T> {
         data: T | undefined,
         success: boolean,
         tempId: string,
-        config?: any,
+        config?: unknown,
         options?: EntityAddOptions,
     ): EntityActions;
 
     addList(
         data: T[],
-        config?: any,
+        config?: unknown,
         isReplace?: boolean,
         hasMore?: boolean,
         options?: EntityAddListOptions,
@@ -72,11 +72,11 @@ export interface DispatchEntityMethods<T> {
 
     setState(
         state: LoadingState,
-        config?: any,
+        config?: unknown,
         options?: EntitySetStateOptions,
     ): EntityActions;
 
-    clear(config: any): EntityActions;
+    clear(config: unknown): EntityActions;
 
     clearAll(): EntityActions;
 
@@ -96,12 +96,12 @@ export interface DispatchEntityMethods<T> {
     setStateBus(
         state: LoadingState,
         id?: Id,
-        config?: any,
+        config?: unknown,
         key?: string,
     ): EntityActions;
 
     affectState(
-        config?: any,
+        config?: unknown,
         key?: string,
         rethrow?: boolean,
     ): (...pipes: Array<OperatorFunction<any, any> | Observable<T>>) => any;
@@ -113,7 +113,7 @@ export interface DispatchEntityMethods<T> {
     ): (...pipes: Array<OperatorFunction<any, any> | Observable<T>>) => any;
 
     affectStateByConfigOrId(
-        config?: any,
+        config?: unknown,
         id?: Id,
         key?: string,
         rethrow?: boolean,

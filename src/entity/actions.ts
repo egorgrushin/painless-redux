@@ -28,7 +28,7 @@ export const createAddByHash = <T>(types: EntityActionTypes) => (
 
 export const createAdd = <T>(types: EntityActionTypes) => (
     entity: EntityType<T>,
-    config?: any,
+    config?: unknown,
     tempId?: string,
     options?: EntityInternalAddOptions,
 ) => {
@@ -43,7 +43,7 @@ export const createResolveAdd = <T>(types: EntityActionTypes) => (
     result: EntityType<T>,
     success: boolean,
     tempId: string,
-    config?: any,
+    config?: unknown,
     options?: EntityAddOptions,
 ) => {
     const configHash = getHash(config);
@@ -54,7 +54,7 @@ export const createResolveAdd = <T>(types: EntityActionTypes) => (
 
 export const createAddList = <T>(types: EntityActionTypes) => (
     entities: EntityType<T>[],
-    config?: any,
+    config?: unknown,
     isReplace: boolean = false,
     hasMore: boolean = false,
     options?: EntityInternalAddListOptions,
@@ -76,7 +76,7 @@ export const createRemove = (types: EntityActionTypes) => (
 
 export const createSetState = (types: EntityActionTypes) => (
     state: LoadingState,
-    config?: any,
+    config?: unknown,
     id?: Id,
     key?: string,
     options?: EntityInternalSetStateOptions,
@@ -137,7 +137,7 @@ export const createRestoreRemoved = <T>(types: EntityActionTypes) => (
     return { type: types.RESTORE_REMOVED, payload: { id } } as const;
 };
 
-export const createClear = (types: EntityActionTypes) => (config: any) => {
+export const createClear = (types: EntityActionTypes) => (config: unknown) => {
     const configHash = getHash(config);
     return { type: types.CLEAR, payload: { configHash } } as const;
 };

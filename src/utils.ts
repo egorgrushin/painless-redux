@@ -4,20 +4,17 @@ import { mergeWith } from 'lodash/fp';
 import { capitalize, defaultsDeep, keyBy, lowerCase } from 'lodash';
 import { Observable, OperatorFunction } from 'rxjs';
 import { distinctUntilChanged, map, take } from 'rxjs/operators';
-import { Dictionary } from './system-types';
-
+import { DeepPartial, Dictionary } from './system-types';
 
 export const capitalizeAll = (str: string | number | symbol): string =>
     lowerCase(str.toString()).split(' ').map((part: string) => capitalize(part)).join(' ');
 
-
 export const hashString = (value: string): string => MD5(value).toString();
 
-export const hashIt = (value?: any): string => {
+export const hashIt = (value?: unknown): string => {
     if (typeof value === 'string') return hashString(value);
     return objectMD5(value ?? {});
 };
-
 
 export const getHeadedActionName = (
     header: string,
@@ -41,10 +38,10 @@ export const createActionTypes = <T>(
     }, {});
 };
 
-export const merge = (
-    obj: any,
-    newValue: any,
-): any => mergeWith((
+export const merge = <T>(
+    obj: T,
+    newValue: DeepPartial<T>,
+): T => mergeWith((
     objValue,
     srcValue,
     key,
@@ -62,13 +59,11 @@ export const typedDefaultsDeep = <T>(
     ...args: Partial<T>[]
 ): Partial<T> => defaultsDeep({}, obj, ...args) as Partial<T>;
 
-
 export const snapshot = <T>(obs$: Observable<T>): T | undefined => {
     let value;
     obs$.pipe(take(1)).subscribe((v) => value = v);
     return value;
 };
-
 
 export const select = <T, R>(
     selector: (
