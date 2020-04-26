@@ -2,7 +2,6 @@ import { Dictionary, LoadingState } from '../../system-types';
 import { LoadingStateActionTypes } from './types';
 import { LoadingStateActions } from './actions';
 
-
 const pureLoadingStateReducer = (
     state: LoadingState | undefined,
     newState: LoadingState,
@@ -32,7 +31,6 @@ export const loadingStateReducer = (
     };
 };
 
-
 export const createLoadingStateReducer = (
     types: LoadingStateActionTypes,
 ) => (
@@ -40,7 +38,7 @@ export const createLoadingStateReducer = (
     action: LoadingStateActions,
 ) => {
     switch (action.type) {
-        case types.SET_STATE: {
+        case types.SET_LOADING_STATE: {
             const { key, state: newState } = action.payload;
             return loadingStateReducer(state, key, newState);
         }

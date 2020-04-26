@@ -47,12 +47,12 @@ export const createDispatchWorkspaceMethods = <T>(
         return changeWithId(patch, label, undefined, options);
     };
 
-    const setState = (
+    const setLoadingState = (
         state: LoadingState,
         key?: string,
         options?: LoadingStateSetOptions,
     ) => {
-        return dispatcher.createAndDispatch('SET_STATE', [state], options);
+        return dispatcher.createAndDispatch('SET_LOADING_STATE', [state, key], options);
     };
 
     const batch = (
@@ -61,5 +61,5 @@ export const createDispatchWorkspaceMethods = <T>(
         return dispatcher.createAndDispatch('BATCH', [actions]);
     };
 
-    return { changeWithId, setState, change, resolveChange, batch };
+    return { changeWithId, setLoadingState: setLoadingState, change, resolveChange, batch };
 };

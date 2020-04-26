@@ -59,9 +59,9 @@ export interface MixedEntityMethods<T> {
         options?: ChangeOptions,
     ): Observable<DeepPartial<T>>;
 
-    removeRemote$(
+    removeRemote$<R>(
         id: Id,
-        observable: Observable<T>,
+        observable: Observable<R>,
         options?: EntityRemoveOptions,
-    ): Observable<T>;
+    ): Observable<R>;
 }

@@ -10,7 +10,7 @@ import {
     createResolveChange,
     createResolveRemove,
     createRestoreRemoved,
-    createSetState,
+    createSetLoadingState,
 } from './actions';
 import { createBatch } from '../shared/system/actions';
 
@@ -25,7 +25,7 @@ export const createEntityActionCreators = <T>(
     REMOVE: createRemove(actionTypes),
     RESOLVE_REMOVE: createResolveRemove<T>(actionTypes),
     RESTORE_REMOVED: createRestoreRemoved<T>(actionTypes),
-    SET_STATE: createSetState(actionTypes),
+    SET_LOADING_STATE: createSetLoadingState(actionTypes),
     CLEAR: createClear(actionTypes),
     CLEAR_ALL: createClearAll(actionTypes),
     BATCH: createBatch(actionTypes),

@@ -2,7 +2,7 @@ import { EMPTY, Observable, of, OperatorFunction, throwError } from 'rxjs';
 import { catchError, finalize, switchMap, tap } from 'rxjs/operators';
 import { AffectStateSetter } from './types';
 
-export const affectStateOperatorFactory = <T, E>(
+export const affectLoadingStateOperatorFactory = <T, E>(
     setter: AffectStateSetter<T, E>,
     rethrow: boolean = true,
 ) => (
@@ -13,7 +13,7 @@ export const affectStateOperatorFactory = <T, E>(
     let stateCleared: boolean;
     return (source as any).pipe(
         tap((value: T) => {
-            setter?.({ isLoading: true }, false, value);
+            setter?.({ isLoading: true, error: undefined }, false, value);
             stateCleared = false;
         }),
         switchMap((value: T) => (of(value) as any).pipe(
@@ -35,7 +35,7 @@ export const affectStateOperatorFactory = <T, E>(
     );
 };
 
-export const affectStateFactory = <T, E>(
+export const affectLoadingStateFactory = <T, E>(
     setter: AffectStateSetter<T, E>,
     rethrow: boolean = true,
 ) => (
@@ -43,7 +43,7 @@ export const affectStateFactory = <T, E>(
 ): OperatorFunction<T, T> => {
     const obs = pipes[0];
     const isObs = obs instanceof Observable;
-    const operatorFactory = affectStateOperatorFactory<T, E>(setter, rethrow);
+    const operatorFactory = affectLoadingStateOperatorFactory<T, E>(setter, rethrow);
     if (!isObs) return operatorFactory(...pipes as OperatorFunction<T, T>[]);
     const operator = operatorFactory(switchMap(() => obs));
     return (of(undefined) as any).pipe(operator);

@@ -15,7 +15,7 @@ export interface RemotePipeConfig<TSource, TStore, TResponse> {
         success: boolean,
         result?: TResponse,
     ) => AnyAction | undefined;
-    setState?: (loadingState: LoadingState) => void;
+    setLoadingState?: (loadingState: LoadingState) => void;
 }
 
 export interface OptimisticOptions {

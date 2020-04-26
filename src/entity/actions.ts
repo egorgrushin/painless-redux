@@ -4,7 +4,7 @@ import {
     EntityAddOptions,
     EntityInternalAddListOptions,
     EntityInternalAddOptions,
-    EntityInternalSetStateOptions,
+    EntityInternalSetLoadingStateOptions,
     EntityRemoveOptions,
     EntityType,
 } from './types';
@@ -75,14 +75,14 @@ export const createRemove = (types: EntityActionTypes) => (
     return { type: types.REMOVE, payload, options } as const;
 };
 
-export const createSetState = (types: EntityActionTypes) => (
+export const createSetLoadingState = (types: EntityActionTypes) => (
     state: LoadingState,
     config?: unknown,
     id?: Id,
     key?: string,
-    options?: EntityInternalSetStateOptions,
+    options?: EntityInternalSetLoadingStateOptions,
 ) => {
-    const actionCreator = loadingStateActions.createSetState(types);
+    const actionCreator = loadingStateActions.createSetLoadingState(types);
     const action = actionCreator(state, key, options);
     const configHash = getHash(config);
     return {
@@ -151,7 +151,7 @@ type SelfActionCreators = ReturnType<typeof createAdd>
     | ReturnType<typeof createResolveAdd>
     | ReturnType<typeof createAddList>
     | ReturnType<typeof createRemove>
-    | ReturnType<typeof createSetState>
+    | ReturnType<typeof createSetLoadingState>
     | ReturnType<typeof createChange>
     | ReturnType<typeof createResolveChange>
     | ReturnType<typeof createResolveRemove>

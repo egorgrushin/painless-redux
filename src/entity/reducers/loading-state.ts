@@ -10,6 +10,6 @@ export const createEntityLoadingStateReducer = (
     action: EntityActions,
 ) => {
     const loadingStateReducer = createLoadingStateReducer(types);
-    if (action.type !== types.SET_STATE) return state;
+    if (action.type !== types.SET_LOADING_STATE) return state;
     return loadingStateReducer(state, action);
 };

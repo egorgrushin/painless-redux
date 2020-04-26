@@ -55,7 +55,7 @@ export const resolveChanges = <T>(
             return change;
         });
     }
-    return changes.filter((change) => change.id === id);
+    return changes.filter((change) => change.id !== id);
 };
 
 export const getPatchByOptions = <T>(

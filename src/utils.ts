@@ -1,4 +1,4 @@
-import { MD5 } from 'crypto-js';
+import md5 from 'md5-hash';
 import { MD5 as objectMD5 } from 'object-hash';
 import { mergeWith } from 'lodash/fp';
 import { capitalize, defaultsDeep, keyBy, lowerCase } from 'lodash';
@@ -9,7 +9,7 @@ import { DeepPartial, Dictionary } from './system-types';
 export const capitalizeAll = (str: string | number | symbol): string =>
     lowerCase(str.toString()).split(' ').map((part: string) => capitalize(part)).join(' ');
 
-export const hashString = (value: string): string => MD5(value).toString();
+export const hashString = (value: string): string => md5(value).toString();
 
 export const hashIt = (value?: unknown): string => {
     if (typeof value === 'string') return hashString(value);

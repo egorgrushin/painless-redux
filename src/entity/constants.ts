@@ -6,7 +6,7 @@ export const ENTITY_TYPE_NAMES: Array<keyof EntityActionTypes> = [
     'ADD',
     'RESOLVE_ADD',
     'ADD_LIST',
-    'SET_STATE',
+    'SET_LOADING_STATE',
     'CHANGE',
     'RESOLVE_CHANGE',
     'REMOVE',

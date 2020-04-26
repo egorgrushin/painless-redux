@@ -23,7 +23,7 @@ export interface WorkspaceSchema<T> {
 }
 
 export interface WorkspaceActionTypes extends SystemActionTypes {
-    SET_STATE: LoadingStateActionTypes['SET_STATE'];
+    SET_LOADING_STATE: LoadingStateActionTypes['SET_LOADING_STATE'];
     CHANGE: 'CHANGE';
     RESOLVE_CHANGE: 'RESOLVE_CHANGE';
 }

@@ -76,7 +76,7 @@ const createPageReducer = (
                     ids: state.ids?.filter((id) => id !== tempId),
                 };
             }
-            case types.SET_STATE: {
+            case types.SET_LOADING_STATE: {
                 return {
                     ...state,
                     ids: state?.ids,
@@ -98,7 +98,7 @@ export const createPagesReducer = (
         action: EntityActions,
     ): Dictionary<Page> => {
         switch (action.type) {
-            case types.SET_STATE:
+            case types.SET_LOADING_STATE:
             case types.ADD_LIST:
             case types.ADD: {
                 const {

@@ -22,7 +22,7 @@ export const createWorkspaceMixedMethods = <T>(
         options?: ChangeOptions,
     ): Observable<DeepPartial<T>> => {
         const changeId = v4();
-        const { changeWithId, resolveChange, setState } = dispatchMethods;
+        const { changeWithId, resolveChange, setLoadingState } = dispatchMethods;
         const { getLoadingState$ } = selectMethods;
 
         const sourcePipe = getRemotePipe<LoadingState | undefined, unknown, DeepPartial<T> | undefined, DeepPartial<T>>({
@@ -43,7 +43,7 @@ export const createWorkspaceMixedMethods = <T>(
                 const patchToApply = getResolvePatchByOptions(patch, response, options);
                 return resolveChange(label, changeId, success, patchToApply, options);
             },
-            setState,
+            setLoadingState: (state) => setLoadingState(state),
         });
         const loadingState$ = getLoadingState$(prSchema.useAsapSchedulerInLoadingGuards);
         return guardIfLoading(loadingState$).pipe(sourcePipe);

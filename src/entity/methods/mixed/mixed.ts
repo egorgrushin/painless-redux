@@ -54,7 +54,7 @@ export const createMixedEntityMethods = <T>(
                     const hasMore = data.length >= size;
                     return dispatchMethods.addList(data, config, isReplace, hasMore, options);
                 },
-                setState: (state) => dispatchMethods.setStateBus(state, undefined, config),
+                setLoadingState: (state) => dispatchMethods.setLoadingStateBus(state, undefined, config),
             },
         );
         const paginator = getPaginator(config, paginatorSubj, options);
@@ -76,7 +76,7 @@ export const createMixedEntityMethods = <T>(
                 const entity = { ...response, id };
                 return dispatchMethods.add(entity, undefined, options);
             },
-            setState: (state) => dispatchMethods.setStateBus(state, id),
+            setLoadingState: (state) => dispatchMethods.setLoadingStateBus(state, id),
         });
         const loadingState$ = selectMethods.getLoadingStateById$(id, prSchema.useAsapSchedulerInLoadingGuards);
         return guardIfLoading(loadingState$).pipe(sourcePipe);
@@ -162,7 +162,7 @@ export const createMixedEntityMethods = <T>(
             emitOnSuccess: true,
             optimistic: options?.optimistic,
             optimisticResolve: (success, result) => resolveAdd(result, success, tempId, config, options),
-            setState: (state) => dispatchMethods.setStateBus(state, undefined, config),
+            setLoadingState: (state) => dispatchMethods.setLoadingStateBus(state, undefined, config),
         });
         return of(null).pipe(sourcePipe);
     };
@@ -195,19 +195,19 @@ export const createMixedEntityMethods = <T>(
                 const patchToApply = getResolvePatchByOptions(patch, response, options);
                 return resolveChange(id, changeId, success, patchToApply, options);
             },
-            setState: (state) => dispatchMethods.setStateBus(state, id),
+            setLoadingState: (state) => dispatchMethods.setLoadingStateBus(state, id),
         });
         const loadingState$ = getLoadingStateById$(id, prSchema.useAsapSchedulerInLoadingGuards);
         return guardIfLoading(loadingState$).pipe(sourcePipe);
     };
 
-    const removeRemote$ = (
+    const removeRemote$ = <R>(
         id: Id,
-        observable: Observable<T>,
+        observable: Observable<R>,
         options?: EntityRemoveOptions,
-    ): Observable<T> => {
+    ): Observable<R> => {
         const { remove, resolveRemove } = dispatchMethods;
-        const sourcePipe = getRemotePipe<LoadingState | undefined, unknown, T, T>({
+        const sourcePipe = getRemotePipe<LoadingState | undefined, unknown, R, R>({
             options,
             remoteObsOrFactory: observable,
             success: () => remove(id, options),
@@ -215,7 +215,7 @@ export const createMixedEntityMethods = <T>(
             emitOnSuccess: true,
             optimistic: options?.optimistic,
             optimisticResolve: (success: boolean) => resolveRemove(id, success, options),
-            setState: (state) => dispatchMethods.setStateBus(state, id),
+            setLoadingState: (state) => dispatchMethods.setLoadingStateBus(state, id),
         });
         const loadingState$ = selectMethods.getLoadingStateById$(id, prSchema.useAsapSchedulerInLoadingGuards);
         return guardIfLoading(loadingState$).pipe(sourcePipe);
