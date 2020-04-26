@@ -38,7 +38,7 @@ General features:
 		born: number;
 	}
 	const PaintersEntity = createEntity<Painter>({ name: 'painters' });
-	PAINLESS_REDUX_STORE.registerSlots(PaintersEntity);
+	PAINLESS_REDUX_STORE.registerSlot(PaintersEntity);
 	export PaintersEntity;
 	```
 
