@@ -2,7 +2,7 @@ import { DeepPartial, LoadingState } from '../../../system-types';
 import { Observable } from 'rxjs';
 import { ChangeOptions } from '../../../shared/change/types';
 import { v4 } from 'uuid';
-import { getPatchByOptions, getResolvePatchByOptions } from '../../../shared/change/utils';
+import { getPatchByOptions, getResolvePatchByOptions, normalizePatch } from '../../../shared/change/utils';
 import { PainlessReduxSchema } from '../../../painless-redux/types';
 import { getRemotePipe, guardIfLoading } from '../../../shared/utils';
 import { SelectWorkspaceMethods } from '../select/types';
@@ -16,14 +16,15 @@ export const createWorkspaceMixedMethods = <T>(
 ): MixedWorkspaceMethods<T> => {
 
     const changeRemote$ = (
-        patch: DeepPartial<T>,
+        patch: DeepPartial<T> | ((value: DeepPartial<T> | undefined) => DeepPartial<T>),
         dataSource$: Observable<DeepPartial<T> | undefined>,
         label: string,
         options?: ChangeOptions,
     ): Observable<DeepPartial<T>> => {
         const changeId = v4();
         const { changeWithId, resolveChange, setLoadingState } = dispatchMethods;
-        const { getLoadingState$ } = selectMethods;
+        const { getLoadingState$, get$ } = selectMethods;
+        const normalizedPatch = normalizePatch(patch, get$());
 
         const sourcePipe = getRemotePipe<LoadingState | undefined, unknown, DeepPartial<T> | undefined, DeepPartial<T>>({
             options,
@@ -31,7 +32,7 @@ export const createWorkspaceMixedMethods = <T>(
             success: (
                 response?: DeepPartial<T>,
             ) => {
-                const patchToApply = getPatchByOptions(patch, response, options) ?? {};
+                const patchToApply = getPatchByOptions(normalizedPatch, response, options) ?? {};
                 return changeWithId(patchToApply, label, changeId, options);
             },
             emitOnSuccess: true,
@@ -40,7 +41,7 @@ export const createWorkspaceMixedMethods = <T>(
                 success: boolean,
                 response?: DeepPartial<T>,
             ) => {
-                const patchToApply = getResolvePatchByOptions(patch, response, options);
+                const patchToApply = getResolvePatchByOptions(normalizedPatch, response, options);
                 return resolveChange(label, changeId, success, patchToApply, options);
             },
             setLoadingState: (state) => setLoadingState(state),

@@ -20,7 +20,7 @@ import { MixedEntityMethods } from './types';
 import { v4 } from 'uuid';
 import { PainlessReduxSchema } from '../../../painless-redux/types';
 import { ChangeOptions } from '../../../shared/change/types';
-import { getPatchByOptions, getResolvePatchByOptions } from '../../../shared/change/utils';
+import { getPatchByOptions, getResolvePatchByOptions, normalizePatch } from '../../../shared/change/utils';
 import { getRemotePipe, guardIfLoading } from '../../../shared/utils';
 
 export const createMixedEntityMethods = <T>(
@@ -169,13 +169,15 @@ export const createMixedEntityMethods = <T>(
 
     const changeRemote$ = (
         id: Id,
-        patch: DeepPartial<T>,
+        patch: DeepPartial<T> | ((value: DeepPartial<T> | undefined) => DeepPartial<T>),
         dataSource$: Observable<DeepPartial<T> | undefined>,
         options?: ChangeOptions,
     ): Observable<DeepPartial<T>> => {
         const changeId = v4();
         const { changeWithId, resolveChange } = dispatchMethods;
-        const { getLoadingStateById$ } = selectMethods;
+        const { getLoadingStateById$, getById$ } = selectMethods;
+
+        const normalizedPatch = normalizePatch(patch, getById$(id));
 
         const sourcePipe = getRemotePipe<LoadingState | undefined, unknown, DeepPartial<T> | undefined, DeepPartial<T>>({
             options,
@@ -183,7 +185,7 @@ export const createMixedEntityMethods = <T>(
             success: (
                 response?: DeepPartial<T>,
             ) => {
-                const patchToApply = getPatchByOptions(patch, response, options) ?? {};
+                const patchToApply = getPatchByOptions(normalizedPatch, response, options) ?? {};
                 return changeWithId(id, patchToApply, changeId, options);
             },
             emitOnSuccess: true,
@@ -192,7 +194,7 @@ export const createMixedEntityMethods = <T>(
                 success: boolean,
                 response?: DeepPartial<T>,
             ) => {
-                const patchToApply = getResolvePatchByOptions(patch, response, options);
+                const patchToApply = getResolvePatchByOptions(normalizedPatch, response, options);
                 return resolveChange(id, changeId, success, patchToApply, options);
             },
             setLoadingState: (state) => dispatchMethods.setLoadingStateBus(state, id),
