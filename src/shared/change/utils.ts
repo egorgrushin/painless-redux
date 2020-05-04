@@ -1,7 +1,8 @@
 import { DeepPartial } from '../../system-types';
-import { Change, ChangeableState, ChangeOptions } from './types';
+import { Change, ChangeableState, ChangeOptions, PatchRequest } from './types';
 import { merge as mergeFn, snapshot } from '../../utils';
 import { Observable } from 'rxjs';
+import { IdPatch } from '../..';
 
 export const createEntityChange = <T>(
     patch: DeepPartial<T>,
@@ -78,7 +79,7 @@ export const getResolvePatchByOptions = <T>(
 };
 
 export const normalizePatch = <T>(
-    patch: DeepPartial<T> | ((value: DeepPartial<T> | undefined) => DeepPartial<T>),
+    patch: PatchRequest<T>,
     oldValue$: Observable<DeepPartial<T> | undefined>,
 ): DeepPartial<T> => {
     if (typeof patch === 'function') {
@@ -87,3 +88,4 @@ export const normalizePatch = <T>(
     }
     return patch;
 };
+

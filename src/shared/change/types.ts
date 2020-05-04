@@ -23,3 +23,5 @@ export interface ChangeableState<T> {
     actual: T;
     changes?: Change<T>[];
 }
+
+export type PatchRequest<T> = DeepPartial<T> | ((value: DeepPartial<T> | undefined) => DeepPartial<T>);

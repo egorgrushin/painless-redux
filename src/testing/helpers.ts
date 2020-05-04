@@ -73,6 +73,9 @@ export const createTestHelpers = <T>(
         CLEAR: 'CLEAR',
         CLEAR_ALL: 'CLEAR_ALL',
         BATCH: 'BATCH',
+        SET_LOADING_STATES: 'SET_LOADING_STATES',
+        CHANGE_LIST: 'CHANGE_LIST',
+        RESOLVE_CHANGE_LIST: 'RESOLVE_CHANGE_LIST',
     };
 
     const actionCreators = createEntityActionCreators<T>(types);

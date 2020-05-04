@@ -30,7 +30,7 @@ export const createDictionaryReducer = <T>(
             }
             case types.RESOLVE_ADD: {
                 const {
-                    payload: { success, result, tempId, configHash },
+                    payload: { success, result, tempId },
                     options,
                 } = action;
                 const optimisticCreated = state[tempId];

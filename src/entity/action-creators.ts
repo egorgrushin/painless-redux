@@ -2,24 +2,25 @@ import { EntityActionTypes } from './types';
 import {
     createAdd,
     createAddList,
-    createChange,
+    createChange, createChangeList,
     createClear,
     createClearAll,
     createRemove,
     createResolveAdd,
-    createResolveChange,
+    createResolveChange, createResolveChangeList,
     createResolveRemove,
     createRestoreRemoved,
-    createSetLoadingState,
+    createSetLoadingState, createSetLoadingStates,
 } from './actions';
 import { createBatch } from '../shared/system/actions';
+import { EntityActionCreators } from './action-creators.types';
 
 export const createEntityActionCreators = <T>(
     actionTypes: EntityActionTypes,
-) => ({
-    ADD: createAdd(actionTypes),
-    RESOLVE_ADD: createResolveAdd(actionTypes),
-    ADD_LIST: createAddList(actionTypes),
+): EntityActionCreators<T> => ({
+    ADD: createAdd<T>(actionTypes),
+    RESOLVE_ADD: createResolveAdd<T>(actionTypes),
+    ADD_LIST: createAddList<T>(actionTypes),
     CHANGE: createChange<T>(actionTypes),
     RESOLVE_CHANGE: createResolveChange<T>(actionTypes),
     REMOVE: createRemove(actionTypes),
@@ -28,7 +29,8 @@ export const createEntityActionCreators = <T>(
     SET_LOADING_STATE: createSetLoadingState(actionTypes),
     CLEAR: createClear(actionTypes),
     CLEAR_ALL: createClearAll(actionTypes),
-    BATCH: createBatch(actionTypes),
+    BATCH: createBatch<T>(actionTypes),
+    CHANGE_LIST: createChangeList<T>(actionTypes),
+    SET_LOADING_STATES: createSetLoadingStates(actionTypes),
+    RESOLVE_CHANGE_LIST: createResolveChangeList<T>(actionTypes),
 });
-
-export type EntityActionCreators = ReturnType<typeof createEntityActionCreators>;

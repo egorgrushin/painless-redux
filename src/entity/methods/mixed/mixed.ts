@@ -6,6 +6,8 @@ import {
     EntityLoadOptions,
     EntityRemoveOptions,
     EntitySchema,
+    IdPatch,
+    IdPatchRequest,
     PaginatedResponse,
     Pagination,
     Response$Factory,
@@ -19,7 +21,7 @@ import { createMixedEntityMethodsUtils } from './utils';
 import { MixedEntityMethods } from './types';
 import { v4 } from 'uuid';
 import { PainlessReduxSchema } from '../../../painless-redux/types';
-import { ChangeOptions } from '../../../shared/change/types';
+import { ChangeOptions, PatchRequest } from '../../../shared/change/types';
 import { getPatchByOptions, getResolvePatchByOptions, normalizePatch } from '../../../shared/change/utils';
 import { getRemotePipe, guardIfLoading } from '../../../shared/utils';
 
@@ -169,17 +171,17 @@ export const createMixedEntityMethods = <T>(
 
     const changeRemote$ = (
         id: Id,
-        patch: DeepPartial<T> | ((value: DeepPartial<T> | undefined) => DeepPartial<T>),
+        patch: PatchRequest<T>,
         dataSource$: Observable<DeepPartial<T> | undefined>,
         options?: ChangeOptions,
-    ): Observable<DeepPartial<T>> => {
+    ): Observable<DeepPartial<T> | undefined> => {
         const changeId = v4();
-        const { changeWithId, resolveChange } = dispatchMethods;
+        const { changeWithId, resolveChange, setLoadingStateBus } = dispatchMethods;
         const { getLoadingStateById$, getById$ } = selectMethods;
 
         const normalizedPatch = normalizePatch(patch, getById$(id));
 
-        const sourcePipe = getRemotePipe<LoadingState | undefined, unknown, DeepPartial<T> | undefined, DeepPartial<T>>({
+        const sourcePipe = getRemotePipe<LoadingState | undefined, unknown, DeepPartial<T> | undefined, DeepPartial<T> | undefined>({
             options,
             remoteObsOrFactory: dataSource$,
             success: (
@@ -197,9 +199,56 @@ export const createMixedEntityMethods = <T>(
                 const patchToApply = getResolvePatchByOptions(normalizedPatch, response, options);
                 return resolveChange(id, changeId, success, patchToApply, options);
             },
-            setLoadingState: (state) => dispatchMethods.setLoadingStateBus(state, id),
+            setLoadingState: (state) => setLoadingStateBus(state, id),
         });
         const loadingState$ = getLoadingStateById$(id, prSchema.useAsapSchedulerInLoadingGuards);
+        return guardIfLoading(loadingState$).pipe(sourcePipe);
+    };
+
+    const changeListRemote$ = (
+        patches: IdPatchRequest<T>[],
+        dataSource$: Observable<IdPatch<T>[] | undefined>,
+        options?: ChangeOptions,
+    ): Observable<IdPatch<T>[] | undefined> => {
+        const changeId = v4();
+        const { changeListWithId, resolveChangeList, setLoadingStateByIds } = dispatchMethods;
+        const { getLoadingStateByIds$, getById$ } = selectMethods;
+        const normalizedPatches: IdPatch<T>[] = patches.map((patch) => ({
+            ...patch,
+            patch: normalizePatch(patch.patch, getById$(patch.id)),
+        }));
+        const ids = normalizedPatches.map((patch) => patch.id);
+
+        const sourcePipe = getRemotePipe<LoadingState | undefined, unknown, IdPatch<T>[] | undefined, IdPatch<T>[]>({
+            options,
+            remoteObsOrFactory: dataSource$,
+            success: (
+                response?: IdPatch<T>[] | undefined,
+            ) => {
+                const patchesToApply = normalizedPatches.map((idPatch) => {
+                    const responsePatch = response?.find((r) => r.id === idPatch.id);
+                    const patch = getPatchByOptions(idPatch.patch, responsePatch?.patch, options) ?? {};
+                    return { ...idPatch, patch };
+                });
+                return changeListWithId(patchesToApply, changeId, options);
+            },
+            emitOnSuccess: true,
+            optimistic: options?.optimistic,
+            optimisticResolve: (
+                success: boolean,
+                response?: IdPatch<T>[] | undefined,
+            ) => {
+                const patchesToApply = normalizedPatches.map((idPatch) => {
+                    const responsePatch = response?.find((r) => r.id === idPatch.id);
+                    const patch = getResolvePatchByOptions(idPatch.patch, responsePatch?.patch, options) ?? {};
+                    return { ...idPatch, patch };
+                });
+                return resolveChangeList(patchesToApply, changeId, success, options);
+            },
+            setLoadingState: (state) => setLoadingStateByIds(ids, state),
+        });
+
+        const loadingState$ = getLoadingStateByIds$(ids, prSchema.useAsapSchedulerInLoadingGuards);
         return guardIfLoading(loadingState$).pipe(sourcePipe);
     };
 
@@ -232,5 +281,6 @@ export const createMixedEntityMethods = <T>(
         addRemote$,
         changeRemote$,
         removeRemote$,
+        changeListRemote$,
     };
 };

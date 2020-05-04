@@ -307,7 +307,7 @@ describe('Entity', () => {
 
         test('should load entity with tuple id', () => {
             // arrange
-            const data = { objectId: '23a4123', type: 5, title: 'Some object 1' };
+            const data = { objectId: '23a4123', type: 5, name: 'Some object 1' };
             const remote$ = cold('--a|', { a: data });
             const id = [data.objectId, data.type].toString();
             const addAction = entity.actionCreators.ADD({ id, ...data });

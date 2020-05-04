@@ -1,6 +1,6 @@
 import { DeepPartial, LoadingState } from '../../../system-types';
 import { Observable } from 'rxjs';
-import { ChangeOptions } from '../../../shared/change/types';
+import { ChangeOptions, PatchRequest } from '../../../shared/change/types';
 import { v4 } from 'uuid';
 import { getPatchByOptions, getResolvePatchByOptions, normalizePatch } from '../../../shared/change/utils';
 import { PainlessReduxSchema } from '../../../painless-redux/types';
@@ -16,7 +16,7 @@ export const createWorkspaceMixedMethods = <T>(
 ): MixedWorkspaceMethods<T> => {
 
     const changeRemote$ = (
-        patch: DeepPartial<T> | ((value: DeepPartial<T> | undefined) => DeepPartial<T>),
+        patch: PatchRequest<T>,
         dataSource$: Observable<DeepPartial<T> | undefined>,
         label: string,
         options?: ChangeOptions,

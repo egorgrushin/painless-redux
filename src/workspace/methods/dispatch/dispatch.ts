@@ -5,7 +5,7 @@ import { DispatchWorkspaceMethods } from './types';
 import { DeepPartial, Id, LoadingState } from '../../../system-types';
 import { SelectWorkspaceMethods } from '../select/types';
 import { getHeadedActionName } from '../../../utils';
-import { ChangeOptions } from '../../../shared/change/types';
+import { ChangeOptions, PatchRequest } from '../../../shared/change/types';
 import { LoadingStateSetOptions } from '../../../shared/loading-state/types';
 import { normalizePatch } from '../../../shared/change/utils';
 
@@ -16,7 +16,7 @@ export const createDispatchWorkspaceMethods = <T>(
 ): DispatchWorkspaceMethods<T> => {
 
     const changeWithId = (
-        patch: DeepPartial<T> | ((value: DeepPartial<T> | undefined) => DeepPartial<T>),
+        patch: PatchRequest<T>,
         label: string,
         changeId?: string,
         options?: ChangeOptions,
@@ -37,7 +37,7 @@ export const createDispatchWorkspaceMethods = <T>(
     };
 
     const change = (
-        patch: DeepPartial<T> | ((value: DeepPartial<T> | undefined) => DeepPartial<T>),
+        patch: PatchRequest<T>,
         label: string,
         options?: ChangeOptions,
     ) => {

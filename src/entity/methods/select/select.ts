@@ -70,6 +70,11 @@ export const createSelectEntityMethods = <T>(
         return selectManager.select$(selector);
     };
 
+    const getLoadingStateByIds$ = (ids: Id[]) => {
+        const selector = selectors.createLoadingStateByIds(ids);
+        return selectManager.select$(selector);
+    };
+
     return {
         get$,
         getById$,
@@ -77,6 +82,7 @@ export const createSelectEntityMethods = <T>(
         getPage$,
         getPageLoadingState$,
         getLoadingStateById$,
+        getLoadingStateByIds$,
         getAll$,
         getPages$,
         getLoadingState$,

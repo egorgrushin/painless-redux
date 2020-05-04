@@ -4,12 +4,12 @@ import {
     EntityGetOptions,
     EntityLoadListOptions,
     EntityLoadOptions,
-    EntityRemoveOptions,
+    EntityRemoveOptions, IdPatch, IdPatchRequest,
     Response$Factory,
 } from '../../types';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { DeepPartial, Dictionary, Id } from '../../../system-types';
-import { ChangeOptions } from '../../../shared/change/types';
+import { ChangeOptions, PatchRequest } from '../../../shared/change/types';
 
 export interface MixedEntityMethods<T> {
     loadList$(
@@ -54,10 +54,16 @@ export interface MixedEntityMethods<T> {
 
     changeRemote$(
         id: Id,
-        patch: DeepPartial<T>,
+        patch: PatchRequest<T>,
         dataSource$: Observable<DeepPartial<T> | undefined>,
         options?: ChangeOptions,
-    ): Observable<DeepPartial<T>>;
+    ): Observable<DeepPartial<T> | undefined>;
+
+    changeListRemote$(
+        patches: IdPatchRequest<T>[],
+        dataSource$: Observable<IdPatch<T>[] | undefined>,
+        options?: ChangeOptions,
+    ): Observable<IdPatch<T>[] | undefined>;
 
     removeRemote$<R>(
         id: Id,

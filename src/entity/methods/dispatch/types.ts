@@ -1,8 +1,14 @@
-import { EntityAddListOptions, EntityAddOptions, EntityRemoveOptions, EntitySetLoadingStateOptions } from '../../types';
+import {
+    EntityAddListOptions,
+    EntityAddOptions,
+    EntityRemoveOptions,
+    EntitySetLoadingStateOptions, IdPatch,
+    IdPatchRequest,
+} from '../../types';
 import { DeepPartial, Id, LoadingState } from '../../../system-types';
 import { EntityActions } from '../../actions';
 import { Observable, OperatorFunction } from 'rxjs';
-import { ChangeOptions } from '../../../shared/change/types';
+import { ChangeOptions, PatchRequest } from '../../../shared/change/types';
 
 export interface DispatchEntityMethods<T> {
     add(
@@ -36,13 +42,24 @@ export interface DispatchEntityMethods<T> {
 
     change(
         id: Id,
-        patch: DeepPartial<T>,
+        patch: PatchRequest<T>,
+        options?: ChangeOptions,
+    ): EntityActions;
+
+    changeList(
+        patches: IdPatchRequest<T>[],
+        options?: ChangeOptions,
+    ): EntityActions;
+
+    changeListWithId(
+        patches: IdPatchRequest<T>[],
+        changeId: string,
         options?: ChangeOptions,
     ): EntityActions;
 
     changeWithId(
         id: Id,
-        patch: DeepPartial<T>,
+        patch: PatchRequest<T>,
         changeId: string,
         options?: ChangeOptions,
     ): EntityActions;
@@ -52,6 +69,13 @@ export interface DispatchEntityMethods<T> {
         changeId: string,
         success: boolean,
         remotePatch?: DeepPartial<T>,
+        options?: ChangeOptions,
+    ): EntityActions;
+
+    resolveChangeList(
+        patches: IdPatch<T>[],
+        changeId: string,
+        success: boolean,
         options?: ChangeOptions,
     ): EntityActions;
 
@@ -82,6 +106,12 @@ export interface DispatchEntityMethods<T> {
 
     setLoadingStateById(
         id: Id,
+        state: LoadingState,
+        options?: EntitySetLoadingStateOptions,
+    ): EntityActions;
+
+    setLoadingStateByIds(
+        ids: Id[],
         state: LoadingState,
         options?: EntitySetLoadingStateOptions,
     ): EntityActions;

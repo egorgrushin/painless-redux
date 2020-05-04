@@ -7,6 +7,7 @@ import {
     EntityInternalSetLoadingStateOptions,
     EntityRemoveOptions,
     EntityType,
+    IdPatch,
 } from './types';
 import { DeepPartial, Id, LoadingState } from '../system-types';
 import { typedDefaultsDeep } from '../utils';
@@ -92,6 +93,18 @@ export const createSetLoadingState = (types: EntityActionTypes) => (
     } as const;
 };
 
+export const createSetLoadingStates = (types: EntityActionTypes) => (
+    state: LoadingState,
+    ids: Id[],
+    options?: EntityInternalSetLoadingStateOptions,
+) => {
+    return {
+        type: types.SET_LOADING_STATES,
+        payload: { state, ids },
+        options: { maxPagesCount: options?.maxPagesCount ?? MAX_PAGES_COUNT },
+    } as const;
+};
+
 export const createChange = <T>(types: EntityActionTypes) => (
     id: Id,
     patch: DeepPartial<T>,
@@ -104,6 +117,19 @@ export const createChange = <T>(types: EntityActionTypes) => (
         ...action,
         type: types.CHANGE,
         payload: { ...action.payload, id },
+    } as const;
+};
+
+export const createChangeList = <T>(types: EntityActionTypes) => (
+    patches: IdPatch<T>[],
+    changeId?: string,
+    options?: ChangeOptions,
+) => {
+    options = typedDefaultsDeep(options, { merge: true });
+    return {
+        type: types.CHANGE_LIST,
+        payload: { patches, changeId },
+        options,
     } as const;
 };
 
@@ -120,6 +146,20 @@ export const createResolveChange = <T>(types: EntityActionTypes) => (
         ...action,
         type: types.RESOLVE_CHANGE,
         payload: { ...action.payload, id },
+    } as const;
+};
+
+export const createResolveChangeList = <T>(types: EntityActionTypes) => (
+    patches: IdPatch<T>[],
+    changeId: string,
+    success: boolean,
+    options?: ChangeOptions,
+) => {
+    options = typedDefaultsDeep(options, { merge: true });
+    return {
+        type: types.RESOLVE_CHANGE_LIST,
+        payload: { patches, changeId, success },
+        options,
     } as const;
 };
 
@@ -158,6 +198,9 @@ type SelfActionCreators = ReturnType<typeof createAdd>
     | ReturnType<typeof createRestoreRemoved>
     | ReturnType<typeof createClear>
     | ReturnType<typeof createClearAll>
+    | ReturnType<typeof createChangeList>
+    | ReturnType<typeof createSetLoadingStates>
+    | ReturnType<typeof createResolveChangeList>
 
 export type EntityActions = ReturnType<SelfActionCreators> | SystemActions;
 

@@ -12,6 +12,7 @@ export * from './workspace/action-creators';
 export * from './entity/entity';
 export * from './entity/types';
 export * from './entity/action-creators';
+export * from './entity/action-creators.types';
 export { EntityActions } from './entity/actions';
 export * from './affect-loading-state/affect-loading-state';
 export * from './affect-loading-state/types';

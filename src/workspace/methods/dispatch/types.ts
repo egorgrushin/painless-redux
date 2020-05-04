@@ -1,16 +1,16 @@
 import { DeepPartial, Id, LoadingState } from '../../../system-types';
-import { ChangeOptions } from '../../../shared/change/types';
+import { ChangeOptions, PatchRequest } from '../../../shared/change/types';
 import { WorkspaceActions } from '../../actions';
 import { LoadingStateSetOptions } from '../../../shared/loading-state/types';
 
 export interface DispatchWorkspaceMethods<T> {
     change: (
-        patch: DeepPartial<T> | ((value: DeepPartial<T> | undefined) => DeepPartial<T>),
+        patch: PatchRequest<T>,
         label: string,
         options?: ChangeOptions,
     ) => WorkspaceActions;
     changeWithId: (
-        patch: DeepPartial<T> | ((value: DeepPartial<T> | undefined) => DeepPartial<T>),
+        patch: PatchRequest<T>,
         label: string,
         changeId?: string,
         options?: ChangeOptions,

@@ -1,10 +1,10 @@
 import { DeepPartial } from '../../../system-types';
-import { ChangeOptions } from '../../../shared/change/types';
+import { ChangeOptions, PatchRequest } from '../../../shared/change/types';
 import { Observable } from 'rxjs';
 
 export interface MixedWorkspaceMethods<T> {
     changeRemote$: (
-        patch: DeepPartial<T>,
+        patch: PatchRequest<T>,
         dataSource$: Observable<DeepPartial<T> | undefined>,
         label: string,
         options?: ChangeOptions,
