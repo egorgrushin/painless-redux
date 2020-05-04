@@ -15,4 +15,7 @@ export const ENTITY_TYPE_NAMES: Array<keyof EntityActionTypes> = [
     'CLEAR',
     'CLEAR_ALL',
     'BATCH',
+    'RESOLVE_CHANGE_LIST',
+    'CHANGE_LIST',
+    'SET_LOADING_STATES',
 ];
