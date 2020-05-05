@@ -13,14 +13,16 @@ export const createMixedEntityMethodsUtils = <T>(
     schema: EntitySchema<T>,
     prSchema: PainlessReduxSchema,
 ) => {
+    const { getPage$, getPageLoadingState$ } = selectMethods;
+
     const getPaginator = (
         config: unknown,
         paginatorSubj?: BehaviorSubject<boolean>,
         options?: EntityGetListOptions,
     ): Observable<Pagination> => {
         paginatorSubj = paginatorSubj ?? new BehaviorSubject<boolean>(false);
-        const page$ = selectMethods.getPage$(config);
-        const loadingState$ = selectMethods.getPageLoadingState$(config, prSchema.useAsapSchedulerInLoadingGuards);
+        const page$ = getPage$(config);
+        const loadingState$ = getPageLoadingState$(config, prSchema.useAsapSchedulerInLoadingGuards);
         return paginatorSubj.pipe(
             switchMap((isNext) => guardIfLoading(loadingState$).pipe(map(() => isNext))),
             scan((
