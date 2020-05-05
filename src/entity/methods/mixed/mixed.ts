@@ -24,7 +24,7 @@ import { PainlessReduxSchema } from '../../../painless-redux/types';
 import { ChangeOptions, PatchRequest } from '../../../shared/change/types';
 import { getPatchByOptions, getResolvePatchByOptions, normalizePatch } from '../../../shared/change/utils';
 import { getRemotePipe, guardIfLoading } from '../../../shared/utils';
-import { switchMap } from 'rxjs/operators';
+import { switchMap, take } from 'rxjs/operators';
 
 export const createMixedEntityMethods = <T>(
     dispatchMethods: DispatchEntityMethods<T>,
@@ -62,7 +62,7 @@ export const createMixedEntityMethods = <T>(
             },
         );
         const paginator = getPaginator(config, paginatorSubj, options);
-        return paginator.pipe(sourcePipe);
+        return paginator.pipe(sourcePipe, take(1));
     };
 
     const loadById$ = (
@@ -84,7 +84,7 @@ export const createMixedEntityMethods = <T>(
             setLoadingState: (state) => dispatchMethods.setLoadingStateBus(state, id),
         });
         const loadingState$ = selectMethods.getLoadingStateById$(id, prSchema.useAsapSchedulerInLoadingGuards);
-        return guardIfLoading(loadingState$).pipe(sourcePipe);
+        return guardIfLoading(loadingState$).pipe(sourcePipe, take(1));
     };
 
     const tryInvokeList$ = <S>(
