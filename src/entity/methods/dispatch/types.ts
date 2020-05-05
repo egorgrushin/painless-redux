@@ -9,6 +9,7 @@ import { DeepPartial, Id, LoadingState } from '../../../system-types';
 import { EntityActions } from '../../actions';
 import { Observable, OperatorFunction } from 'rxjs';
 import { ChangeOptions, PatchRequest } from '../../../shared/change/types';
+import { AffectLoadingStateFactory } from '../../..';
 
 export interface DispatchEntityMethods<T> {
     add(
@@ -138,18 +139,18 @@ export interface DispatchEntityMethods<T> {
         config?: unknown,
         key?: string,
         rethrow?: boolean,
-    ): <R>(...pipes: Array<OperatorFunction<any, any> | Observable<R>>) => any;
+    ): AffectLoadingStateFactory;
 
     affectLoadingStateById(
         id?: Id,
         key?: string,
         rethrow?: boolean,
-    ): <R>(...pipes: Array<OperatorFunction<any, any> | Observable<R>>) => any;
+    ): AffectLoadingStateFactory;
 
     affectLoadingStateByConfigOrId(
         config?: unknown,
         id?: Id,
         key?: string,
         rethrow?: boolean,
-    ): <R>(...pipes: Array<OperatorFunction<any, any> | Observable<R>>) => any;
+    ): AffectLoadingStateFactory;
 }

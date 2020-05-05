@@ -21,6 +21,7 @@ import { affectLoadingStateFactory } from '../../../affect-loading-state/affect-
 import { ChangeOptions, PatchRequest } from '../../../shared/change/types';
 import { normalizePatch } from '../../../shared/change/utils';
 import { SelectEntityMethods } from '../select/types';
+import { AffectLoadingStateFactory } from '../../..';
 
 export const createDispatchEntityMethods = <T>(
     dispatcher: Dispatcher<EntityActionTypes, EntityActions>,
@@ -260,7 +261,7 @@ export const createDispatchEntityMethods = <T>(
         id?: Id,
         key?: string,
         rethrow?: boolean,
-    ) => {
+    ): AffectLoadingStateFactory => {
         const setter = (state: LoadingState) => {
             setLoadingStateBus(state, id, config, key);
         };
