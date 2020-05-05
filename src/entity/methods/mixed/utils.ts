@@ -45,11 +45,11 @@ export const createMixedEntityMethodsUtils = <T>(
 
     const tryInvoke = <T, R, S>(
         store$: Observable<S>,
-        invoker: (dataSource: ObservableOrFactory<T, R>) => Observable<never>,
+        invoker: (dataSource: ObservableOrFactory<T, R>) => Observable<unknown>,
         dataSource?: ObservableOrFactory<T, R>,
     ) => {
         if (dataSource) {
-            const result$ = invoker(dataSource);
+            const result$ = invoker(dataSource).pipe(switchMap(() => EMPTY));
             return merge(store$, result$);
         }
         return store$;

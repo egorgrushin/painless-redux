@@ -12,7 +12,7 @@ import {
     Pagination,
     Response$Factory,
 } from '../../types';
-import { BehaviorSubject, merge, Observable, of } from 'rxjs';
+import { BehaviorSubject, EMPTY, merge, Observable, of } from 'rxjs';
 import { DispatchEntityMethods } from '../dispatch/types';
 import { SelectEntityMethods } from '../select/types';
 import { getPaginated$ } from '../../utils';
@@ -24,6 +24,7 @@ import { PainlessReduxSchema } from '../../../painless-redux/types';
 import { ChangeOptions, PatchRequest } from '../../../shared/change/types';
 import { getPatchByOptions, getResolvePatchByOptions, normalizePatch } from '../../../shared/change/utils';
 import { getRemotePipe, guardIfLoading } from '../../../shared/utils';
+import { switchMap } from 'rxjs/operators';
 
 export const createMixedEntityMethods = <T>(
     dispatchMethods: DispatchEntityMethods<T>,
@@ -42,11 +43,12 @@ export const createMixedEntityMethods = <T>(
         dataSource: Observable<T[]> | Response$Factory<T[]>,
         options?: EntityLoadListOptions,
         paginatorSubj?: BehaviorSubject<boolean>,
-    ): Observable<never> => {
+    ): Observable<PaginatedResponse<T>> => {
         const store$ = selectMethods.get$(config);
-        const sourcePipe = getRemotePipe<Pagination, T[] | undefined, PaginatedResponse<T>, never>({
+        const sourcePipe = getRemotePipe<Pagination, T[] | undefined, PaginatedResponse<T>, PaginatedResponse<T>>({
                 options,
                 store$,
+                emitOnSuccess: true,
                 remoteObsOrFactory: (pagination: Pagination) => getPaginated$(dataSource, pagination),
                 success: (result?: PaginatedResponse<T>) => {
                     if (!result) return;
@@ -67,11 +69,12 @@ export const createMixedEntityMethods = <T>(
         id: Id,
         dataSource$: Observable<T>,
         options?: EntityLoadOptions,
-    ): Observable<never> => {
+    ): Observable<T> => {
         const store$ = selectMethods.getById$(id);
-        const sourcePipe = getRemotePipe<LoadingState | undefined, T | undefined, T, never>({
+        const sourcePipe = getRemotePipe<LoadingState | undefined, T | undefined, T, T>({
             options,
             store$,
+            emitOnSuccess: true,
             remoteObsOrFactory: dataSource$,
             success: (response) => {
                 if (!response) return;
@@ -139,7 +142,7 @@ export const createMixedEntityMethods = <T>(
     ): Observable<T | undefined> => {
         const store$ = selectMethods.getById$(id);
         if (dataSource) {
-            const remote$ = loadById$(id, dataSource, options);
+            const remote$ = loadById$(id, dataSource, options).pipe(switchMap(() => EMPTY));
             return merge(store$, remote$);
         }
         return store$;

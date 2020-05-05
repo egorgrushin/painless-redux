@@ -4,7 +4,7 @@ import {
     EntityGetOptions,
     EntityLoadListOptions,
     EntityLoadOptions,
-    EntityRemoveOptions, IdPatch, IdPatchRequest,
+    EntityRemoveOptions, IdPatch, IdPatchRequest, PaginatedResponse,
     Response$Factory,
 } from '../../types';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -17,13 +17,13 @@ export interface MixedEntityMethods<T> {
         dataSource: (Observable<T[]> | Response$Factory<T[]>),
         options?: EntityLoadListOptions,
         paginatorSubj?: BehaviorSubject<boolean>,
-    ): Observable<never>;
+    ): Observable<PaginatedResponse<T>>;
 
     loadById$(
         id: Id,
         dataSource$: Observable<T>,
         options?: EntityLoadOptions,
-    ): Observable<never>;
+    ): Observable<T>;
 
     get$(
         config: unknown,
