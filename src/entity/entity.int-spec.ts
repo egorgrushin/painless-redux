@@ -47,7 +47,7 @@ describe('[Integration] Entity', () => {
 
         test('should emit instance after response', () => {
             // arrange
-            const remote$ = cold('  --a', { a: [user] });
+            const remote$ = cold('  --a', { a: { data: [user] } });
             const expected$ = cold('a-b   ', { a: undefined, b: [user] });
             // act
             const actual$ = entity.get$(filter, remote$);
@@ -137,11 +137,12 @@ describe('[Integration] Entity', () => {
             ${'addRemote$'}    | ${(remote$: ColdObservable<any>) => entity.addRemote$(user, user.id, remote$)}
             ${'changeRemote$'} | ${(remote$: ColdObservable<any>) => entity.changeRemote$(user.id, {}, remote$)}
             ${'removeRemote$'} | ${(remote$: ColdObservable<any>) => entity.removeRemote$(user.id, remote$)}
-        `('should set loading state during remote$ for entity.$actionName', ({ action }) => {
+        `('should set loading state during remote$ for entity.$actionName', ({ actionName, action }) => {
             // arrange
             const remoteMarble = '      --a';
             const loadingStateMarble = 'a-b';
-            const remote$ = cold(remoteMarble, { a: undefined });
+            const response = actionName === 'get$' ? { data: undefined } : undefined;
+            const remote$ = cold(remoteMarble, { a: response });
             // act
             const actual$ = entity.getLoadingState$();
             action(remote$).subscribe();

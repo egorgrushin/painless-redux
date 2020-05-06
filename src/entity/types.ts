@@ -83,11 +83,16 @@ export interface Pagination {
     to: number;
 }
 
-export interface PaginatedResponse<T> extends Pagination {
-    response: T[];
+export interface ResponseArray<T> {
+    data: T[];
+    hasMore?: boolean;
 }
 
-export type Response$Factory<T> = (pagination: Pagination) => Observable<T>;
+export interface PaginatedResponse<T> extends Pagination {
+    response: ResponseArray<T>;
+}
+
+export type Response$Factory<T> = (pagination: Pagination) => Observable<ResponseArray<T>>;
 
 export interface Page {
     ids: Id[] | undefined;

@@ -10,7 +10,7 @@ import {
     IdPatchRequest,
     PaginatedResponse,
     Pagination,
-    Response$Factory,
+    Response$Factory, ResponseArray,
 } from '../../types';
 import { BehaviorSubject, EMPTY, merge, Observable, of } from 'rxjs';
 import { DispatchEntityMethods } from '../dispatch/types';
@@ -40,7 +40,7 @@ export const createMixedEntityMethods = <T>(
 
     const loadList$ = (
         config: unknown,
-        dataSource: Observable<T[]> | Response$Factory<T[]>,
+        dataSource: Observable<ResponseArray<T>> | Response$Factory<T>,
         options?: EntityLoadListOptions,
         paginatorSubj?: BehaviorSubject<boolean>,
     ): Observable<PaginatedResponse<T>> => {
@@ -53,16 +53,16 @@ export const createMixedEntityMethods = <T>(
                 success: (result?: PaginatedResponse<T>) => {
                     if (!result) return;
                     const { index, size, response } = result;
-                    const data = response || [];
+                    const data = response.data ?? [];
                     const isReplace = index === 0;
-                    const hasMore = data.length >= size;
+                    const hasMore = response.hasMore ?? data.length >= size;
                     return dispatchMethods.addList(data, config, isReplace, hasMore, options);
                 },
                 setLoadingState: (state) => dispatchMethods.setLoadingStateBus(state, undefined, config),
             },
         );
         const paginator = getPaginator(config, paginatorSubj, options);
-        return paginator.pipe(sourcePipe, take(1));
+        return paginator.pipe(sourcePipe);
     };
 
     const loadById$ = (
@@ -84,17 +84,17 @@ export const createMixedEntityMethods = <T>(
             setLoadingState: (state) => dispatchMethods.setLoadingStateBus(state, id),
         });
         const loadingState$ = selectMethods.getLoadingStateById$(id, prSchema.useAsapSchedulerInLoadingGuards);
-        return guardIfLoading(loadingState$).pipe(sourcePipe, take(1));
+        return guardIfLoading(loadingState$).pipe(sourcePipe);
     };
 
     const tryInvokeList$ = <S>(
         store$: Observable<S>,
         config: unknown,
-        dataSource?: Observable<T[]> | Response$Factory<T[]>,
+        dataSource?: Observable<ResponseArray<T>> | Response$Factory<T>,
         options?: EntityGetListOptions,
         paginatorSubj?: BehaviorSubject<boolean>,
     ) => {
-        const invoker = (ds: Observable<T[]> | Response$Factory<T[]>) => loadList$(
+        const invoker = (ds: Observable<ResponseArray<T>> | Response$Factory<T>) => loadList$(
             config,
             ds,
             options,
@@ -105,7 +105,7 @@ export const createMixedEntityMethods = <T>(
 
     const get$ = (
         config: unknown,
-        dataSource?: Observable<T[]> | Response$Factory<T[]>,
+        dataSource?: Observable<ResponseArray<T>> | Response$Factory<T>,
         options?: EntityGetListOptions,
         paginatorSubj?: BehaviorSubject<boolean>,
     ): Observable<T[] | undefined> => {
@@ -121,7 +121,7 @@ export const createMixedEntityMethods = <T>(
 
     const getDictionary$ = (
         config: unknown,
-        dataSource?: Observable<T[]> | Response$Factory<T[]>,
+        dataSource?: Observable<ResponseArray<T>> | Response$Factory<T>,
         options?: EntityGetListOptions,
         paginatorSubj?: BehaviorSubject<boolean>,
     ): Observable<Dictionary<T>> => {
