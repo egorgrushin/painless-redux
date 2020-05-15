@@ -1,6 +1,7 @@
 import { DeepPartial } from '../../system-types';
+import { RequestOptions } from '../types';
 
-export interface ChangeOptions {
+export interface ChangeOptions extends RequestOptions {
     merge?: boolean;
     ifNotExist?: boolean;
     optimistic?: boolean;

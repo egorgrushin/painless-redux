@@ -14,6 +14,7 @@ import { DispatchEntityMethods } from './methods/dispatch/types';
 import { MixedEntityMethods } from './methods/mixed/types';
 import { SystemActionTypes } from '../shared/system/types';
 import { EntityActionCreators } from './action-creators.types';
+import { RequestOptions } from '../shared/types';
 
 export type EntityType<T> = T & { id: Id };
 
@@ -26,7 +27,7 @@ export interface EntitySchema<T> {
     id?(data: T): Id;
 }
 
-export interface EntityLoadOptions {
+export interface EntityLoadOptions extends RequestOptions {
 
 }
 
@@ -37,11 +38,11 @@ export interface EntityGetOptions extends EntityLoadOptions, EntityAddOptions {
 export interface EntityGetListOptions extends EntityLoadListOptions {
 }
 
-export interface EntityLoadListOptions extends EntityAddListOptions {
+export interface EntityLoadListOptions extends EntityAddListOptions, RequestOptions {
     pageSize?: number;
 }
 
-export interface EntityAddOptions extends EntityOptimisticOptions, EntityInsertOptions {}
+export interface EntityAddOptions extends EntityOptimisticOptions, EntityInsertOptions, RequestOptions {}
 
 interface EntityInternalOptions {
     maxPagesCount?: number;
@@ -59,7 +60,7 @@ export interface EntityRemoteOptions extends EntityOptimisticOptions {
     single?: boolean;
 }
 
-export interface EntityRemoveOptions extends EntityOptimisticOptions {
+export interface EntityRemoveOptions extends EntityOptimisticOptions, RequestOptions {
     safe?: boolean;
 }
 

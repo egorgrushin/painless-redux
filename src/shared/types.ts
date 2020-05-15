@@ -22,6 +22,10 @@ export interface OptimisticOptions {
     optimistic?: boolean;
 }
 
-export interface RemoteOptions extends OptimisticOptions {
+export interface RequestOptions {
+    rethrow?: boolean;
+}
+
+export interface RemoteOptions extends OptimisticOptions, RequestOptions {
     single?: boolean;
 }
