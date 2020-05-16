@@ -25,6 +25,7 @@ import { ChangeOptions, PatchRequest } from '../../../shared/change/types';
 import { getPatchByOptions, getResolvePatchByOptions, normalizePatch } from '../../../shared/change/utils';
 import { getRemotePipe, guardIfLoading } from '../../../shared/utils';
 import { switchMap, take } from 'rxjs/operators';
+import { typedDefaultsDeep } from '../../../utils';
 
 export const createMixedEntityMethods = <T>(
     dispatchMethods: DispatchEntityMethods<T>,
@@ -155,6 +156,7 @@ export const createMixedEntityMethods = <T>(
         options?: EntityAddOptions,
     ): Observable<T> => {
         const tempId = v4();
+        options = typedDefaultsDeep(options, { rethrow: true });
         const { addWithId, resolveAdd } = dispatchMethods;
         const sourcePipe = getRemotePipe<null, unknown, T, T>({
             options,
@@ -165,7 +167,7 @@ export const createMixedEntityMethods = <T>(
                 return addWithId(newEntity, tempId, config, options);
             },
             emitOnSuccess: true,
-            optimistic: options?.optimistic,
+            optimistic: options.optimistic,
             optimisticResolve: (success, result) => resolveAdd(result, success, tempId, config, options),
             setLoadingState: (state) => dispatchMethods.setLoadingStateBus(state, undefined, config),
         });
@@ -178,6 +180,7 @@ export const createMixedEntityMethods = <T>(
         dataSource$: Observable<DeepPartial<T> | undefined>,
         options?: ChangeOptions,
     ): Observable<DeepPartial<T> | undefined> => {
+        options = typedDefaultsDeep(options, { rethrow: true });
         const changeId = v4();
         const { changeWithId, resolveChange, setLoadingStateBus } = dispatchMethods;
         const { getLoadingStateById$, getById$ } = selectMethods;
@@ -194,7 +197,7 @@ export const createMixedEntityMethods = <T>(
                 return changeWithId(id, patchToApply, changeId, options);
             },
             emitOnSuccess: true,
-            optimistic: options?.optimistic,
+            optimistic: options.optimistic,
             optimisticResolve: (
                 success: boolean,
                 response?: DeepPartial<T>,
@@ -213,6 +216,7 @@ export const createMixedEntityMethods = <T>(
         dataSource$: Observable<IdPatch<T>[] | undefined>,
         options?: ChangeOptions,
     ): Observable<IdPatch<T>[] | undefined> => {
+        options = typedDefaultsDeep(options, { rethrow: true });
         const changeId = v4();
         const { changeListWithId, resolveChangeList, setLoadingStateByIds } = dispatchMethods;
         const { getLoadingStateByIds$, getById$ } = selectMethods;
@@ -260,6 +264,7 @@ export const createMixedEntityMethods = <T>(
         observable: Observable<R>,
         options?: EntityRemoveOptions,
     ): Observable<R> => {
+        options = typedDefaultsDeep(options, { rethrow: true });
         const { remove, resolveRemove } = dispatchMethods;
         const sourcePipe = getRemotePipe<LoadingState | undefined, unknown, R, R>({
             options,

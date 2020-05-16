@@ -31,7 +31,7 @@ describe('Entity', () => {
     const setLoadingStateActionFactory = (
         state: LoadingState,
         id?: Id,
-    ) => entity.actionCreators.SET_LOADING_STATE(state, undefined, id);
+    ) => entity.actionCreators.SET_LOADING_STATE(state, undefined, id, undefined);
 
     beforeEach(() => {
         store = new TestStore(undefined, (state) => state);
@@ -130,7 +130,7 @@ describe('Entity', () => {
              ${true}
              `('should change entity remotely with useResponsePatch: $useResponsePatch', ({ useResponsePatch }) => {
             // arrange
-            const options: ChangeOptions = { useResponsePatch };
+            const options: ChangeOptions = { useResponsePatch, rethrow: false };
             const id = user.id;
             const remote$ = cold(' --a| ', { a: responsePatch });
             const resolvePatch = useResponsePatch ? responsePatch : patch;
@@ -152,7 +152,7 @@ describe('Entity', () => {
 		        ${false}
 		        ${true}
 	            `('should change entity remotely with useResponsePatch: $useResponsePatch', ({ useResponsePatch }) => {
-                const options: ChangeOptions = { optimistic: true, useResponsePatch };
+                const options: ChangeOptions = { optimistic: true, useResponsePatch, rethrow: false };
                 const remote$ = cold(' --a| ', { a: responsePatch });
                 const id = user.id;
                 const changeAction = entity.actionCreators.CHANGE(id, patch, changeId, options);
@@ -169,7 +169,7 @@ describe('Entity', () => {
             });
 
             test('should resolve unsuccessfully if response failed', () => {
-                const options: ChangeOptions = { optimistic: true };
+                const options: ChangeOptions = { optimistic: true, rethrow: false };
                 const error = 'Error';
                 const failedRemote$ = cold(' --#|', undefined, error);
                 const id = user.id;
@@ -202,7 +202,8 @@ describe('Entity', () => {
 
         test('should remote remove entity', () => {
             // arrange
-            const removeAction = entity.actionCreators.REMOVE(user.id);
+            const options = { rethrow: false };
+            const removeAction = entity.actionCreators.REMOVE(user.id, options);
             const remote$ = cold(' --a| ', { a: null });
             const actions$ = cold('a-(bc)', {
                 a: setLoadingStateActionFactory({ isLoading: true }, user.id),
@@ -210,14 +211,14 @@ describe('Entity', () => {
                 c: removeAction,
             });
             // act
-            entity.removeRemote$(user.id, remote$).subscribe();
+            entity.removeRemote$(user.id, remote$, options).subscribe();
             // assert
             expect(store.actions$).toBeObservable(actions$);
         });
 
         test('should optimistic remove entity', () => {
             // arrange
-            const options = { optimistic: true };
+            const options = { optimistic: true, rethrow: false };
             const removeAction = entity.actionCreators.REMOVE(user.id, options);
             const resolveRemoveAction = entity.actionCreators.RESOLVE_REMOVE(user.id, true, options);
             const remote$ = cold(' --a| ', { a: null });
@@ -233,7 +234,7 @@ describe('Entity', () => {
 
         test('should optimistic undo if failed', () => {
             // arrange
-            const options = { optimistic: true };
+            const options = { optimistic: true, rethrow: false };
             const error = 'Failed';
             const id = user.id;
             const removeAction = entity.actionCreators.REMOVE(id, options);
@@ -265,15 +266,16 @@ describe('Entity', () => {
 
         test('should remote create entity', () => {
             // arrange
+            const options = { rethrow: false };
             const remote$ = cold('--a|', { a: user });
-            const createAction = entity.actionCreators.ADD(user);
+            const createAction = entity.actionCreators.ADD(user, undefined, undefined, options);
             const actions$ = cold('a-(bc)', {
                 a: setLoadingStateActionFactory({ isLoading: true }),
                 b: createAction,
                 c: setLoadingStateActionFactory({ isLoading: false }),
             });
             // act
-            const actual = entity.addRemote$(user, undefined, remote$);
+            const actual = entity.addRemote$(user, undefined, remote$, options);
             // assert
             expect(actual).toBeObservable(remote$);
             expect(store.actions$).toBeObservable(actions$);
