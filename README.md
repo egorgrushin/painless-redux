@@ -94,7 +94,7 @@ Commonly you need to load some entities from outer source (e.g. your backend api
     }
 ```
 
-More detailed [here](https://github.com/egorgrushin/painless-redux/wiki/Entity#get_observable)
+`get$` algorithm is described [here](https://github.com/egorgrushin/painless-redux/wiki/Entity#get_observable)
 
 # Pagination
 
