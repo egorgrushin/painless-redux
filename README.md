@@ -16,6 +16,9 @@ General features:
 1. To be familiar with [redux](https://github.com/reduxjs/redux)
 2. To be familiar with [RxJS](https://github.com/ReactiveX/rxjs)
 
+# Documentation
+[Wiki](https://github.com/egorgrushin/painless-redux/wiki)
+
 # Plain use
 
 1. install using npm:
