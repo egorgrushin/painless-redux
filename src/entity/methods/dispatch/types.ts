@@ -2,12 +2,12 @@ import {
     EntityAddListOptions,
     EntityAddOptions,
     EntityRemoveOptions,
-    EntitySetLoadingStateOptions, IdPatch,
+    EntitySetLoadingStateOptions,
+    IdPatch,
     IdPatchRequest,
 } from '../../types';
 import { DeepPartial, Id, LoadingState } from '../../../system-types';
 import { EntityActions } from '../../actions';
-import { Observable, OperatorFunction } from 'rxjs';
 import { ChangeOptions, PatchRequest } from '../../../shared/change/types';
 import { AffectLoadingStateFactory } from '../../..';
 
