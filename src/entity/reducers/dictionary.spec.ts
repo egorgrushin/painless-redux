@@ -86,6 +86,27 @@ describe('dictionary', () => {
         expect(actual).toEqual(expected);
     });
 
+    test('should remove entities', () => {
+        // arrange
+        const entity1: TestEntity = { id: 1 };
+        const entity2: TestEntity = { id: 2 };
+        const action = actionCreators.REMOVE_LIST([entity1.id, entity2.id]);
+        // act
+        const actual = reducer({
+            [entity1.id]: {
+                actual: entity1,
+                changes: [],
+            },
+            [entity2.id]: {
+                actual: entity2,
+                changes: [],
+            },
+        }, action);
+        // assert
+        const expected = {};
+        expect(actual).toEqual(expected);
+    });
+
     describe('#CHANGE', () => {
         test.each`
             options
