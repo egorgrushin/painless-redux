@@ -4,6 +4,7 @@ import {
     EntityGetOptions,
     EntityLoadListOptions,
     EntityLoadOptions,
+    EntityRemoveListOptions,
     EntityRemoveOptions,
     EntitySchema,
     IdPatch,
