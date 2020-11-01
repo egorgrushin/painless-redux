@@ -37,13 +37,17 @@ export const createByIdLoadingStatesReducer = (
                 const { payload: { id }, options: { optimistic } } = action;
                 return removeState(state, [id], !optimistic);
             }
+            case types.RESOLVE_REMOVE: {
+                const { payload: { success, id } } = action;
+                return removeState(state, [id], !success);
+            }
             case types.REMOVE_LIST: {
                 const { payload: { ids }, options: { optimistic } } = action;
                 return removeState(state, ids, !optimistic);
             }
-            case types.RESOLVE_REMOVE: {
-                const { payload: { success, id } } = action;
-                return removeState(state, [id], !success);
+            case types.RESOLVE_REMOVE_LIST: {
+                const { payload: { success, ids } } = action;
+                return removeState(state, ids, !success);
             }
             case types.CLEAR_ALL: {
                 return {};

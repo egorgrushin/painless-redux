@@ -86,6 +86,16 @@ export const createRemoveList = (types: EntityActionTypes) => (
     return { type: types.REMOVE_LIST, payload, options } as const;
 };
 
+export const createResolveRemoveList = (types: EntityActionTypes) => (
+    ids: Id[],
+    success: boolean,
+    options?: EntityRemoveListOptions,
+) => {
+    options = typedDefaultsDeep(options);
+    const payload = { ids, success };
+    return { type: types.RESOLVE_REMOVE_LIST, payload, options } as const;
+};
+
 export const createSetLoadingState = (types: EntityActionTypes) => (
     state: LoadingState,
     config?: unknown,
@@ -206,13 +216,14 @@ export const createClearAll = (types: EntityActionTypes) => () => {
 type SelfActionCreators = ReturnType<typeof createAdd>
     | ReturnType<typeof createResolveAdd>
     | ReturnType<typeof createAddList>
-    | ReturnType<typeof createRemove>
-    | ReturnType<typeof createRemoveList>
     | ReturnType<typeof createSetLoadingState>
     | ReturnType<typeof createChange>
     | ReturnType<typeof createResolveChange>
+    | ReturnType<typeof createRemove>
     | ReturnType<typeof createResolveRemove>
     | ReturnType<typeof createRestoreRemoved>
+    | ReturnType<typeof createRemoveList>
+    | ReturnType<typeof createResolveRemoveList>
     | ReturnType<typeof createRestoreRemovedList>
     | ReturnType<typeof createClear>
     | ReturnType<typeof createClearAll>

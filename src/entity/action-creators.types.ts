@@ -48,6 +48,11 @@ export interface EntityActionCreators<T> {
         ids: Id[],
         options?: EntityRemoveOptions,
     ) => { payload: { ids: Id[] }; options: EntityRemoveListOptions; type: 'REMOVE_LIST' };
+    RESOLVE_REMOVE_LIST: (
+        ids: Id[],
+        success: boolean,
+        options?: EntityRemoveOptions,
+    ) => { payload: { success: boolean; ids: Id[] }; options: EntityRemoveListOptions; type: 'RESOLVE_REMOVE_LIST' };
     RESTORE_REMOVED_LIST: (
         ids: Id[],
     ) => { payload: { ids: Id[] }; type: 'RESTORE_REMOVED_LIST' };

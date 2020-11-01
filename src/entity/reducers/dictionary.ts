@@ -73,6 +73,7 @@ export const createDictionaryReducer = <T>(
                 return rest;
             }
             case types.REMOVE_LIST:
+            case types.RESOLVE_REMOVE_LIST:
             case types.RESTORE_REMOVED_LIST: {
                 const { payload: { ids } } = action;
                 return ids.reduce((memo, id) => {

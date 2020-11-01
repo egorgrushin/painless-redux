@@ -145,19 +145,6 @@ export const createDispatchEntityMethods = <T>(
         return dispatcher.createAndDispatch('REMOVE', [id], options);
     };
 
-    const removeList = (
-        ids: Id[],
-        options?: EntityRemoveListOptions,
-    ) => {
-        return dispatcher.createAndDispatch('REMOVE_LIST', [ids], options);
-    };
-
-    const restoreRemovedList = (
-        ids: Id[],
-    ) => {
-        return dispatcher.createAndDispatch('RESTORE_REMOVED_LIST', [ids]);
-    };
-
     const resolveRemove = (
         id: Id,
         success: boolean,
@@ -170,6 +157,27 @@ export const createDispatchEntityMethods = <T>(
         id: Id,
     ) => {
         return dispatcher.createAndDispatch('RESTORE_REMOVED', [id]);
+    };
+
+    const removeList = (
+        ids: Id[],
+        options?: EntityRemoveListOptions,
+    ) => {
+        return dispatcher.createAndDispatch('REMOVE_LIST', [ids], options);
+    };
+
+    const resolveRemoveList = (
+        ids: Id[],
+        success: boolean,
+        options?: EntityRemoveListOptions,
+    ) => {
+        return dispatcher.createAndDispatch('RESOLVE_REMOVE_LIST', [ids, success], options);
+    };
+
+    const restoreRemovedList = (
+        ids: Id[],
+    ) => {
+        return dispatcher.createAndDispatch('RESTORE_REMOVED_LIST', [ids]);
     };
 
     const setLoadingState = (
@@ -300,10 +308,11 @@ export const createDispatchEntityMethods = <T>(
         resolveChangeList,
         resolveAdd,
         remove,
-        removeList,
-        restoreRemovedList,
         resolveRemove,
         restoreRemoved,
+        removeList,
+        resolveRemoveList,
+        restoreRemovedList,
         setLoadingState,
         clear,
         clearAll,

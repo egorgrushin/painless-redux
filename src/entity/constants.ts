@@ -13,6 +13,7 @@ export const ENTITY_TYPE_NAMES: Array<keyof EntityActionTypes> = [
     'RESOLVE_REMOVE',
     'RESTORE_REMOVED',
     'REMOVE_LIST',
+    'RESOLVE_REMOVE_LIST',
     'RESTORE_REMOVED_LIST',
     'CLEAR',
     'CLEAR_ALL',

@@ -75,6 +75,20 @@ const createPageReducer = (
                     ids: removeFromArray(state.ids, ids),
                 };
             }
+
+            case types.RESOLVE_REMOVE_LIST: {
+                const { payload: { success, ids }, options: { safe } } = action;
+                if (!success || safe) return state;
+                if (!state?.ids) return state;
+                // this check needs to clear immutable reference updating.
+                // It means, no state mutating if this id doesn't exist here
+                const hasIds = ids.some((id) => state.ids?.includes(id));
+                if (!hasIds) return state;
+                return {
+                    ...state,
+                    ids: removeFromArray(state.ids, ids),
+                };
+            }
             case types.RESOLVE_ADD: {
                 const { payload: { success, tempId, result } } = action;
                 if (!state) return state;
@@ -142,7 +156,8 @@ export const createPagesReducer = (
             case types.RESOLVE_ADD:
             case types.REMOVE:
             case types.RESOLVE_REMOVE:
-            case types.REMOVE_LIST: {
+            case types.REMOVE_LIST:
+            case types.RESOLVE_REMOVE_LIST: {
                 return Object.keys(state).reduce((
                     memo: Dictionary<Page>,
                     hash: string,

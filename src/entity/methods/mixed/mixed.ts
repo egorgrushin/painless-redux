@@ -288,15 +288,15 @@ export const createMixedEntityMethods = <T>(
         options?: EntityRemoveListOptions,
     ): Observable<R> => {
         options = typedDefaultsDeep(options, { rethrow: true });
-        const { removeList, setLoadingStateByIds } = dispatchMethods;
+        const { removeList, setLoadingStateByIds, resolveRemoveList } = dispatchMethods;
         const sourcePipe = getRemotePipe<LoadingState | undefined, unknown, R, R>({
             options,
             remoteObsOrFactory: observable,
             success: () => removeList(ids, options),
             emitSuccessOutsideAffectState: true,
             emitOnSuccess: true,
-            // optimistic: options?.optimistic,
-            // optimisticResolve: (success: boolean) => resolveRemove(id, success, options),
+            optimistic: options?.optimistic,
+            optimisticResolve: (success: boolean) => resolveRemoveList(ids, success, options),
             setLoadingState: (state) => setLoadingStateByIds(ids, state),
         });
         const loadingState$ = selectMethods.getLoadingStateByIds$(ids, prSchema.useAsapSchedulerInLoadingGuards);
