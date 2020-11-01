@@ -70,6 +70,8 @@ export const createTestHelpers = <T>(
         REMOVE: 'REMOVE',
         RESOLVE_REMOVE: 'RESOLVE_REMOVE',
         RESTORE_REMOVED: 'RESTORE_REMOVED',
+        REMOVE_LIST: 'REMOVE_LIST',
+        RESTORE_REMOVED_LIST: 'RESTORE_REMOVED_LIST',
         CLEAR: 'CLEAR',
         CLEAR_ALL: 'CLEAR_ALL',
         BATCH: 'BATCH',

@@ -53,6 +53,11 @@ export const createIdsReducer = (
             if (optimistic || safe) return state;
             return state.filter(existId => existId !== id);
         }
+        case types.REMOVE_LIST: {
+            const { payload: { ids }, options: { safe, optimistic } } = action;
+            if (optimistic || safe) return state;
+            return state.filter(existId => !ids.includes(existId));
+        }
         case types.RESOLVE_REMOVE: {
             const { payload: { success, id }, options: { safe } } = action;
             if (!success || safe) return state;

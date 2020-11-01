@@ -6,6 +6,7 @@ import {
     EntityInternalAddListOptions,
     EntityInternalAddOptions,
     EntityInternalSetLoadingStateOptions,
+    EntityRemoveListOptions,
     EntityRemoveOptions,
     EntitySchema,
     EntitySetLoadingStateOptions,
@@ -142,6 +143,19 @@ export const createDispatchEntityMethods = <T>(
         options?: EntityRemoveOptions,
     ) => {
         return dispatcher.createAndDispatch('REMOVE', [id], options);
+    };
+
+    const removeList = (
+        ids: Id[],
+        options?: EntityRemoveListOptions,
+    ) => {
+        return dispatcher.createAndDispatch('REMOVE_LIST', [ids], options);
+    };
+
+    const restoreRemovedList = (
+        ids: Id[],
+    ) => {
+        return dispatcher.createAndDispatch('RESTORE_REMOVED_LIST', [ids]);
     };
 
     const resolveRemove = (
@@ -286,6 +300,8 @@ export const createDispatchEntityMethods = <T>(
         resolveChangeList,
         resolveAdd,
         remove,
+        removeList,
+        restoreRemovedList,
         resolveRemove,
         restoreRemoved,
         setLoadingState,

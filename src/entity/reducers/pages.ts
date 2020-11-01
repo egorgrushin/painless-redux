@@ -4,6 +4,7 @@ import { EntityActions } from '../actions';
 import { isNil, uniq } from 'lodash';
 import { createLoadingStateReducer } from '../../shared/loading-state/reducers';
 import { MAX_PAGES_COUNT } from '../constants';
+import { removeFromArray } from '../../utils';
 
 const addList = <T>(
     state: Page | undefined,
@@ -47,7 +48,7 @@ const createPageReducer = (
                 if (!state?.ids?.includes(id)) return state;
                 return {
                     ...state,
-                    ids: state.ids.filter((existId) => existId !== id),
+                    ids: removeFromArray(state.ids, [id]),
                 };
             }
             case types.RESOLVE_REMOVE: {
@@ -58,7 +59,20 @@ const createPageReducer = (
                 if (!state?.ids?.includes(id)) return state;
                 return {
                     ...state,
-                    ids: state.ids.filter((existId) => existId !== id),
+                    ids: removeFromArray(state.ids, [id]),
+                };
+            }
+            case types.REMOVE_LIST: {
+                const { payload: { ids }, options: { safe, optimistic } } = action;
+                if (optimistic || safe) return state;
+                if (!state?.ids) return state;
+                // this check needs to clear immutable reference updating.
+                // It means, no state mutating if this id doesn't exist here
+                const hasIds = ids.some((id) => state.ids?.includes(id));
+                if (!hasIds) return state;
+                return {
+                    ...state,
+                    ids: removeFromArray(state.ids, ids),
                 };
             }
             case types.RESOLVE_ADD: {
@@ -73,7 +87,7 @@ const createPageReducer = (
                 };
                 return {
                     ...state,
-                    ids: state.ids?.filter((id) => id !== tempId),
+                    ids: removeFromArray(state?.ids ?? [], [tempId]),
                 };
             }
             case types.SET_LOADING_STATE: {
@@ -127,7 +141,8 @@ export const createPagesReducer = (
             }
             case types.RESOLVE_ADD:
             case types.REMOVE:
-            case types.RESOLVE_REMOVE: {
+            case types.RESOLVE_REMOVE:
+            case types.REMOVE_LIST: {
                 return Object.keys(state).reduce((
                     memo: Dictionary<Page>,
                     hash: string,

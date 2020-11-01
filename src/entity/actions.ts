@@ -5,6 +5,7 @@ import {
     EntityInternalAddListOptions,
     EntityInternalAddOptions,
     EntityInternalSetLoadingStateOptions,
+    EntityRemoveListOptions,
     EntityRemoveOptions,
     EntityType,
     IdPatch,
@@ -74,6 +75,15 @@ export const createRemove = (types: EntityActionTypes) => (
     options = typedDefaultsDeep(options);
     const payload = { id };
     return { type: types.REMOVE, payload, options } as const;
+};
+
+export const createRemoveList = (types: EntityActionTypes) => (
+    ids: Id[],
+    options?: EntityRemoveListOptions,
+) => {
+    options = typedDefaultsDeep(options);
+    const payload = { ids };
+    return { type: types.REMOVE_LIST, payload, options } as const;
 };
 
 export const createSetLoadingState = (types: EntityActionTypes) => (
@@ -178,6 +188,12 @@ export const createRestoreRemoved = <T>(types: EntityActionTypes) => (
     return { type: types.RESTORE_REMOVED, payload: { id } } as const;
 };
 
+export const createRestoreRemovedList = <T>(types: EntityActionTypes) => (
+    ids: Id[],
+) => {
+    return { type: types.RESTORE_REMOVED_LIST, payload: { ids } } as const;
+};
+
 export const createClear = (types: EntityActionTypes) => (config: unknown) => {
     const configHash = getHash(config);
     return { type: types.CLEAR, payload: { configHash } } as const;
@@ -191,11 +207,13 @@ type SelfActionCreators = ReturnType<typeof createAdd>
     | ReturnType<typeof createResolveAdd>
     | ReturnType<typeof createAddList>
     | ReturnType<typeof createRemove>
+    | ReturnType<typeof createRemoveList>
     | ReturnType<typeof createSetLoadingState>
     | ReturnType<typeof createChange>
     | ReturnType<typeof createResolveChange>
     | ReturnType<typeof createResolveRemove>
     | ReturnType<typeof createRestoreRemoved>
+    | ReturnType<typeof createRestoreRemovedList>
     | ReturnType<typeof createClear>
     | ReturnType<typeof createClearAll>
     | ReturnType<typeof createChangeList>

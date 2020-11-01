@@ -253,6 +253,70 @@ describe('Entity', () => {
 
     });
 
+    describe('#removeList', () => {
+        test('should remove entities', () => {
+            // arrange
+            const removeAction = entity.actionCreators.REMOVE_LIST([user.id, user2.id]);
+            const actions$ = getOrderedMarbleStream(removeAction);
+            // act
+            entity.removeList([user.id, user2.id]);
+            // assert
+            expect(store.actions$).toBeObservable(actions$);
+        });
+
+        test('should remote remove entity', () => {
+            // arrange
+            const options = { rethrow: false };
+            const removeAction = entity.actionCreators.REMOVE(user.id, options);
+            const remote$ = cold(' --a| ', { a: null });
+            const actions$ = cold('a-(bc)', {
+                a: setLoadingStateActionFactory({ isLoading: true }, user.id),
+                b: setLoadingStateActionFactory({ isLoading: false }, user.id),
+                c: removeAction,
+            });
+            // act
+            entity.removeRemote$(user.id, remote$, options).subscribe();
+            // assert
+            expect(store.actions$).toBeObservable(actions$);
+        });
+
+        test('should optimistic remove entity', () => {
+            // arrange
+            const options = { optimistic: true, rethrow: false };
+            const removeAction = entity.actionCreators.REMOVE(user.id, options);
+            const resolveRemoveAction = entity.actionCreators.RESOLVE_REMOVE(user.id, true, options);
+            const remote$ = cold(' --a| ', { a: null });
+            const actions$ = cold('a-b', {
+                a: removeAction,
+                b: resolveRemoveAction,
+            });
+            // act
+            entity.removeRemote$(user.id, remote$, options).subscribe();
+            // assert
+            expect(store.actions$).toBeObservable(actions$);
+        });
+
+        test('should optimistic undo if failed', () => {
+            // arrange
+            const options = { optimistic: true, rethrow: false };
+            const error = 'Failed';
+            const id = user.id;
+            const removeAction = entity.actionCreators.REMOVE(id, options);
+            const resolveRemoveAction = entity.actionCreators.RESOLVE_REMOVE(id, false, options);
+            const remote$ = cold(' --#| ', undefined, error);
+            const actions$ = cold('a-(bc)', {
+                a: removeAction,
+                b: resolveRemoveAction,
+                c: setLoadingStateActionFactory({ isLoading: false, error }, id),
+            });
+            // act
+            entity.removeRemote$(id, remote$, options).subscribe();
+            // assert
+            expect(store.actions$).toBeObservable(actions$);
+        });
+
+    });
+
     describe('#create', () => {
         test('should create entity', () => {
             // arrange
@@ -339,7 +403,7 @@ describe('Entity', () => {
         test('should load entities', () => {
             // arrange
             const users = [user];
-            const remote$ = cold('--a|', { a: { data: users} });
+            const remote$ = cold('--a|', { a: { data: users } });
             const filter = null;
             const addAction = entity.actionCreators.ADD_LIST(users, filter, true, false);
             const actions$ = cold('a-(bc)', {

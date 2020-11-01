@@ -3,16 +3,15 @@ import { Dictionary, Id, LoadingState } from '../../system-types';
 import { EntityActions } from '../actions';
 import { createLoadingStateReducer } from '../../shared/loading-state/reducers';
 import { isNil } from 'lodash';
+import { removeFromObject } from '../../utils';
 
 const removeState = (
     state: Dictionary<LoadingState>,
-    id: Id,
+    ids: Id[] = [],
     condition: boolean = true,
 ): Dictionary<LoadingState> => {
-    if (isNil(id)) return state;
     if (!condition) return state;
-    const { [id]: deleted, ...rest } = state;
-    return rest;
+    return removeFromObject(state, ids);
 };
 
 export const createByIdLoadingStatesReducer = (
@@ -32,15 +31,19 @@ export const createByIdLoadingStatesReducer = (
             }
             case types.RESOLVE_ADD: {
                 const { payload: { tempId } } = action;
-                return removeState(state, tempId);
+                return removeState(state, [tempId]);
             }
             case types.REMOVE: {
                 const { payload: { id }, options: { optimistic } } = action;
-                return removeState(state, id, !optimistic);
+                return removeState(state, [id], !optimistic);
+            }
+            case types.REMOVE_LIST: {
+                const { payload: { ids }, options: { optimistic } } = action;
+                return removeState(state, ids, !optimistic);
             }
             case types.RESOLVE_REMOVE: {
                 const { payload: { success, id } } = action;
-                return removeState(state, id, !success);
+                return removeState(state, [id], !success);
             }
             case types.CLEAR_ALL: {
                 return {};

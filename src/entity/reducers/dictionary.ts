@@ -72,6 +72,20 @@ export const createDictionaryReducer = <T>(
                 const { [id]: deleted, ...rest } = state;
                 return rest;
             }
+            case types.REMOVE_LIST:
+            case types.RESTORE_REMOVED_LIST: {
+                const { payload: { ids } } = action;
+                return ids.reduce((memo, id) => {
+                    const instanceState = state[id];
+                    const instance = instanceReducer(instanceState, action);
+                    if (instance) {
+                        memo[id] = instance;
+                    } else {
+                        delete memo[id];
+                    }
+                    return memo;
+                }, { ...state });
+            }
             case types.CLEAR_ALL: {
                 return {};
             }

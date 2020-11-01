@@ -1,6 +1,7 @@
 import {
     EntityAddListOptions,
     EntityAddOptions,
+    EntityRemoveListOptions,
     EntityRemoveOptions,
     EntitySetLoadingStateOptions,
     IdPatch,
@@ -90,9 +91,18 @@ export interface DispatchEntityMethods<T> {
         id: Id,
     ): EntityActions;
 
+    restoreRemovedList(
+        ids: Id[],
+    ): EntityActions;
+
     remove(
         id: Id,
         options?: EntityRemoveOptions,
+    ): EntityActions;
+
+    removeList(
+        ids: Id[],
+        options?: EntityRemoveListOptions,
     ): EntityActions;
 
     setLoadingState(

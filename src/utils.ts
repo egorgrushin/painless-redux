@@ -4,7 +4,7 @@ import { mergeWith } from 'lodash/fp';
 import { capitalize, defaultsDeep, keyBy, lowerCase } from 'lodash';
 import { Observable, OperatorFunction } from 'rxjs';
 import { distinctUntilChanged, map, take } from 'rxjs/operators';
-import { DeepPartial, Dictionary } from './system-types';
+import { DeepPartial, Dictionary, Id } from './system-types';
 
 export const capitalizeAll = (str: string | number | symbol): string =>
     lowerCase(str.toString()).split(' ').map((part: string) => capitalize(part)).join(' ');
@@ -87,3 +87,16 @@ export const toDictionary = <T>(
 ): Observable<Dictionary<T>> => source.pipe(
     map((values: T[] | undefined) => keyBy(values, key)),
 );
+
+export const removeFromArray = <T>(
+    array: T[],
+    itemsToRemove: T[],
+): T[] => array.filter((item) => !itemsToRemove.includes(item));
+
+export const removeFromObject = <T>(
+    obj: Record<Id, T>,
+    keysToRemove: Id[],
+): Record<string, T> => keysToRemove.reduce((memo, key: Id) => {
+    delete memo[key];
+    return memo;
+}, { ...obj });
