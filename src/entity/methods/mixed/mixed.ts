@@ -4,7 +4,6 @@ import {
     EntityGetOptions,
     EntityLoadListOptions,
     EntityLoadOptions,
-    EntityRemoveListOptions,
     EntityRemoveOptions,
     EntitySchema,
     IdPatch,
@@ -222,11 +221,11 @@ export const createMixedEntityMethods = <T>(
         const changeId = v4();
         const { changeListWithId, resolveChangeList, setLoadingStateByIds } = dispatchMethods;
         const { getLoadingStateByIds$, getById$ } = selectMethods;
-        const normalizedPatches: IdPatch<T>[] = patches?.map((patch) => ({
+        const normalizedPatches: IdPatch<T>[] = patches.map((patch) => ({
             ...patch,
             patch: normalizePatch(patch.patch, getById$(patch.id)),
-        })) ?? [];
-        const ids = options.willPatchIds ?? normalizedPatches.map((patch) => patch.id);
+        }));
+        const ids = normalizedPatches.map((patch) => patch.id);
 
         const sourcePipe = getRemotePipe<LoadingState | undefined, unknown, IdPatch<T>[] | undefined, IdPatch<T>[]>({
             options,
