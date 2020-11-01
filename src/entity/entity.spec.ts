@@ -253,6 +253,73 @@ describe('Entity', () => {
 
     });
 
+    describe('#removeList', () => {
+        test('should remove entities', () => {
+            // arrange
+            const ids = [user.id, user2.id];
+            const removeAction = entity.actionCreators.REMOVE_LIST(ids);
+            const actions$ = getOrderedMarbleStream(removeAction);
+            // act
+            entity.removeList(ids);
+            // assert
+            expect(store.actions$).toBeObservable(actions$);
+        });
+
+        test('should remote remove entities', () => {
+            // arrange
+            const options = { rethrow: false };
+            const ids = [user.id, user2.id];
+            const removeAction = entity.actionCreators.REMOVE_LIST(ids, options);
+            const remote$ = cold(' --a| ', { a: null });
+            const actions$ = cold('a-(bc)', {
+                a: entity.actionCreators.SET_LOADING_STATES({ isLoading: true }, ids),
+                b: entity.actionCreators.SET_LOADING_STATES({ isLoading: false }, ids),
+                c: removeAction,
+            });
+            // act
+            entity.removeListRemote$(ids, remote$, options).subscribe();
+            // assert
+            expect(store.actions$).toBeObservable(actions$);
+        });
+
+        test('should optimistic remove entities', () => {
+            // arrange
+            const ids = [user.id, user2.id];
+            const options = { optimistic: true, rethrow: false };
+            const removeAction = entity.actionCreators.REMOVE_LIST(ids, options);
+            const resolveRemoveAction = entity.actionCreators.RESOLVE_REMOVE_LIST(ids, true, options);
+            const remote$ = cold(' --a| ', { a: null });
+            const actions$ = cold('a-b', {
+                a: removeAction,
+                b: resolveRemoveAction,
+            });
+            // act
+            entity.removeListRemote$(ids, remote$, options).subscribe();
+            // assert
+            expect(store.actions$).toBeObservable(actions$);
+        });
+
+        test('should optimistic undo if failed', () => {
+            // arrange
+            const ids = [user.id, user2.id];
+            const options = { optimistic: true, rethrow: false };
+            const error = 'Failed';
+            const removeAction = entity.actionCreators.REMOVE_LIST(ids, options);
+            const resolveRemoveAction = entity.actionCreators.RESOLVE_REMOVE_LIST(ids, false, options);
+            const remote$ = cold(' --#| ', undefined, error);
+            const actions$ = cold('a-(bc)', {
+                a: removeAction,
+                b: resolveRemoveAction,
+                c: entity.actionCreators.SET_LOADING_STATES({ isLoading: false, error }, ids),
+            });
+            // act
+            entity.removeListRemote$(ids, remote$, options).subscribe();
+            // assert
+            expect(store.actions$).toBeObservable(actions$);
+        });
+
+    });
+
     describe('#create', () => {
         test('should create entity', () => {
             // arrange
@@ -339,7 +406,7 @@ describe('Entity', () => {
         test('should load entities', () => {
             // arrange
             const users = [user];
-            const remote$ = cold('--a|', { a: { data: users} });
+            const remote$ = cold('--a|', { a: { data: users } });
             const filter = null;
             const addAction = entity.actionCreators.ADD_LIST(users, filter, true, false);
             const actions$ = cold('a-(bc)', {

@@ -1,13 +1,14 @@
 import {
     EntityAddListOptions,
     EntityAddOptions,
+    EntityRemoveListOptions,
     EntityRemoveOptions,
-    EntitySetLoadingStateOptions, IdPatch,
+    EntitySetLoadingStateOptions,
+    IdPatch,
     IdPatchRequest,
 } from '../../types';
 import { DeepPartial, Id, LoadingState } from '../../../system-types';
 import { EntityActions } from '../../actions';
-import { Observable, OperatorFunction } from 'rxjs';
 import { ChangeOptions, PatchRequest } from '../../../shared/change/types';
 import { AffectLoadingStateFactory } from '../../..';
 
@@ -80,6 +81,11 @@ export interface DispatchEntityMethods<T> {
         options?: ChangeOptions,
     ): EntityActions;
 
+    remove(
+        id: Id,
+        options?: EntityRemoveOptions,
+    ): EntityActions;
+
     resolveRemove(
         id: Id,
         success: boolean,
@@ -90,9 +96,19 @@ export interface DispatchEntityMethods<T> {
         id: Id,
     ): EntityActions;
 
-    remove(
-        id: Id,
-        options?: EntityRemoveOptions,
+    removeList(
+        ids: Id[],
+        options?: EntityRemoveListOptions,
+    ): EntityActions;
+
+    resolveRemoveList(
+        ids: Id[],
+        success: boolean,
+        options?: EntityRemoveListOptions,
+    ): EntityActions;
+
+    restoreRemovedList(
+        ids: Id[],
     ): EntityActions;
 
     setLoadingState(

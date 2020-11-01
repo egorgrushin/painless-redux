@@ -41,13 +41,15 @@ export const createInstanceReducer = <T>(types: EntityActionTypes) => {
             case types.RESOLVE_CHANGE: {
                 return changeReducer(state, action) as EntityInstanceState<T>;
             }
-            case types.REMOVE: {
+            case types.REMOVE:
+            case types.REMOVE_LIST: {
                 if (!state) return state;
                 const { options: { optimistic, safe } } = action;
                 if (safe || optimistic) return { ...state, removed: true };
                 return undefined;
             }
-            case types.RESOLVE_REMOVE: {
+            case types.RESOLVE_REMOVE:
+            case types.RESOLVE_REMOVE_LIST: {
                 if (!state) return state;
                 const {
                     payload: { success },
@@ -57,7 +59,8 @@ export const createInstanceReducer = <T>(types: EntityActionTypes) => {
                 if (success) return undefined;
                 return { ...state, removed: false };
             }
-            case types.RESTORE_REMOVED: {
+            case types.RESTORE_REMOVED:
+            case types.RESTORE_REMOVED_LIST: {
                 if (!state) return state;
                 return { ...state, removed: false };
             }

@@ -3,8 +3,10 @@ import {
     EntityInternalAddListOptions,
     EntityInternalAddOptions,
     EntityInternalSetLoadingStateOptions,
+    EntityRemoveListOptions,
     EntityRemoveOptions,
-    EntityType, IdPatch,
+    EntityType,
+    IdPatch,
 } from './types';
 import { DeepPartial, Id, LoadingState } from '../system-types';
 import { ChangeOptions } from '../shared/change/types';
@@ -42,6 +44,18 @@ export interface EntityActionCreators<T> {
         id: Id,
         options?: EntityRemoveOptions,
     ) => { payload: { id: Id }; options: EntityRemoveOptions; type: 'REMOVE' };
+    REMOVE_LIST: (
+        ids: Id[],
+        options?: EntityRemoveOptions,
+    ) => { payload: { ids: Id[] }; options: EntityRemoveListOptions; type: 'REMOVE_LIST' };
+    RESOLVE_REMOVE_LIST: (
+        ids: Id[],
+        success: boolean,
+        options?: EntityRemoveOptions,
+    ) => { payload: { success: boolean; ids: Id[] }; options: EntityRemoveListOptions; type: 'RESOLVE_REMOVE_LIST' };
+    RESTORE_REMOVED_LIST: (
+        ids: Id[],
+    ) => { payload: { ids: Id[] }; type: 'RESTORE_REMOVED_LIST' };
     CHANGE: (
         id: Id,
         patch: DeepPartial<T>,

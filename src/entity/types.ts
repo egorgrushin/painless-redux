@@ -27,13 +27,9 @@ export interface EntitySchema<T> {
     id?(data: T): Id;
 }
 
-export interface EntityLoadOptions extends RequestOptions {
+export interface EntityLoadOptions extends EntityInsertOptions, RequestOptions {}
 
-}
-
-export interface EntityGetOptions extends EntityLoadOptions, EntityAddOptions {
-
-}
+export interface EntityGetOptions extends EntityAddOptions {}
 
 export interface EntityGetListOptions extends EntityLoadListOptions {
 }
@@ -56,11 +52,11 @@ export interface EntityOptimisticOptions {
     optimistic?: boolean;
 }
 
-export interface EntityRemoteOptions extends EntityOptimisticOptions {
-    single?: boolean;
+export interface EntityRemoveOptions extends EntityOptimisticOptions, RequestOptions {
+    safe?: boolean;
 }
 
-export interface EntityRemoveOptions extends EntityOptimisticOptions, RequestOptions {
+export interface EntityRemoveListOptions extends EntityOptimisticOptions, RequestOptions {
     safe?: boolean;
 }
 
@@ -163,6 +159,9 @@ export interface EntityActionTypes extends SystemActionTypes {
     REMOVE: 'REMOVE';
     RESOLVE_REMOVE: 'RESOLVE_REMOVE';
     RESTORE_REMOVED: 'RESTORE_REMOVED';
+    REMOVE_LIST: 'REMOVE_LIST';
+    RESOLVE_REMOVE_LIST: 'RESOLVE_REMOVE_LIST';
+    RESTORE_REMOVED_LIST: 'RESTORE_REMOVED_LIST';
     CLEAR: 'CLEAR';
     CLEAR_ALL: 'CLEAR_ALL';
     CHANGE_LIST: 'CHANGE_LIST';

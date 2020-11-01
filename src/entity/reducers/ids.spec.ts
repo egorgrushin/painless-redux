@@ -59,6 +59,17 @@ describe('ids', () => {
         expect(actual).toEqual(expected);
     });
 
+    test('should remove entities ids', () => {
+        // arrange
+        const entity1 = { id: 3 };
+        const entity2 = { id: 4 };
+        const action = actionCreators.REMOVE_LIST([entity1.id, entity2.id]);// act
+        const actual = reducer([1, 2, entity1.id, entity2.id], action);
+        // assert
+        const expected = [1, 2];
+        expect(actual).toEqual(expected);
+    });
+
     test.each`
 		exist
 		${true}
