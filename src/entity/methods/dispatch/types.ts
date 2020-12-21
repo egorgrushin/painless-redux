@@ -145,6 +145,7 @@ export interface DispatchEntityMethods<T> {
         id?: Id,
         config?: unknown,
         key?: string,
+        options?: EntitySetLoadingStateOptions,
     ): EntityActions;
 
     batch(

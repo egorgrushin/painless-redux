@@ -61,7 +61,7 @@ export const createMixedEntityMethods = <T>(
                     const hasMore = response.hasMore ?? data.length >= size;
                     return dispatchMethods.addList(data, config, isReplace, hasMore, options);
                 },
-                setLoadingState: (state) => dispatchMethods.setLoadingStateBus(state, undefined, config),
+                setLoadingState: (state) => dispatchMethods.setLoadingStateBus(state, undefined, config, undefined, options),
             },
         );
         const paginator = getPaginator(config, paginatorSubj, options);
@@ -84,7 +84,7 @@ export const createMixedEntityMethods = <T>(
                 const entity = { ...response, id };
                 return dispatchMethods.add(entity, undefined, options);
             },
-            setLoadingState: (state) => dispatchMethods.setLoadingStateBus(state, id),
+            setLoadingState: (state) => dispatchMethods.setLoadingStateBus(state, id, undefined, undefined, options),
         });
         const loadingState$ = selectMethods.getLoadingStateById$(id, prSchema.useAsapSchedulerInLoadingGuards);
         return guardIfLoading(loadingState$).pipe(sourcePipe);
@@ -171,7 +171,7 @@ export const createMixedEntityMethods = <T>(
             emitOnSuccess: true,
             optimistic: options.optimistic,
             optimisticResolve: (success, result) => resolveAdd(result, success, tempId, config, options),
-            setLoadingState: (state) => dispatchMethods.setLoadingStateBus(state, undefined, config),
+            setLoadingState: (state) => dispatchMethods.setLoadingStateBus(state, undefined, config, undefined, options),
         });
         return of(null).pipe(sourcePipe);
     };
@@ -207,7 +207,7 @@ export const createMixedEntityMethods = <T>(
                 const patchToApply = getResolvePatchByOptions(normalizedPatch, response, options);
                 return resolveChange(id, changeId, success, patchToApply, options);
             },
-            setLoadingState: (state) => setLoadingStateBus(state, id),
+            setLoadingState: (state) => setLoadingStateBus(state, id, undefined, undefined, options),
         });
         const loadingState$ = getLoadingStateById$(id, prSchema.useAsapSchedulerInLoadingGuards);
         return guardIfLoading(loadingState$).pipe(sourcePipe);
@@ -276,7 +276,7 @@ export const createMixedEntityMethods = <T>(
             emitOnSuccess: true,
             optimistic: options?.optimistic,
             optimisticResolve: (success: boolean) => resolveRemove(id, success, options),
-            setLoadingState: (state) => dispatchMethods.setLoadingStateBus(state, id),
+            setLoadingState: (state) => dispatchMethods.setLoadingStateBus(state, id, undefined, undefined, options),
         });
         const loadingState$ = selectMethods.getLoadingStateById$(id, prSchema.useAsapSchedulerInLoadingGuards);
         return guardIfLoading(loadingState$).pipe(sourcePipe);
@@ -297,7 +297,7 @@ export const createMixedEntityMethods = <T>(
             emitOnSuccess: true,
             optimistic: options?.optimistic,
             optimisticResolve: (success: boolean) => resolveRemoveList(ids, success, options),
-            setLoadingState: (state) => setLoadingStateByIds(ids, state),
+            setLoadingState: (state) => setLoadingStateByIds(ids, state, options),
         });
         const loadingState$ = selectMethods.getLoadingStateByIds$(ids, prSchema.useAsapSchedulerInLoadingGuards);
         return guardIfLoading(loadingState$).pipe(sourcePipe);

@@ -5,11 +5,12 @@ import { TestStore } from '../testing/store';
 import { createEntity } from './entity';
 import { createPainlessRedux } from '../painless-redux/painless-redux';
 import { PainlessRedux } from '../painless-redux/types';
-import { Entity, Pagination } from './types';
+import { Entity, EntityInternalSetLoadingStateOptions, Pagination } from './types';
 import { BehaviorSubject } from 'rxjs';
 import { mocked } from 'ts-jest/utils';
 import * as uuid from 'uuid';
 import { ChangeOptions } from '../shared/change/types';
+import { RequestOptions } from '../shared/types';
 
 jest.mock('uuid');
 
@@ -31,7 +32,14 @@ describe('Entity', () => {
     const setLoadingStateActionFactory = (
         state: LoadingState,
         id?: Id,
-    ) => entity.actionCreators.SET_LOADING_STATE(state, undefined, id, undefined);
+        options?: RequestOptions,
+    ) => entity.actionCreators.SET_LOADING_STATE(
+        state,
+        undefined,
+        id,
+        undefined,
+        options as unknown as EntityInternalSetLoadingStateOptions,
+    );
 
     beforeEach(() => {
         store = new TestStore(undefined, (state) => state);
@@ -136,9 +144,9 @@ describe('Entity', () => {
             const resolvePatch = useResponsePatch ? responsePatch : patch;
             const changeAction = entity.actionCreators.CHANGE(id, resolvePatch, changeId, options);
             const actions$ = cold('a-(bc)', {
-                a: setLoadingStateActionFactory({ isLoading: true }, id),
+                a: setLoadingStateActionFactory({ isLoading: true }, id, options),
                 b: changeAction,
-                c: setLoadingStateActionFactory({ isLoading: false }, id),
+                c: setLoadingStateActionFactory({ isLoading: false }, id, options),
             });
             // act
             entity.changeRemote$(id, patch, remote$, options).subscribe();
@@ -178,7 +186,7 @@ describe('Entity', () => {
                 const actions$ = cold('a-(bc)', {
                     a: changeAction,
                     b: resolveChangeAction,
-                    c: setLoadingStateActionFactory({ isLoading: false, error }, id),
+                    c: setLoadingStateActionFactory({ isLoading: false, error }, id, options),
                 });
                 // act
                 entity.changeRemote$(id, patch, failedRemote$, options).subscribe();
@@ -206,8 +214,8 @@ describe('Entity', () => {
             const removeAction = entity.actionCreators.REMOVE(user.id, options);
             const remote$ = cold(' --a| ', { a: null });
             const actions$ = cold('a-(bc)', {
-                a: setLoadingStateActionFactory({ isLoading: true }, user.id),
-                b: setLoadingStateActionFactory({ isLoading: false }, user.id),
+                a: setLoadingStateActionFactory({ isLoading: true }, user.id, options),
+                b: setLoadingStateActionFactory({ isLoading: false }, user.id, options),
                 c: removeAction,
             });
             // act
@@ -243,7 +251,7 @@ describe('Entity', () => {
             const actions$ = cold('a-(bc)', {
                 a: removeAction,
                 b: resolveRemoveAction,
-                c: setLoadingStateActionFactory({ isLoading: false, error }, id),
+                c: setLoadingStateActionFactory({ isLoading: false, error }, id, options),
             });
             // act
             entity.removeRemote$(id, remote$, options).subscribe();
@@ -337,9 +345,9 @@ describe('Entity', () => {
             const remote$ = cold('--a|', { a: user });
             const createAction = entity.actionCreators.ADD(user, undefined, undefined, options);
             const actions$ = cold('a-(bc)', {
-                a: setLoadingStateActionFactory({ isLoading: true }),
+                a: setLoadingStateActionFactory({ isLoading: true }, undefined, options),
                 b: createAction,
-                c: setLoadingStateActionFactory({ isLoading: false }),
+                c: setLoadingStateActionFactory({ isLoading: false }, undefined, options),
             });
             // act
             const actual = entity.addRemote$(user, undefined, remote$, options);
