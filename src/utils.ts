@@ -1,5 +1,10 @@
 import { MD5 } from 'object-hash';
-import { capitalize, defaultsDeep, isNil, isObject, keyBy, lowerCase } from 'lodash';
+import capitalize from 'lodash/capitalize';
+import defaultsDeep from 'lodash/defaultsDeep';
+import isNil from 'lodash/isNil';
+import isObject from 'lodash/isObject';
+import keyBy from 'lodash/keyBy';
+import lowerCase from 'lodash/lowerCase';
 import { Observable, OperatorFunction } from 'rxjs';
 import { distinctUntilChanged, map, take } from 'rxjs/operators';
 import { DeepPartial, Dictionary, Id } from './system-types';
