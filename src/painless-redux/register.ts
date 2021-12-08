@@ -1,5 +1,5 @@
 import { PainlessReduxRegister, SlotTypes } from './types';
-import { isNil } from 'lodash';
+import isNil from 'lodash/isNil';
 import { AnyAction, Reducer } from '../system-types';
 
 export const createRegister = () => {

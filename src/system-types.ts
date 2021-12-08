@@ -33,6 +33,10 @@ export type Reducer<S, A extends AnyAction> = (
     action: A,
 ) => S;
 
+export type CombinedReducers<TState> = {
+    [K in keyof TState]: Reducer<TState[K], any>;
+}
+
 export type ActionCreator<TActionTypes, TActions> = (...args: any) => TActions;
 
 export type HashFn = (ob: any) => string;

@@ -1,7 +1,6 @@
 import { PainlessReduxRegister, PainlessReduxSchema, PainlessReduxState, SlotTypes } from './types';
 import { AnyAction, PayloadAction, Reducer } from '../system-types';
-// @ts-ignore
-import * as combineReducers from 'combine-reducers';
+import { combineReducers } from '../shared/utils';
 import { SystemActionTypes } from '../shared/system/types';
 
 export const getSlotReducer = (

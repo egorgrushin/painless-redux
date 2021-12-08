@@ -1,7 +1,6 @@
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { AnyAction, Reducer, RxStore } from '../system-types';
-// @ts-ignore
-import * as combineReducers from 'combine-reducers';
+import { combineReducers } from '../shared/utils';
 
 export class TestStore<T = any> extends BehaviorSubject<T> implements RxStore<T> {
     actions$: ReplaySubject<AnyAction> = new ReplaySubject();
@@ -30,7 +29,7 @@ export class TestStore<T = any> extends BehaviorSubject<T> implements RxStore<T>
         key: string,
         reducer: any,
     ) {
-        this.reducer = combineReducers({ [key]: reducer });
+        this.reducer = combineReducers<any, AnyAction>({ [key]: reducer });
         this.performDispatch({ type: 'ADD_REDUCER' });
     }
 

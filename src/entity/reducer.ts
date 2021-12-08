@@ -1,8 +1,6 @@
 import { EntityActionTypes, EntityState } from './types';
 import { Reducer } from '../system-types';
-// @ts-ignore
-import * as combineReducers from 'combine-reducers';
-
+import { combineReducers } from '../shared/utils';
 import { createDictionaryReducer } from './reducers/dictionary';
 import { createIdsReducer } from './reducers/ids';
 import { createPagesReducer } from './reducers/pages';
