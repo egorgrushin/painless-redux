@@ -1,7 +1,7 @@
 import { Dictionary } from '../../system-types';
 import { createAddByHash, createResolveChange, EntityActions } from '../actions';
 import { EntityActionTypes, EntityInstanceState } from '../types';
-import keyBy from 'lodash/keyBy';
+import { keyBy } from 'lodash-es';
 import { createInstanceReducer } from './instance';
 
 const addInstances = <T>(
