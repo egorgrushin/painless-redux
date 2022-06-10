@@ -57,7 +57,11 @@ General features:
    
 # Use with Angular
 
-[This adapter](https://github.com/egorgrushin/ngx-painless-redux) will help you to connect `painless-redux` to your angular project, who uses [@ngrx/store](https://github.com/ngrx/platform).
+[This adapter](https://github.com/egorgrushin/ngx-painless-redux) will help you to connect `painless-redux` to your Angular project, who uses [@ngrx/store](https://github.com/ngrx/platform).
+
+# Use with React
+
+[This adapter](https://www.npmjs.com/package/react-painless-redux) will help you to connect `painless-redux` to your React project, who uses [@reduxjs/toolkit](https://www.npmjs.com/package/@reduxjs/toolkit).
 
 # Common use
 
