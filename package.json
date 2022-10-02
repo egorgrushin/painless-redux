@@ -17,7 +17,7 @@
     "rxjs",
     "angular"
   ],
-  "types": "index.d.ts",
+  "types": "dist/index.d.ts",
   "author": "Grushin Egor",
   "license": "MIT",
   "bugs": {
