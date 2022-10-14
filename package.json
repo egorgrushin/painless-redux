@@ -1,6 +1,6 @@
 {
   "name": "painless-redux",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Reducers-actions-selectors free reactive state management in redux-way",
   "main": "dist/index.js",
   "scripts": {
