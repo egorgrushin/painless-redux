@@ -1,7 +1,7 @@
 import { StoreLib } from './store';
 import { TestBed } from '@angular/core/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { StoreLibConnectingModule } from './store-connecting.module';
+import { StoreConnectingModule } from './store-connecting.module';
 import { combineReducers, Store } from '@ngrx/store';
 import { cold } from 'jest-marbles';
 import { Workspace } from './workspace';
@@ -30,7 +30,7 @@ describe('Workspace', () => {
 		};
 		workspace = new Workspace<ITestWorkspace>({ name: 'test', initialValue });
 		TestBed.configureTestingModule({
-			imports: [StoreLibConnectingModule.forRoot({ slots: [workspace] })],
+			imports: [StoreConnectingModule.forRoot({ slots: [workspace] })],
 			providers: [provideMockStore()],
 		});
 

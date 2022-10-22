@@ -8,7 +8,7 @@ const INITIAL_SLOTS_TOKEN = new InjectionToken<Slot[]>('INITIAL_SLOTS_TOKEN');
 const CHILDREN_SLOTS_TOKEN = new InjectionToken<Slot[]>('CHILDREN_SLOTS_TOKEN');
 
 @NgModule({})
-class StoreLibChildrenConnectingModule {
+class StoreChildrenConnectingModule {
 	constructor(
 		storeLib: StoreLib,
 		rxStore: Store<any>,
@@ -19,7 +19,7 @@ class StoreLibChildrenConnectingModule {
 }
 
 @NgModule({})
-class StoreLibInitialConnectingModule {
+class StoreInitialConnectingModule {
 	constructor(
 		rxStore: Store<any>,
 		store: StoreLib,
@@ -30,11 +30,11 @@ class StoreLibInitialConnectingModule {
 }
 
 @NgModule({})
-export class StoreLibConnectingModule {
+export class StoreConnectingModule {
 
 	static forRoot({ schema, slots }: { schema?: IStoreSchema; slots?: Slot[] }): ModuleWithProviders {
 		return {
-			ngModule: StoreLibInitialConnectingModule,
+			ngModule: StoreInitialConnectingModule,
 			providers: [
 				{
 					provide: StoreLib,
@@ -50,7 +50,7 @@ export class StoreLibConnectingModule {
 
 	static forChild(slots: Slot[]): ModuleWithProviders {
 		return {
-			ngModule: StoreLibChildrenConnectingModule,
+			ngModule: StoreChildrenConnectingModule,
 			providers: [
 				{
 					provide: CHILDREN_SLOTS_TOKEN,
