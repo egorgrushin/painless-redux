@@ -48,10 +48,6 @@ export class Actor<T extends object = object, S extends IActorSchema = IActorSch
 		this.createAndDispatch('change', [id, value, path], options);
 	}
 
-	getAll() {
-		return this.select(this.selectors.all);
-	}
-
 	getByIdsDenormalizedSelector(ids: Id[]): any {
 		const related = this.getRelatedConfig();
 		return createSelector(this.selectors.dictionary, s => s, (dict, state) => {
@@ -200,17 +196,6 @@ export class Actor<T extends object = object, S extends IActorSchema = IActorSch
 			global: createLoadingStatesGlobalSelector(selector),
 			byIds: createLoadingStatesByIdsSelector(selector),
 		};
-		this.selectors.all = createSelector(
-			this.selectors.ids,
-			this.selectors.dictionary,
-			(ids: any[], dictionary: any) => ids.reduce((memo, id) => {
-				const entity = dictionary[id];
-				if (entity) {
-					memo.push(entity);
-				}
-				return memo;
-			}, []),
-		);
 	}
 
 	private getRelatedConfig() {
