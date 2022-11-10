@@ -155,6 +155,7 @@ export class Actor<T extends object = object, S extends IActorSchema = IActorSch
 			idsSelector,
 			this.selectors.dictionary,
 			(ids: Id[], dict: IDictionary<T>) => {
+				if (!ids) return undefined;
 				const entities = ids.map(id => dict[id]);
 				if (options && options.asDict) return keyBy(entities, 'id');
 				return entities;
