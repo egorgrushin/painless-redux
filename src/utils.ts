@@ -110,6 +110,7 @@ type AffectStateFactorySetter<IArgsType> = (
 	args?: IArgsType,
 	error?: { message: string },
 	value?: any,
+	isInterrupted?: boolean,
 ) => void;
 
 // TODO(yrgrushi): remove curring function approach
@@ -139,7 +140,7 @@ export const affectStatePipeFactory = <IArgsType>(stateSetter: AffectStateFactor
 				switchMap((value) => (of(value) as any).pipe(
 					...pipes,
 					catchError((error: Error) => {
-						stateSetter(false, argumentsToSetter, error);
+						stateSetter(false, argumentsToSetter, error, undefined, true);
 						stateCleared = true;
 						return rethrow ? throwError(error) : EMPTY;
 					}),
@@ -150,7 +151,7 @@ export const affectStatePipeFactory = <IArgsType>(stateSetter: AffectStateFactor
 				}),
 				finalize(() => {
 					if (stateCleared) return;
-					stateSetter(false, argumentsToSetter);
+					stateSetter(false, argumentsToSetter, null, undefined, true);
 				}),
 			);
 		};
