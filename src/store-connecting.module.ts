@@ -4,11 +4,14 @@ import { StoreLib } from './store';
 import { IStoreSchema } from './types';
 import { Slot } from './slot';
 
-const INITIAL_SLOTS_TOKEN = new InjectionToken<Slot[]>('INITIAL_SLOTS_TOKEN');
-const CHILDREN_SLOTS_TOKEN = new InjectionToken<Slot[]>('CHILDREN_SLOTS_TOKEN');
+export const INITIAL_SLOTS_TOKEN = new InjectionToken<Slot[]>('INITIAL_SLOTS_TOKEN');
+export const CHILDREN_SLOTS_TOKEN = new InjectionToken<Slot[]>('CHILDREN_SLOTS_TOKEN');
+export const storeLibFactoryFactory = function(schema) {
+	return function() { return new StoreLib(schema); };
+};
 
 @NgModule({})
-class StoreChildrenConnectingModule {
+export class StoreChildrenConnectingModule {
 	constructor(
 		storeLib: StoreLib,
 		rxStore: Store<any>,
@@ -19,7 +22,7 @@ class StoreChildrenConnectingModule {
 }
 
 @NgModule({})
-class StoreInitialConnectingModule {
+export class StoreInitialConnectingModule {
 	constructor(
 		rxStore: Store<any>,
 		store: StoreLib,
@@ -38,7 +41,7 @@ export class StoreConnectingModule {
 			providers: [
 				{
 					provide: StoreLib,
-					useFactory: () => new StoreLib(schema),
+					useFactory: storeLibFactoryFactory(schema),
 				},
 				{
 					provide: INITIAL_SLOTS_TOKEN,
