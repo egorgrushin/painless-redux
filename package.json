@@ -2,7 +2,7 @@
   "name": "painless-redux",
   "version": "2.0.1",
   "description": "Reducers-actions-selectors free reactive state management in redux-way",
-  "main": "dist/src/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "rimraf dist && rimraf compiled && ngc -p tsconfig.json",
     "test": "exit 1"
