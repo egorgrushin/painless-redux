@@ -16,8 +16,5 @@
   "exclude": [
     "node_modules",
     "**/*.spec.*"
-  ],
-  "angularCompilerOptions": {
-    "genDir": "./compiled"
-  }
+  ]
 }

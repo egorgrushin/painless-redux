@@ -1,8 +1,10 @@
 import { defaultsDeep, isNil, keyBy } from 'lodash';
-import { combineReducers, createSelector } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { ForeignKeyArray } from './foreign-keys';
 import { Manipulator } from './manipulator';
+import { createSelector } from 'reselect';
+import * as combineReducers  from 'combine-reducers';
+
 import {
 	createByIdSelector,
 	createDictionarySelector,

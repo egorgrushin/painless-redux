@@ -14,7 +14,7 @@ import { mergeWith } from 'lodash/fp';
 import { v4 } from 'uuid';
 import { IEntityActionOptions, IStoreAction, SelectResult } from './types';
 import { EMPTY, Observable, of, OperatorFunction, throwError } from 'rxjs';
-import { catchError, finalize, switchMap, tap } from 'rxjs/operators';
+import { catchError, distinctUntilChanged, finalize, map, switchMap, tap } from 'rxjs/operators';
 import { MD5 } from 'crypto-js';
 import { MD5 as objectMD5 } from 'object-hash';
 
@@ -185,3 +185,9 @@ export const actionSanitizer = (action: IStoreAction) => ({
 	_type: action.type,
 	type: action.label || action.type,
 });
+
+export const select = <S, R>(selector: (value: S, index: number) => R) =>
+	(source: Observable<S>) => source.pipe(
+		map<S, R>(selector),
+		distinctUntilChanged(),
+	);
