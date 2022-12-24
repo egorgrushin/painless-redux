@@ -4,10 +4,10 @@ import { defaultsDeep } from 'lodash';
 import { subscribeOn, take } from 'rxjs/operators';
 import { IBaseSchema, IEntityActionEnhancedOptions, IRxStore, StoreActionTypes } from './types';
 import { capitalizeAll, hashIt, select } from './utils';
-import { StoreLib } from './store';
+import { PainlessRedux } from './store';
 
 export abstract class Slot<S extends IBaseSchema = IBaseSchema> {
-	store: StoreLib;
+	store: PainlessRedux;
 	actionCreators: any;
 	actionTypes: StoreActionTypes;
 	rxStore: IRxStore<any>;
