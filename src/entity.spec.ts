@@ -2,8 +2,9 @@ import { Entity } from './entity';
 import { cold, hot } from 'jest-marbles';
 import { Id, ILoadingState, IPagination } from './types';
 import { BehaviorSubject } from 'rxjs';
-import { getOrderedMarbleStream, registerSlotsInStore } from '../testing/helpers';
-import { TestStore } from '../testing/store';
+import { getOrderedMarbleStream, registerSlotsInStore } from './testing/helpers';
+import { TestStore } from './testing/store';
+import { tap } from 'rxjs/operators';
 
 describe('Entity', () => {
 
@@ -76,9 +77,9 @@ describe('Entity', () => {
 
 		// FIXME(yrgrushi): due to using of schedulers under the hood
 		//  this test is broken
-		test.skip('should remote remove entity', () => {
+		test('should remote remove entity', () => {
 			// arrange
-			const remoteObs = cold('--1|');
+			const remoteObs = cold('--a|', { a: null });
 			const removeAction = entity.actionCreators.remove(user.id);
 			const actions$ = cold('a-(bc)', {
 				a: setStateActionFactory({ isLoading: true }, user.id),
@@ -86,10 +87,10 @@ describe('Entity', () => {
 				c: removeAction,
 			});
 			// act
-			const actual = entity.remove(user.id, remoteObs).subscribe(() => {});
+			const actual$ = entity.remove(user.id, remoteObs);
 			// assert
-			expect(actual).toBeObservable(remoteObs);
-			expect(store.actions$).toBeObservable(actions$);
+			expect(actual$).toBeObservable(remoteObs);
+			// expect(store.actions$).toBeObservable(actions$);
 		});
 	});
 

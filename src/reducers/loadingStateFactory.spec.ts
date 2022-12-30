@@ -1,4 +1,4 @@
-/* tslint:disable:no-magic-numbers */
+
 import { createLoadingStateReducer, loadingStateByKeysReducer, loadingStateReducer } from './loadingStateFactory';
 import { IStoreEntityActionTypes } from '../types';
 

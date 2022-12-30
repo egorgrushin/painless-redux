@@ -1,4 +1,4 @@
-/* tslint:disable:no-magic-numbers */
+
 import { IStoreEntityActionTypes } from '../types';
 import { createIdsReducer } from './idsFactory';
 
