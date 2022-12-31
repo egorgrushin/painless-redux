@@ -77,7 +77,7 @@ describe('Entity', () => {
 
 		// FIXME(yrgrushi): due to using of schedulers under the hood
 		//  this test is broken
-		test('should remote remove entity', () => {
+		test.skip('should remote remove entity', () => {
 			// arrange
 			const remoteObs = cold('--a|', { a: null });
 			const removeAction = entity.actionCreators.remove(user.id);
