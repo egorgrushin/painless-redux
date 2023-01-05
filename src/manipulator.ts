@@ -1,7 +1,7 @@
 import { isNil } from 'lodash';
 import { Observable } from 'rxjs';
 import { createLoadingStatesByIdSelector } from './selectors';
-import { IBaseSchema, Id, IDictionary, IEntityActionOptions, ILoadingState, IAffectState } from './types';
+import { IAffectState, IBaseSchema, Id, IDictionary, IEntityActionOptions, ILoadingState } from './types';
 import { affectStateFactory } from './utils';
 import { Slot } from './slot';
 import * as actionCreators from './action-creators/actor';
@@ -66,16 +66,20 @@ export abstract class Manipulator<S extends IBaseSchema> extends Slot<S> {
 	protected stateSetter(
 		isLoading: boolean,
 		args: { config?: null, id?: Id, key?: string },
-		err?: { message: string },
+		error?: { message: string },
 	) {
+		const errorMessage = error && error.message;
 		if (!isNil(args.id)) {
 			if (!isNil(args.key)) {
-				this.setStateForKey(args.id, args.key, isLoading, err && err.message);
+				this.setStateForKey(args.id, args.key, isLoading, errorMessage);
 			} else {
-				this.setStateById(args.id, isLoading, err && err.message);
+				this.setStateById(args.id, isLoading, errorMessage);
 			}
 		} else {
-			this.setState(isLoading, args.config, err && err.message);
+			if (error) {
+				console.error(error);
+			}
+			this.setState(isLoading, args.config, errorMessage);
 		}
 	}
 
