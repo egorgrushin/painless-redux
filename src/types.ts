@@ -55,6 +55,7 @@ export interface IDictionary<T> {
 }
 
 export interface IEntityActionOptions {
+	pageSize?: number;
 	single?: boolean;
 	merge?: boolean;
 	asDict?: boolean;
