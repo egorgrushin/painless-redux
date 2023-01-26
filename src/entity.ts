@@ -69,6 +69,7 @@ export class Entity<T extends object = object, I extends Id[] | Id = Id> extends
 		hasMore?: boolean,
 		options?: IEntityActionOptions,
 	) {
+		data = data || [];
 		data = this.resolveIds(data);
 		return this.createAndDispatch('addList', [data, config, isReplace, hasMore], options);
 	}
@@ -88,7 +89,7 @@ export class Entity<T extends object = object, I extends Id[] | Id = Id> extends
 				remoteObsOrFactory: (pagination) => this.getPaginatedObs(dataFactoryOrObs, pagination),
 				success: (result) => {
 					const { index, size, response } = result;
-					const data = response.data;
+					const data = response.data || [];
 					const isReplace = index === 0;
 					const hasMore = data.length >= size;
 					this.addList(data, config, isReplace, hasMore, options);
