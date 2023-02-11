@@ -21,26 +21,30 @@ General features:
 
 2. create an store:
     ```typescript
-	import { PainlessRedux, I } from 'painless-redux';
-    export const PAINLESS_REDUX_STORE = new PainlessRedux();
+	import { PainlessRedux, IRxStore } from 'painless-redux';
+	const store: IRxStore = <use any implementation you want>;
+    export const PAINLESS_REDUX_STORE = new PainlessRedux(store);
     ```
 
-2. create an entity:
+3. create an entity:
 	```typescript
 	import { Entity } from 'painless-redux';
+	import { PAINLESS_REDUX_STORE } from './store';
 	export interface IPainter {
 		id: number | string;
 		fullName: string;
 		born: number;
 	}
-	export const PaintersEntity = new Entity<IPainter>({ name: 'painters' });
+	const PaintersEntity = new Entity<IPainter>({ name: 'painters' });
+	PAINLESS_REDUX_STORE.registerSlots(PaintersEntity);
+	export PaintersEntity;
 	```
 
-3. add new entity
+4. add new entity
     ```typescript
    PaintersEntity.add({ id: 1, fullName: 'Vincent van Gogh', born: 1853 });
     ```
-4. get entity or all entities
+5. get entity or all entities
     ```typescript
     PaintersEntity.getById$(1).subscribe((painter: IPainter) => {});
     PaintersEntity.get$().subscribe((painters: IPainter[]) => {});
@@ -54,6 +58,7 @@ Commonly you need to load some entities from outer source (e.g. your backend api
 ```typescript
     import { Observable, of } from 'rxjs';
     import { IResponseArray } from 'painless-redux';
+    import { PaintersEntity } from './painters';
 
     const init = () => {
         const filterObj = {};
@@ -103,7 +108,8 @@ The algorithm you can always see in Redux DevTools panel.
 
 ```typescript
     import { Observable, of, BehaviorSubject } from 'rxjs';
-    import { IResponseArray } from 'painless-redux';
+    import { IResponseArray, IPagination } from 'painless-redux';
+    import { PaintersEntity } from './painters';
 
     const init = () => {
         const paginator = new BehaviorSubject(false);
@@ -122,20 +128,17 @@ The algorithm you can always see in Redux DevTools panel.
     }
 
     const getPainters = (filterObj: object, paginator: BehaviorSubject<boolean>): Observable<IPainter[]> {
-        const dataSource = getPaintersFromApi(filterObj);
+        const dataSource = ({ from, to, size, index }: IPagination) => getPaintersFromApi(filterObj, from, to);
         return PaintersEntity.get$(filterObj, dataSource, null, paginator);
     }
 
-    const getPaintersFromApi = (filterObj: object): Observable<IResponseArray<IPainter>> => {
+    const getPaintersFromApi = (filterObj: object, from: number, to: number): Observable<IResponseArray<IPainter>> => {
         // use can use any data source you need, this is for demo purposes.
         const painters: IPainter[] = [
            { id: 1, fullName: 'Leonardo da Vinci', born: 1452 },
            { id: 2, fullName: 'Vincent van Gogh', born: 1853 },
            { id: 3, fullName: 'Pablo Picasso', born: 1881 },
-        ];
+        ].slice(from, to);
         return of({ data: painters });
     }
 
-```
-
-In the example above you could notice that `getPaintersFromApi` called twice
