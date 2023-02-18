@@ -56,7 +56,7 @@ export const getOrderedMarbleStream = (...items: any) => {
     return cold(marble, values);
 };
 
-export const createTestHelpers = <T>(
+export const createTestHelpers = <T, TPageMetadata>(
     reducerFactory: <T>(types: EntityActionTypes) => Reducer<any, EntityActions>,
 ) => {
     const types: EntityActionTypes = {
@@ -80,7 +80,7 @@ export const createTestHelpers = <T>(
         RESOLVE_CHANGE_LIST: 'RESOLVE_CHANGE_LIST',
     };
 
-    const actionCreators = createEntityActionCreators<T>(types);
+    const actionCreators = createEntityActionCreators<T, TPageMetadata>(types);
     const reducer = reducerFactory<T>(types);
     return { actionCreators, reducer };
 };
