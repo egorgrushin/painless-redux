@@ -182,6 +182,6 @@ export type PublicDispatchEntityMethods<T, TPageMetadata> = Omit<DispatchEntityM
     'changeWithId' | 'changeListWithId' | 'resolveChange' | 'resolveAdd' | 'resolveRemove' | 'resolveChangeList'>
 export type PublicSelectEntityMethods<T, TPageMetadata> = Omit<SelectEntityMethods<T, TPageMetadata>, 'get$' | 'getDictionary$' | 'getById$'>
 
-export interface Entity<T, TPageMetadata> extends PublicSelectEntityMethods<T, TPageMetadata>, PublicDispatchEntityMethods<T, TPageMetadata>, MixedEntityMethods<T, TPageMetadata> {
+export interface Entity<T, TPageMetadata = void> extends PublicSelectEntityMethods<T, TPageMetadata>, PublicDispatchEntityMethods<T, TPageMetadata>, MixedEntityMethods<T, TPageMetadata> {
     actionCreators: EntityActionCreators<T, TPageMetadata>;
 }
