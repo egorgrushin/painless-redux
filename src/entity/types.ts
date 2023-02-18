@@ -1,7 +1,7 @@
-import { Observable } from 'rxjs';
-import { Selector } from 'reselect';
-import { DeepPartial, Dictionary, HashFn, Id, LoadingState } from '../system-types';
-import { ChangeableState, PatchRequest } from '../shared/change/types';
+import {Observable} from 'rxjs';
+import {Selector} from 'reselect';
+import {DeepPartial, Dictionary, HashFn, Id, LoadingState} from '../system-types';
+import {ChangeableState, PatchRequest} from '../shared/change/types';
 import {
     LoadingStateActionTypes,
     LoadingStateSelector,
@@ -9,12 +9,12 @@ import {
     LoadingStateSetOptions,
     LoadingStateState,
 } from '../shared/loading-state/types';
-import { SelectEntityMethods } from './methods/select/types';
-import { DispatchEntityMethods } from './methods/dispatch/types';
-import { MixedEntityMethods } from './methods/mixed/types';
-import { SystemActionTypes } from '../shared/system/types';
-import { EntityActionCreators } from './action-creators.types';
-import { RequestOptions } from '../shared/types';
+import {SelectEntityMethods} from './methods/select/types';
+import {DispatchEntityMethods} from './methods/dispatch/types';
+import {MixedEntityMethods} from './methods/mixed/types';
+import {SystemActionTypes} from '../shared/system/types';
+import {EntityActionCreators} from './action-creators.types';
+import {RequestOptions} from '../shared/types';
 
 export type EntityType<T> = T & { id: Id };
 
@@ -27,9 +27,11 @@ export interface EntitySchema<T> {
     id?(data: T): Id;
 }
 
-export interface EntityLoadOptions extends EntityInsertOptions, RequestOptions {}
+export interface EntityLoadOptions extends EntityInsertOptions, RequestOptions {
+}
 
-export interface EntityGetOptions extends EntityAddOptions {}
+export interface EntityGetOptions extends EntityAddOptions {
+}
 
 export interface EntityGetListOptions extends EntityLoadListOptions {
 }
@@ -38,15 +40,18 @@ export interface EntityLoadListOptions extends EntityAddListOptions, RequestOpti
     pageSize?: number;
 }
 
-export interface EntityAddOptions extends EntityOptimisticOptions, EntityInsertOptions, RequestOptions {}
+export interface EntityAddOptions extends EntityOptimisticOptions, EntityInsertOptions, RequestOptions {
+}
 
 interface EntityInternalOptions {
     maxPagesCount?: number;
 }
 
-export interface EntityInternalAddOptions extends EntityAddOptions, EntityInternalOptions {}
+export interface EntityInternalAddOptions extends EntityAddOptions, EntityInternalOptions {
+}
 
-export interface EntityInternalAddListOptions extends EntityAddListOptions, EntityInternalOptions {}
+export interface EntityInternalAddListOptions extends EntityAddListOptions, EntityInternalOptions {
+}
 
 export interface EntityOptimisticOptions {
     optimistic?: boolean;
@@ -60,9 +65,11 @@ export interface EntityRemoveListOptions extends EntityOptimisticOptions, Reques
     safe?: boolean;
 }
 
-export interface EntitySetLoadingStateOptions extends LoadingStateSetOptions {}
+export interface EntitySetLoadingStateOptions extends LoadingStateSetOptions {
+}
 
-export interface EntityInternalSetLoadingStateOptions extends EntitySetLoadingStateOptions, EntityInternalOptions {}
+export interface EntityInternalSetLoadingStateOptions extends EntitySetLoadingStateOptions, EntityInternalOptions {
+}
 
 export interface EntityInsertOptions {
     pasteIndex?: number;
@@ -80,22 +87,24 @@ export interface Pagination {
     to: number;
 }
 
-export interface ResponseArray<T> {
+export interface ResponseArray<T, TPageMetadata> {
     data: T[];
     hasMore?: boolean;
+    metadata?: TPageMetadata;
 }
 
-export interface PaginatedResponse<T> extends Pagination {
-    response: ResponseArray<T>;
+export interface PaginatedResponse<T, TPageMetadata> extends Pagination {
+    response: ResponseArray<T, TPageMetadata>;
 }
 
-export type Response$Factory<T> = (pagination: Pagination) => Observable<ResponseArray<T>>;
+export type Response$Factory<T, TPageMetadata> = (pagination: Pagination) => Observable<ResponseArray<T, TPageMetadata>>;
 
-export interface Page {
+export interface Page<TPageMetadata> {
     ids: Id[] | undefined;
     order?: number;
     hasMore?: boolean;
     loadingState?: LoadingState;
+    metadata?: TPageMetadata;
 }
 
 export interface IdPatchRequest<T> {
@@ -112,41 +121,41 @@ export interface EntityInstanceState<T> extends ChangeableState<EntityType<T>> {
     removed?: boolean;
 }
 
-export interface EntityState<T> extends LoadingStateState {
+export interface EntityState<T, TPageMetadata> extends LoadingStateState {
     ids: Id[];
     dictionary: Dictionary<EntityInstanceState<T>>;
-    pages: Dictionary<Page>;
+    pages: Dictionary<Page<TPageMetadata>>;
     loadingStates: Dictionary<LoadingState>;
 }
 
-export type IdsSelector<T> = Selector<EntityState<T>, Id[] | undefined>;
-export type DictionarySelector<T> = Selector<EntityState<T>, Dictionary<EntityInstanceState<T>>>;
-export type PagesSelector<T> = Selector<EntityState<T>, Dictionary<Page>>;
-export type PagesListSelector<T> = Selector<EntityState<T>, Page[]>;
-export type PageSelector<T> = Selector<EntityState<T>, Page | undefined>;
-export type LoadingStatesSelector<T> = Selector<EntityState<T>, Dictionary<LoadingState>>;
-export type ActualSelector<T> = Selector<EntityState<T>, T | undefined>;
-export type ListSelector<T> = Selector<EntityState<T>, T[] | undefined>;
+export type IdsSelector<T, TPageMetadata> = Selector<EntityState<T, TPageMetadata>, Id[] | undefined>;
+export type DictionarySelector<T, TPageMetadata> = Selector<EntityState<T, TPageMetadata>, Dictionary<EntityInstanceState<T>>>;
+export type PagesSelector<T, TPageMetadata> = Selector<EntityState<T, TPageMetadata>, Dictionary<Page<TPageMetadata>>>;
+export type PagesListSelector<T, TPageMetadata> = Selector<EntityState<T, TPageMetadata>, Page<TPageMetadata>[]>;
+export type PageSelector<T, TPageMetadata> = Selector<EntityState<T, TPageMetadata>, Page<TPageMetadata> | undefined>;
+export type LoadingStatesSelector<T, TPageMetadata> = Selector<EntityState<T, TPageMetadata>, Dictionary<LoadingState>>;
+export type ActualSelector<T, TPageMetadata> = Selector<EntityState<T, TPageMetadata>, T | undefined>;
+export type ListSelector<T, TPageMetadata> = Selector<EntityState<T, TPageMetadata>, T[] | undefined>;
 
-export interface BaseEntitySelectors<T> extends LoadingStateSelectors<EntityState<T>> {
-    ids: IdsSelector<T>;
-    dictionary: DictionarySelector<T>;
-    pages: PagesSelector<T>;
-    loadingStates: LoadingStatesSelector<T>;
-    createLoadingStateById: (id: Id) => LoadingStateSelector<EntityState<T>>;
-    createLoadingStateByIds: (ids: Id[]) => LoadingStateSelector<EntityState<T>>;
+export interface BaseEntitySelectors<T, TPageMetadata> extends LoadingStateSelectors<EntityState<T, TPageMetadata>> {
+    ids: IdsSelector<T, TPageMetadata>;
+    dictionary: DictionarySelector<T, TPageMetadata>;
+    pages: PagesSelector<T, TPageMetadata>;
+    loadingStates: LoadingStatesSelector<T, TPageMetadata>;
+    createLoadingStateById: (id: Id) => LoadingStateSelector<EntityState<T, TPageMetadata>>;
+    createLoadingStateByIds: (ids: Id[]) => LoadingStateSelector<EntityState<T, TPageMetadata>>;
 }
 
-export interface EntitySelectors<T> extends BaseEntitySelectors<T> {
-    createActual: (id: Id) => ActualSelector<T>;
-    createPage: (config: unknown) => PageSelector<T>;
-    createPageIds: (hash: string) => IdsSelector<T>;
-    createPageLoadingState: (config: unknown) => LoadingStateSelector<EntityState<T>>;
-    createPageIdsByConfig: (config: unknown) => IdsSelector<T>;
-    createListSelectorByIds: (idsSelector: IdsSelector<T>) => ListSelector<T>;
-    createPageListByConfig: (config: unknown) => ListSelector<T>;
-    allPages: PagesListSelector<T>;
-    all: ListSelector<T>;
+export interface EntitySelectors<T, TPageMetadata> extends BaseEntitySelectors<T, TPageMetadata> {
+    createActual: (id: Id) => ActualSelector<T, TPageMetadata>;
+    createPage: (config: unknown) => PageSelector<T, TPageMetadata>;
+    createPageIds: (hash: string) => IdsSelector<T, TPageMetadata>;
+    createPageLoadingState: (config: unknown) => LoadingStateSelector<EntityState<T, TPageMetadata>>;
+    createPageIdsByConfig: (config: unknown) => IdsSelector<T, TPageMetadata>;
+    createListSelectorByIds: (idsSelector: IdsSelector<T, TPageMetadata>) => ListSelector<T, TPageMetadata>;
+    createPageListByConfig: (config: unknown) => ListSelector<T, TPageMetadata>;
+    allPages: PagesListSelector<T, TPageMetadata>;
+    all: ListSelector<T, TPageMetadata>;
 }
 
 export interface EntityActionTypes extends SystemActionTypes {
@@ -169,10 +178,10 @@ export interface EntityActionTypes extends SystemActionTypes {
     SET_LOADING_STATES: 'SET_LOADING_STATES';
 }
 
-export type PublicDispatchEntityMethods<T> = Omit<DispatchEntityMethods<T>,
+export type PublicDispatchEntityMethods<T, TPageMetadata> = Omit<DispatchEntityMethods<T, TPageMetadata>,
     'changeWithId' | 'changeListWithId' | 'resolveChange' | 'resolveAdd' | 'resolveRemove' | 'resolveChangeList'>
-export type PublicSelectEntityMethods<T> = Omit<SelectEntityMethods<T>, 'get$' | 'getDictionary$' | 'getById$'>
+export type PublicSelectEntityMethods<T, TPageMetadata> = Omit<SelectEntityMethods<T, TPageMetadata>, 'get$' | 'getDictionary$' | 'getById$'>
 
-export interface Entity<T> extends PublicSelectEntityMethods<T>, PublicDispatchEntityMethods<T>, MixedEntityMethods<T> {
-    actionCreators: EntityActionCreators<T>;
+export interface Entity<T, TPageMetadata> extends PublicSelectEntityMethods<T, TPageMetadata>, PublicDispatchEntityMethods<T, TPageMetadata>, MixedEntityMethods<T, TPageMetadata> {
+    actionCreators: EntityActionCreators<T, TPageMetadata>;
 }

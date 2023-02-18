@@ -29,37 +29,38 @@ import { getRemotePipe, guardIfLoading } from '../../../shared/utils';
 import { switchMap } from 'rxjs/operators';
 import { typedDefaultsDeep } from '../../../utils';
 
-export const createMixedEntityMethods = <T>(
-    dispatchMethods: DispatchEntityMethods<T>,
-    selectMethods: SelectEntityMethods<T>,
+export const createMixedEntityMethods = <T, TPageMetadata>(
+    dispatchMethods: DispatchEntityMethods<T, TPageMetadata>,
+    selectMethods: SelectEntityMethods<T, TPageMetadata>,
     schema: EntitySchema<T>,
     prSchema: PainlessReduxSchema,
-): MixedEntityMethods<T> => {
+): MixedEntityMethods<T, TPageMetadata> => {
 
     const {
         getPaginator,
         tryInvoke,
-    } = createMixedEntityMethodsUtils<T>(dispatchMethods, selectMethods, schema, prSchema);
+    } = createMixedEntityMethodsUtils<T, TPageMetadata>(dispatchMethods, selectMethods, schema, prSchema);
 
     const loadList$ = (
         config: unknown,
-        dataSource: Observable<ResponseArray<T>> | Response$Factory<T>,
+        dataSource: Observable<ResponseArray<T, TPageMetadata>> | Response$Factory<T, TPageMetadata>,
         options?: EntityLoadListOptions,
         paginatorSubj?: BehaviorSubject<boolean>,
-    ): Observable<PaginatedResponse<T>> => {
+    ): Observable<PaginatedResponse<T, TPageMetadata>> => {
         const store$ = selectMethods.get$(config);
-        const sourcePipe = getRemotePipe<Pagination, T[] | undefined, PaginatedResponse<T>, PaginatedResponse<T>>({
+        const sourcePipe = getRemotePipe<Pagination, T[] | undefined, PaginatedResponse<T, TPageMetadata>, PaginatedResponse<T, TPageMetadata>>({
                 options,
                 store$,
                 emitOnSuccess: true,
                 remoteObsOrFactory: (pagination: Pagination) => getPaginated$(dataSource, pagination),
-                success: (result?: PaginatedResponse<T>) => {
+                success: (result?: PaginatedResponse<T, TPageMetadata>) => {
                     if (!result) return;
                     const { index, size, response } = result;
                     const data = response.data ?? [];
                     const isReplace = index === 0;
                     const hasMore = response.hasMore ?? data.length >= size;
-                    return dispatchMethods.addList(data, config, isReplace, hasMore, options);
+                    const metadata = response.metadata;
+                    return dispatchMethods.addList(data, config, isReplace, hasMore, metadata, options);
                 },
                 setLoadingState: (state) => dispatchMethods.setLoadingStateBus(state, undefined, config, undefined, options),
             },
@@ -93,11 +94,11 @@ export const createMixedEntityMethods = <T>(
     const tryInvokeList$ = <S>(
         store$: Observable<S>,
         config: unknown,
-        dataSource?: Observable<ResponseArray<T>> | Response$Factory<T>,
+        dataSource?: Observable<ResponseArray<T, TPageMetadata>> | Response$Factory<T, TPageMetadata>,
         options?: EntityGetListOptions,
         paginatorSubj?: BehaviorSubject<boolean>,
     ) => {
-        const invoker = (ds: Observable<ResponseArray<T>> | Response$Factory<T>) => loadList$(
+        const invoker = (ds: Observable<ResponseArray<T, TPageMetadata>> | Response$Factory<T, TPageMetadata>) => loadList$(
             config,
             ds,
             options,
@@ -108,7 +109,7 @@ export const createMixedEntityMethods = <T>(
 
     const get$ = (
         config: unknown,
-        dataSource?: Observable<ResponseArray<T>> | Response$Factory<T>,
+        dataSource?: Observable<ResponseArray<T, TPageMetadata>> | Response$Factory<T, TPageMetadata>,
         options?: EntityGetListOptions,
         paginatorSubj?: BehaviorSubject<boolean>,
     ): Observable<T[] | undefined> => {
@@ -124,7 +125,7 @@ export const createMixedEntityMethods = <T>(
 
     const getDictionary$ = (
         config: unknown,
-        dataSource?: Observable<ResponseArray<T>> | Response$Factory<T>,
+        dataSource?: Observable<ResponseArray<T, TPageMetadata>> | Response$Factory<T, TPageMetadata>,
         options?: EntityGetListOptions,
         paginatorSubj?: BehaviorSubject<boolean>,
     ): Observable<Dictionary<T>> => {

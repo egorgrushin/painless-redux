@@ -6,10 +6,10 @@ import { createLoadingStateReducer } from '../../shared/loading-state/reducers';
 import { MAX_PAGES_COUNT } from '../constants';
 import { removeFromArray } from '../../utils';
 
-const addList = <T>(
-    state: Page | undefined,
+const addList = <T, TPageMetadata>(
+    state: Page<TPageMetadata> | undefined,
     data: EntityType<T>[],
-): Page => {
+): Page<TPageMetadata> => {
     const newIds = data.map(entity => entity.id);
     const oldIds = state?.ids ?? [];
     return {
@@ -18,19 +18,22 @@ const addList = <T>(
     };
 };
 
-const createPageReducer = (
+const createPageReducer = <TPageMetadata>(
     types: EntityActionTypes,
 ) => {
     const loadingStateReducer = createLoadingStateReducer(types);
     return (
-        state: Page | undefined,
+        state: Page<TPageMetadata> | undefined,
         action: EntityActions,
-    ): Page | undefined => {
+    ): Page<TPageMetadata> | undefined => {
         switch (action.type) {
             case types.ADD_LIST: {
                 let newState = state ?? { ids: [] };
                 if (!isNil(action.payload.hasMore)) {
                     newState = { ...newState, hasMore: action.payload.hasMore };
+                }
+                if (!isNil(action.payload.metadata)) {
+                    newState = { ...newState, metadata: action.payload.metadata as TPageMetadata }
                 }
                 if (action.payload.isReplace) {
                     newState = { ...newState, ids: undefined };
@@ -117,14 +120,14 @@ const createPageReducer = (
     };
 };
 
-export const createPagesReducer = (
+export const createPagesReducer = <TPageMetadata>(
     types: EntityActionTypes,
 ) => {
-    const pageReducer = createPageReducer(types);
+    const pageReducer = createPageReducer<TPageMetadata>(types);
     return (
-        state: Dictionary<Page> = {},
+        state: Dictionary<Page<TPageMetadata>> = {},
         action: EntityActions,
-    ): Dictionary<Page> => {
+    ): Dictionary<Page<TPageMetadata>> => {
         switch (action.type) {
             case types.SET_LOADING_STATE:
             case types.ADD_LIST:
@@ -143,7 +146,7 @@ export const createPagesReducer = (
                 const pagesCount = pageHashes.length;
                 page.order = pagesCount - 1;
                 if (pagesCount <= maxPagesCount) return newState;
-                return pageHashes.reduce((memo: Dictionary<Page>, hash: string) => {
+                return pageHashes.reduce((memo: Dictionary<Page<TPageMetadata>>, hash: string) => {
                     const existPage = newState[hash];
                     if (existPage.order === 0) return memo;
                     memo[hash] = {
@@ -159,7 +162,7 @@ export const createPagesReducer = (
             case types.REMOVE_LIST:
             case types.RESOLVE_REMOVE_LIST: {
                 return Object.keys(state).reduce((
-                    memo: Dictionary<Page>,
+                    memo: Dictionary<Page<TPageMetadata>>,
                     hash: string,
                 ) => {
                     const page = pageReducer(state[hash], action);

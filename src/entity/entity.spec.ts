@@ -20,7 +20,7 @@ interface TestEntity {
 
 describe('Entity', () => {
 
-    let entity: Entity<TestEntity>;
+    let entity: Entity<TestEntity, void>;
     let pr: PainlessRedux;
     let store: TestStore<any>;
     let user: any;

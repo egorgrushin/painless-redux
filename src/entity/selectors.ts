@@ -22,34 +22,34 @@ import { LoadingStateSelector } from '../shared/loading-state/types';
 import { isNil, values } from 'lodash-es';
 import { getChangeableActual } from '../shared/change/selectors';
 
-export const createDictionarySelector = <T>(
-    selector: Selector<PainlessReduxState, EntityState<T>>,
-): DictionarySelector<T> =>
+export const createDictionarySelector = <T, TPageMetadata>(
+    selector: Selector<PainlessReduxState, EntityState<T, TPageMetadata>>,
+): DictionarySelector<T, TPageMetadata> =>
     createSelector(selector, (s) => s.dictionary);
 
-export const createIdsSelector = <T>(
-    selector: Selector<PainlessReduxState, EntityState<T>>,
-): IdsSelector<T> =>
+export const createIdsSelector = <T, TPageMetadata>(
+    selector: Selector<PainlessReduxState, EntityState<T, TPageMetadata>>,
+): IdsSelector<T, TPageMetadata> =>
     createSelector(selector, (s) => s.ids);
 
-export const createPagesSelector = <T>(
-    selector: Selector<PainlessReduxState, EntityState<T>>,
-): PagesSelector<T> =>
+export const createPagesSelector = <T, TPageMetadata>(
+    selector: Selector<PainlessReduxState, EntityState<T, TPageMetadata>>,
+): PagesSelector<T, TPageMetadata> =>
     createSelector(selector, (s) => s.pages);
 
-export const createLoadingStatesSelector = <T>(
-    selector: Selector<PainlessReduxState, EntityState<T>>,
-): LoadingStatesSelector<T> =>
+export const createLoadingStatesSelector = <T, TPageMetadata>(
+    selector: Selector<PainlessReduxState, EntityState<T, TPageMetadata>>,
+): LoadingStatesSelector<T, TPageMetadata> =>
     createSelector(selector, (s) => s.loadingStates);
 
-const createCreateLoadingStateById = <T>(
-    selector: LoadingStatesSelector<T>,
+const createCreateLoadingStateById = <T, TPageMetadata>(
+    selector: LoadingStatesSelector<T, TPageMetadata>,
 ) => (id: Id) => createSelector(
     selector,
     (loadingStates) => loadingStates[id],
 );
-const createCreateLoadingStateByIds = <T>(
-    selector: LoadingStatesSelector<T>,
+const createCreateLoadingStateByIds = <T, TPageMetadata>(
+    selector: LoadingStatesSelector<T, TPageMetadata>,
 ) => (ids: Id[]) => createSelector(
     selector,
     (loadingStates) => ids.reduce((memo: LoadingState, id: Id) => {
@@ -60,13 +60,13 @@ const createCreateLoadingStateByIds = <T>(
     }, { isLoading: false }),
 );
 
-export const createBaseEntitySelectors = <T>(
-    selector: Selector<PainlessReduxState, EntityState<T>>,
-): BaseEntitySelectors<T> => {
+export const createBaseEntitySelectors = <T, TPageMetadata>(
+    selector: Selector<PainlessReduxState, EntityState<T, TPageMetadata>>,
+): BaseEntitySelectors<T, TPageMetadata> => {
     const ids = createIdsSelector(selector);
     const dictionary = createDictionarySelector(selector);
     const pages = createPagesSelector(selector);
-    const loadingState = createLoadingStateSelector<EntityState<T>>(selector);
+    const loadingState = createLoadingStateSelector<EntityState<T, TPageMetadata>>(selector);
     const loadingStates = createLoadingStatesSelector(selector);
     const createLoadingStateById = createCreateLoadingStateById(loadingStates);
     const createLoadingStateByIds = createCreateLoadingStateByIds(loadingStates);
@@ -89,26 +89,26 @@ const getActual = <T>(
     return getChangeableActual(instance);
 };
 
-export const createCreateActualSelector = <T>(
-    dictionarySelector: DictionarySelector<T>,
+export const createCreateActualSelector = <T, TPageMetadata>(
+    dictionarySelector: DictionarySelector<T, TPageMetadata>,
 ) => (
     id: Id,
-): ActualSelector<T> => createSelector(
+): ActualSelector<T, TPageMetadata> => createSelector(
     dictionarySelector,
     (dictionary) => getActual(dictionary[id]),
 );
-export const createListSelectorFromPages = <T>(
-    pagesSelector: PagesSelector<T>,
-): PagesListSelector<T> => createSelector(
+export const createListSelectorFromPages = <T, TPageMetadata>(
+    pagesSelector: PagesSelector<T, TPageMetadata>,
+): PagesListSelector<T, TPageMetadata> => createSelector(
     pagesSelector,
     (pages) => values(pages),
 );
 
-export const createListSelector = <T>(
-    dictionarySelector: DictionarySelector<T>,
+export const createListSelector = <T, TPageMetadata>(
+    dictionarySelector: DictionarySelector<T, TPageMetadata>,
 ) => (
-    idsSelector: IdsSelector<T>,
-): ListSelector<T> => createSelector(
+    idsSelector: IdsSelector<T, TPageMetadata>,
+): ListSelector<T, TPageMetadata> => createSelector(
     idsSelector,
     dictionarySelector,
     (ids, dict) => {
@@ -118,53 +118,53 @@ export const createListSelector = <T>(
     },
 );
 
-export const createPageSelector = <T>(
-    pagesSelector: PagesSelector<T>,
+export const createPageSelector = <T, TPageMetadata>(
+    pagesSelector: PagesSelector<T, TPageMetadata>,
     hash: string,
-): PageSelector<T> =>
+): PageSelector<T, TPageMetadata> =>
     createSelector(pagesSelector, (pages) => pages[hash]);
 
-export const createCreatePageIdsSelector = <T>(pagesSelector: PagesSelector<T>) => (
+export const createCreatePageIdsSelector = <T, TPageMetadata>(pagesSelector: PagesSelector<T, TPageMetadata>) => (
     hash: string,
-): IdsSelector<T> => {
-    const pageSelector = createPageSelector<T>(pagesSelector, hash);
+): IdsSelector<T, TPageMetadata> => {
+    const pageSelector = createPageSelector<T, TPageMetadata>(pagesSelector, hash);
     return createSelector(
         pageSelector,
-        (page: Page | undefined) => {
+        (page: Page<TPageMetadata> | undefined) => {
             if (!page) return undefined;
             return page.ids;
         },
     );
 };
 
-export const createCreatePageIdsByConfigSelector = <T>(
-    pagesSelector: PagesSelector<T>,
+export const createCreatePageIdsByConfigSelector = <T, TPageMetadata>(
+    pagesSelector: PagesSelector<T, TPageMetadata>,
     hashFn: HashFn,
 ) => (
     config: unknown,
-): IdsSelector<T> => {
+): IdsSelector<T, TPageMetadata> => {
     const hash = hashFn(config);
-    return createCreatePageIdsSelector<T>(pagesSelector)(hash);
+    return createCreatePageIdsSelector<T, TPageMetadata>(pagesSelector)(hash);
 };
 
-export const createCreatePageByConfigSelector = <T>(
-    pagesSelector: PagesSelector<T>,
+export const createCreatePageByConfigSelector = <T, TPageMetadata>(
+    pagesSelector: PagesSelector<T, TPageMetadata>,
     hashFn: HashFn,
 ) => (
     config: unknown,
-): PageSelector<T> => {
+): PageSelector<T, TPageMetadata> => {
     const hash = hashFn(config);
-    return createPageSelector<T>(pagesSelector, hash);
+    return createPageSelector<T, TPageMetadata>(pagesSelector, hash);
 };
 
-export const createCreatePageLoadingState = <T>(
-    pagesSelector: PagesSelector<T>,
+export const createCreatePageLoadingState = <T, TPageMetadata>(
+    pagesSelector: PagesSelector<T, TPageMetadata>,
     hashFn: HashFn,
 ) => (
     config: unknown,
-): LoadingStateSelector<EntityState<T>> => {
+): LoadingStateSelector<EntityState<T, TPageMetadata>> => {
     const hash = hashFn(config);
-    const pageSelector = createPageSelector<T>(pagesSelector, hash);
+    const pageSelector = createPageSelector<T, TPageMetadata>(pagesSelector, hash);
     return createSelector(
         pageSelector,
         (page) => page?.loadingState,
@@ -172,10 +172,10 @@ export const createCreatePageLoadingState = <T>(
 };
 
 // TODO(egorgrushin): refactor here
-export const createEntitySelectors = <T>(
-    selector: Selector<PainlessReduxState, EntityState<T>>,
+export const createEntitySelectors = <T, TPageMetadata>(
+    selector: Selector<PainlessReduxState, EntityState<T, TPageMetadata>>,
     hashFn: HashFn,
-): EntitySelectors<T> => {
+): EntitySelectors<T, TPageMetadata> => {
     const {
         dictionary,
         loadingStates,
@@ -184,7 +184,7 @@ export const createEntitySelectors = <T>(
         ids,
         createLoadingStateById,
         createLoadingStateByIds,
-    } = createBaseEntitySelectors<T>(selector);
+    } = createBaseEntitySelectors<T, TPageMetadata>(selector);
     const createListSelectorByIds = createListSelector(dictionary);
     const all = createListSelectorByIds(ids);
     const allPages = createListSelectorFromPages(pages);

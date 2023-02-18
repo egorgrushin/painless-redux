@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 import { Dictionary, Id, LoadingState } from '../../../system-types';
 import { Page } from '../../types';
 
-export interface SelectEntityMethods<T> {
+export interface SelectEntityMethods<T, TPageMetadata> {
     get$(config: unknown): Observable<T[] | undefined>;
 
     getDictionary$(config: unknown): Observable<Dictionary<T>>;
@@ -26,7 +26,7 @@ export interface SelectEntityMethods<T> {
     getPage$(
         config: unknown,
         isAsap?: boolean,
-    ): Observable<Page | undefined>;
+    ): Observable<Page<TPageMetadata> | undefined>;
 
     getPageLoadingState$(
         config: unknown,
@@ -35,5 +35,5 @@ export interface SelectEntityMethods<T> {
 
     getAll$(): Observable<T[] | undefined>;
 
-    getPages$(): Observable<Page[]>;
+    getPages$(): Observable<Page<TPageMetadata>[]>;
 }

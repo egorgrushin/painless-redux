@@ -12,7 +12,7 @@ import { EntityActions } from '../../actions';
 import { ChangeOptions, PatchRequest } from '../../../shared/change/types';
 import { AffectLoadingStateFactory } from '../../..';
 
-export interface DispatchEntityMethods<T> {
+export interface DispatchEntityMethods<T, TPageMetadata> {
     add(
         data: T,
         config?: unknown,
@@ -39,6 +39,7 @@ export interface DispatchEntityMethods<T> {
         config?: unknown,
         isReplace?: boolean,
         hasMore?: boolean,
+        metadata?: TPageMetadata,
         options?: EntityAddListOptions,
     ): EntityActions;
 

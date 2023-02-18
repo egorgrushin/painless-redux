@@ -8,18 +8,19 @@ import {
     EntityType,
     IdPatch,
 } from './types';
-import { DeepPartial, Id, LoadingState } from '../system-types';
-import { ChangeOptions } from '../shared/change/types';
+import {DeepPartial, Id, LoadingState} from '../system-types';
+import {ChangeOptions} from '../shared/change/types';
 
 // this types for public use
-export interface EntityActionCreators<T> {
+export interface EntityActionCreators<T, TPageMetadata> {
     ADD_LIST: (
         entities: EntityType<T>[],
         config?: unknown,
         isReplace?: boolean,
         hasMore?: boolean,
+        metadata?: TPageMetadata,
         options?: EntityInternalAddListOptions,
-    ) => { payload: { entities: EntityType<T>[]; isReplace: boolean; hasMore: boolean; configHash: string }; options: EntityInternalAddListOptions; type: 'ADD_LIST' };
+    ) => { payload: { entities: EntityType<T>[]; isReplace: boolean; hasMore: boolean; configHash: string; metadata: TPageMetadata | undefined }; options: EntityInternalAddListOptions; type: 'ADD_LIST' };
     RESTORE_REMOVED: (id: Id) => { payload: { id: Id }; type: 'RESTORE_REMOVED' };
     ADD: (
         entity: EntityType<T>,

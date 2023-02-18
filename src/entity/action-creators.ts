@@ -21,12 +21,12 @@ import {
 import { createBatch } from '../shared/system/actions';
 import { EntityActionCreators } from './action-creators.types';
 
-export const createEntityActionCreators = <T>(
+export const createEntityActionCreators = <T, TPageMetadata>(
     actionTypes: EntityActionTypes,
-): EntityActionCreators<T> => ({
+): EntityActionCreators<T, TPageMetadata> => ({
     ADD: createAdd<T>(actionTypes),
     RESOLVE_ADD: createResolveAdd<T>(actionTypes),
-    ADD_LIST: createAddList<T>(actionTypes),
+    ADD_LIST: createAddList<T, TPageMetadata>(actionTypes),
     CHANGE: createChange<T>(actionTypes),
     RESOLVE_CHANGE: createResolveChange<T>(actionTypes),
     REMOVE: createRemove(actionTypes),

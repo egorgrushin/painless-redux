@@ -16,13 +16,13 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { DeepPartial, Dictionary, Id } from '../../../system-types';
 import { ChangeOptions, PatchRequest } from '../../../shared/change/types';
 
-export interface MixedEntityMethods<T> {
+export interface MixedEntityMethods<T, TPageMetadata> {
     loadList$(
         config: unknown,
-        dataSource: Observable<ResponseArray<T>> | Response$Factory<T>,
+        dataSource: Observable<ResponseArray<T, TPageMetadata>> | Response$Factory<T, TPageMetadata>,
         options?: EntityLoadListOptions,
         paginatorSubj?: BehaviorSubject<boolean>,
-    ): Observable<PaginatedResponse<T>>;
+    ): Observable<PaginatedResponse<T, TPageMetadata>>;
 
     loadById$(
         id: Id,
@@ -32,14 +32,14 @@ export interface MixedEntityMethods<T> {
 
     get$(
         config: unknown,
-        dataSource?: Observable<ResponseArray<T>> | Response$Factory<T>,
+        dataSource?: Observable<ResponseArray<T, TPageMetadata>> | Response$Factory<T, TPageMetadata>,
         options?: EntityGetListOptions,
         paginatorSubj?: BehaviorSubject<boolean>,
     ): Observable<T[] | undefined>;
 
     getDictionary$(
         config: unknown,
-        dataSource?: Observable<ResponseArray<T>> | Response$Factory<T>,
+        dataSource?: Observable<ResponseArray<T, TPageMetadata>> | Response$Factory<T, TPageMetadata>,
         options?: EntityGetListOptions,
         paginatorSubj?: BehaviorSubject<boolean>,
     ): Observable<Dictionary<T>>;
