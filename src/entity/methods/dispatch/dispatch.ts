@@ -3,56 +3,76 @@ import {
     EntityActionTypes,
     EntityAddListOptions,
     EntityAddOptions,
+    EntityChangeOptions,
     EntityRemoveOptions,
     EntitySetStateOptions,
+    EntityType,
 } from '../../types';
 import { EntityActions } from '../../actions';
 import { DeepPartial, Id, LoadingState } from '../../../system-types';
 import { DispatchEntityMethods } from './types';
 import { isNil } from 'lodash';
 import { affectStateFactory } from '../../../affect-state/affect-state';
-import { ChangeActionOptions } from '../../../shared/change/types';
-
+import { ChangeOptions } from '../../../shared/change/types';
 
 export const createDispatchEntityMethods = <T>(
     dispatcher: Dispatcher<EntityActionTypes, EntityActions>,
-    idResolver: (data: Partial<T>) => Partial<T>,
+    idResolver: (data: T) => EntityType<T>,
 ): DispatchEntityMethods<T> => {
 
     const add = (
-        data: Partial<T>,
+        entity: T,
         config?: any,
         options?: EntityAddOptions,
     ) => {
-        data = idResolver(data);
-        return dispatcher.createAndDispatch('ADD', [data, config], options);
+        entity = idResolver(entity);
+        return dispatcher.createAndDispatch('ADD', [entity, config], options);
     };
 
     const addList = (
-        data: Partial<T>[],
+        entities: T[],
         config?: any,
         isReplace: boolean = false,
         hasMore: boolean = false,
         options?: EntityAddListOptions,
     ) => {
-        return dispatcher.createAndDispatch('ADD_LIST', [data, config, isReplace, hasMore], options);
+        entities = entities.map((entity) => idResolver(entity));
+        return dispatcher.createAndDispatch('ADD_LIST', [entities, config, isReplace, hasMore], options);
     };
 
     const change = (
-        id: Id | Id[],
+        id: Id,
         patch: DeepPartial<T>,
-        options?: ChangeActionOptions,
+        options?: ChangeOptions,
     ) => {
         return dispatcher.createAndDispatch('CHANGE', [id, patch], options);
     };
 
+    const changeWithId = (
+        id: Id,
+        patch: DeepPartial<T>,
+        changeId: string,
+        options?: EntityChangeOptions,
+    ) => {
+        return dispatcher.createAndDispatch('CHANGE', [id, patch, changeId], options);
+    };
+
+    const resolveChange = (
+        id: Id,
+        changeId: Id,
+        success: boolean,
+        remotePatch: DeepPartial<T>,
+        options?: EntityChangeOptions,
+    ) => {
+        return dispatcher.createAndDispatch('RESOLVE_CHANGE', [id, changeId, success, remotePatch], options);
+    };
+
     const remove = (
-        id: Id | Id[],
+        id: Id,
         options?: EntityRemoveOptions,
     ) => {
         return dispatcher.createAndDispatch('REMOVE', [id], options);
     };
-
 
     const setState = (
         state: LoadingState,
@@ -63,7 +83,7 @@ export const createDispatchEntityMethods = <T>(
     };
 
     const setStateById = (
-        id: Id | Id[],
+        id: Id,
         state: LoadingState,
         options?: EntitySetStateOptions,
     ) => {
@@ -71,7 +91,7 @@ export const createDispatchEntityMethods = <T>(
     };
 
     const setStateForKey = (
-        id: Id | Id[],
+        id: Id,
         key: string,
         state: LoadingState,
         options?: EntitySetStateOptions,
@@ -81,21 +101,21 @@ export const createDispatchEntityMethods = <T>(
 
     const setStateBus = (
         state: LoadingState,
-        id?: Id | Id[],
+        id?: Id,
         config?: any,
         key?: string,
     ) => {
         if (!isNil(id)) {
             if (!isNil(key)) {
-                setStateForKey(id, key, state);
+                return setStateForKey(id, key, state);
             } else {
-                setStateById(id, state);
+                return setStateById(id, state);
             }
         } else {
             if (state.error) {
                 console.error(state.error);
             }
-            setState(state, config);
+            return setState(state, config);
         }
     };
 
@@ -111,7 +131,7 @@ export const createDispatchEntityMethods = <T>(
     };
 
     const affectStateById = (
-        id?: Id | Id[],
+        id?: Id,
         key?: string,
         rethrow?: boolean,
     ) => {
@@ -123,7 +143,7 @@ export const createDispatchEntityMethods = <T>(
 
     const affectStateByConfigOrId = (
         config?: any,
-        id?: Id | Id[],
+        id?: Id,
         key?: string,
         rethrow?: boolean,
     ) => {
@@ -138,8 +158,11 @@ export const createDispatchEntityMethods = <T>(
         addList,
         create: add,
         change,
+        changeWithId,
+        resolveChange,
         remove,
         setState,
+        setStateBus,
         setStateById,
         setStateForKey,
         affectState,

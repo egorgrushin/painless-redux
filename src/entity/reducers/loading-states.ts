@@ -14,13 +14,15 @@ export const createByIdLoadingStatesReducer = (
     ): Dictionary<LoadingState> => {
         switch (action.type) {
             case types.SET_STATE: {
-                const id = action.payload.id;
+                const id = action.payload.id?.toString();
                 if (isNil(id)) return state;
                 const byId = entityLoadingStateReducer(state[id], action) as LoadingState;
                 return { ...state, [id]: byId };
             }
             case types.REMOVE: {
-                const { [action.payload.id]: deleted, ...rest } = state;
+                const id = action.payload.id?.toString();
+                if (isNil(id)) return state;
+                const { [id]: deleted, ...rest } = state;
                 return rest;
             }
             default:

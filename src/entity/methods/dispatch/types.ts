@@ -1,66 +1,104 @@
-import { EntityAddListOptions, EntityAddOptions, EntityRemoveOptions, EntitySetStateOptions } from '../../types';
+import {
+    EntityAddListOptions,
+    EntityAddOptions,
+    EntityChangeOptions,
+    EntityRemoveOptions,
+    EntitySetStateOptions,
+} from '../../types';
 import { DeepPartial, Id, LoadingState } from '../../../system-types';
 import { EntityActions } from '../../actions';
 import { Observable, OperatorFunction } from 'rxjs';
-import { ChangeActionOptions } from '../../../shared/change/types';
+import { ChangeOptions } from '../../../shared/change/types';
 
 export interface DispatchEntityMethods<T> {
-    add: (
-        data: Partial<T>,
+    add(
+        data: T,
         config?: any,
         options?: EntityAddOptions,
-    ) => EntityActions;
-    addList: (
-        data: Partial<T>[],
+    ): EntityActions;
+
+    addList(
+        data: T[],
         config?: any,
         isReplace?: boolean,
         hasMore?: boolean,
         options?: EntityAddListOptions,
-    ) => EntityActions;
-    create: (
-        data: Partial<T>,
+    ): EntityActions;
+
+    create(
+        data: T,
         config?: any,
         options?: EntityAddOptions,
-    ) => EntityActions;
-    change: (
-        id: Id | Id[],
+    ): EntityActions;
+
+    change(
+        id: Id,
         patch: DeepPartial<T>,
-        options?: ChangeActionOptions,
-    ) => EntityActions;
-    remove: (
-        id: Id | Id[],
+        options?: ChangeOptions,
+    ): EntityActions;
+
+    changeWithId(
+        id: Id,
+        patch: DeepPartial<T>,
+        changeId: string,
+        options?: EntityChangeOptions,
+    ): EntityActions;
+
+    resolveChange(
+        id: Id,
+        changeId: string,
+        success: boolean,
+        remotePatch?: DeepPartial<T>,
+        options?: EntityChangeOptions,
+    ): EntityActions;
+
+    remove(
+        id: Id,
         options?: EntityRemoveOptions,
-    ) => EntityActions;
-    setState: (
+    ): EntityActions;
+
+    setState(
         state: LoadingState,
         config?: any,
         options?: EntitySetStateOptions,
-    ) => EntityActions;
-    setStateById: (
-        id: Id | Id[],
+    ): EntityActions;
+
+    setStateById(
+        id: Id,
         state: LoadingState,
         options?: EntitySetStateOptions,
-    ) => EntityActions;
-    setStateForKey: (
-        id: Id | Id[],
+    ): EntityActions;
+
+    setStateForKey(
+        id: Id,
         key: string,
         state: LoadingState,
         options?: EntitySetStateOptions,
-    ) => EntityActions;
-    affectState: (
+    ): EntityActions;
+
+    setStateBus(
+        state: LoadingState,
+        id?: Id,
+        config?: any,
+        key?: string,
+    ): EntityActions;
+
+    affectState(
         config?: any,
         key?: string,
         rethrow?: boolean,
-    ) => (...pipes: Array<OperatorFunction<any, any> | Observable<T>>) => any;
-    affectStateById: (
-        id?: Id | Id[],
+    ): (...pipes: Array<OperatorFunction<any, any> | Observable<T>>) => any;
+
+    affectStateById(
+        id?: Id,
         key?: string,
         rethrow?: boolean,
-    ) => (...pipes: Array<OperatorFunction<any, any> | Observable<T>>) => any;
-    affectStateByConfigOrId: (
+    ): (...pipes: Array<OperatorFunction<any, any> | Observable<T>>) => any;
+
+    affectStateByConfigOrId(
         config?: any,
-        id?: Id | Id[],
+        id?: Id,
         key?: string,
         rethrow?: boolean,
-    ) => (...pipes: Array<OperatorFunction<any, any> | Observable<T>>) => any;
+    ): (...pipes: Array<OperatorFunction<any, any> | Observable<T>>) => any;
 }

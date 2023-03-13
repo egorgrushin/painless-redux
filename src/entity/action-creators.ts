@@ -1,23 +1,24 @@
 import { EntityActionTypes } from './types';
-import { ActionCreator, SameShaped } from '../system-types';
 import {
     createAdd,
     createAddList,
     createChange,
     createCreate,
     createRemove,
+    createResolveChange,
     createSetState,
-    EntityActions,
 } from './actions';
 
-export type EntityActionCreators = SameShaped<EntityActionTypes, ActionCreator<EntityActionTypes, EntityActions>>;
-export const createEntityActionCreators = (
+export const createEntityActionCreators = <T>(
     actionTypes: EntityActionTypes,
-): EntityActionCreators => ({
-    ADD: createAdd(actionTypes),
-    CREATE: createCreate(actionTypes),
-    ADD_LIST: createAddList(actionTypes),
-    CHANGE: createChange(actionTypes),
+) => ({
+    ADD: createAdd<T>(actionTypes),
+    CREATE: createCreate<T>(actionTypes),
+    ADD_LIST: createAddList<T>(actionTypes),
+    CHANGE: createChange<T>(actionTypes),
+    RESOLVE_CHANGE: createResolveChange<T>(actionTypes),
     REMOVE: createRemove(actionTypes),
     SET_STATE: createSetState(actionTypes),
 });
+
+export type EntityActionCreators = ReturnType<typeof createEntityActionCreators>;

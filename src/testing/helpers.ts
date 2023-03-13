@@ -4,13 +4,12 @@ import { TestStore } from './store';
 import * as combineReducers from 'combine-reducers';
 import { PainlessRedux } from '../painless-redux/types';
 
-
 export const initStoreWithPr = (
     store: TestStore<any>,
     pr: PainlessRedux,
 ) => {
     const reducer = pr.getReducer();
-    const globalReducer = combineReducers({ [pr.name]: reducer });
+    const globalReducer = combineReducers<any>({ [pr.name]: reducer });
     const state = globalReducer({}, { type: 'any' });
     store.setState(state);
     return globalReducer;

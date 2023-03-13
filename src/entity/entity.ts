@@ -9,14 +9,13 @@ import { createEntityActionCreators } from './action-creators';
 import { createSelectEntityMethods } from './methods/select/select';
 import { createMixedEntityMethods } from './methods/mixed/mixed';
 
-
 export const createEntity = <T>(
     pr: PainlessRedux,
     schema?: Partial<EntitySchema<T>>,
 ): Entity<T> => {
     const fullSchema = getFullEntitySchema<T>(schema);
     const actionTypes = createEntityActionTypes(fullSchema.name);
-    const actionCreators = createEntityActionCreators(actionTypes);
+    const actionCreators = createEntityActionCreators<T>(actionTypes);
     const reducer = createEntityReducer<T>(actionTypes);
     const {
         selector,
@@ -29,21 +28,26 @@ export const createEntity = <T>(
         actionCreators,
     );
     const selectors = createEntitySelectors<T>(selector, fullSchema.hashFn);
-    const idResolver = createIdResolver(fullSchema);
+    const idResolver = createIdResolver<T>(fullSchema);
 
     const dispatchMethods = createDispatchEntityMethods<T>(dispatcher, idResolver);
     const selectMethods = createSelectEntityMethods<T>(selectManager, selectors);
-    const mixedMethods = createMixedEntityMethods<T>(dispatchMethods, selectMethods, fullSchema);
+    const mixedMethods = createMixedEntityMethods<T>(dispatchMethods, selectMethods);
+
+    const { changeWithId, resolveChange, ...publicDispatchMethods } = dispatchMethods;
+    const { get$, getDictionary$, getById$, ...publicSelectMethods } = selectMethods;
 
     return {
-        ...dispatchMethods,
+        ...publicDispatchMethods,
         ...mixedMethods,
+        ...publicSelectMethods,
         getPage$: selectMethods.getPage$,
         getPageLoadingState$: selectMethods.getPageLoadingState$,
         getLoadingStateById$: selectMethods.getLoadingStateById$,
         getAll$: selectMethods.getAll$,
         getLoadingState$: selectMethods.getLoadingState$,
         getLoadingStates$: selectMethods.getLoadingStates$,
+        // @ts-ignore
         actionCreators,
     };
 };

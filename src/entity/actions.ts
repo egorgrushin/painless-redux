@@ -1,38 +1,44 @@
-import { controlId, getHash } from './utils';
+import { getHash } from './utils';
 import {
     EntityActionTypes,
     EntityAddListOptions,
     EntityAddOptions,
+    EntityChangeOptions,
     EntityRemoveOptions,
     EntitySetStateOptions,
+    EntityType,
 } from './types';
-import { Id, LoadingState } from '../system-types';
-import * as changeActions from '../shared/change/actions';
+import { DeepPartial, Id, LoadingState } from '../system-types';
 import { typedDefaultsDeep } from '../utils';
 import * as loadingStateActions from '../shared/loading-state/actions';
-import { ChangeActionOptions } from '../shared/change/types';
 
-export const createAdd = (types: EntityActionTypes) => (
-    entity: any,
-    config?: any,
+export const createAddByHash = <T>(types: EntityActionTypes) => (
+    entity: EntityType<T>,
+    configHash: string,
     options?: EntityAddOptions,
 ) => {
-    const configHash = getHash(config);
-    controlId(entity);
     options = typedDefaultsDeep(options, { merge: true });
     const payload = { entity, configHash };
     return { type: types.ADD, payload, options } as const;
 };
 
-export const createAddList = (types: EntityActionTypes) => (
-    entities: any[],
+export const createAdd = <T>(types: EntityActionTypes) => (
+    entity: EntityType<T>,
+    config?: any,
+    options?: EntityAddOptions,
+) => {
+    const configHash = getHash(config);
+    return createAddByHash(types)(entity, configHash, options);
+};
+
+export const createAddList = <T>(types: EntityActionTypes) => (
+    entities: EntityType<T>[],
     config?: any,
     isReplace: boolean = false,
     hasMore: boolean = false,
     options?: EntityAddListOptions,
 ) => {
     const configHash = getHash(config);
-    entities = entities.map(e => controlId(e));
     options = typedDefaultsDeep(options, { merge: true });
     const payload = { entities, configHash, isReplace, hasMore };
     return { type: types.ADD_LIST, payload, options } as const;
@@ -56,18 +62,31 @@ export const createSetState = (types: EntityActionTypes) => (
     key?: string,
     options?: EntitySetStateOptions,
 ) => {
-    const action = loadingStateActions.createSetState(types)(state, key, options);
+    const actionCreator = loadingStateActions.createSetState(types);
+    const action = actionCreator(state, key, options);
     const configHash = getHash(config);
     return { ...action, payload: { ...action.payload, configHash, id } } as const;
 };
 
-export const createChange = (types: EntityActionTypes) => (
+export const createChange = <T>(types: EntityActionTypes) => (
     id: Id,
-    patch: any,
-    options?: ChangeActionOptions,
+    patch: DeepPartial<T>,
+    changeId?: string,
+    options?: EntityChangeOptions,
 ) => {
-    const action = changeActions.createChange(types)(patch, options);
-    return { ...action, payload: { ...action.payload, id } } as const;
+    options = typedDefaultsDeep(options, { merge: true });
+    return { type: types.CHANGE, payload: { patch, id, changeId }, options } as const;
+};
+
+export const createResolveChange = <T>(types: EntityActionTypes) => (
+    id: Id,
+    changeId: string,
+    success: boolean,
+    remotePatch?: DeepPartial<T>,
+    options?: EntityChangeOptions,
+) => {
+    options = typedDefaultsDeep(options, { merge: true });
+    return { type: types.RESOLVE_CHANGE, payload: { id, changeId, success, remotePatch }, options } as const;
 };
 
 type SelfActionCreators = ReturnType<typeof createAdd>
@@ -76,6 +95,7 @@ type SelfActionCreators = ReturnType<typeof createAdd>
     | ReturnType<typeof createRemove>
     | ReturnType<typeof createSetState>
     | ReturnType<typeof createChange>
+    | ReturnType<typeof createResolveChange>
 
 export type EntityActions = ReturnType<SelfActionCreators>;
 

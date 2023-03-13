@@ -1,5 +1,13 @@
 import { Selector } from 'reselect';
-import { ActionCreator, AnyAction, Dictionary, Reducer, SameShaped, StrictDictionary } from '../system-types';
+import {
+    ActionCreator,
+    AnyAction,
+    Dictionary,
+    PayloadAction,
+    Reducer,
+    SameShaped,
+    StrictDictionary,
+} from '../system-types';
 import { Dispatcher } from '../dispatcher/types';
 import { SelectManager } from '../select-manager/types';
 
@@ -22,7 +30,7 @@ export type PainlessReduxState = Dictionary<any>;
 
 export type PainlessRedux = {
     name: string;
-    registerSlot<TState, TActionTypes, TActions extends { type: string }>(
+    registerSlot<TState, TActionTypes, TActions extends AnyAction>(
         type: SlotTypes,
         name: string,
         reducer: Reducer<TState, TActions>,
@@ -32,5 +40,5 @@ export type PainlessRedux = {
         dispatcher: Dispatcher<TActionTypes, TActions>;
         selectManager: SelectManager;
     };
-    getReducer(): Reducer<PainlessReduxState, AnyAction>;
+    getReducer(): Reducer<PainlessReduxState, PayloadAction>;
 }

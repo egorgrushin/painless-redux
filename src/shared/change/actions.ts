@@ -1,9 +1,9 @@
-import { ChangeActionOptions, ChangeActionTypes } from './types';
+import { ChangeOptions, ChangeActionTypes } from './types';
 import { typedDefaultsDeep } from '../../utils';
 
 export const createChange = (types: ChangeActionTypes) => (
     patch: any,
-    options?: ChangeActionOptions,
+    options?: ChangeOptions,
 ) => {
     options = typedDefaultsDeep(options, { merge: true });
     const payload = { patch };
