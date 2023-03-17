@@ -1,8 +1,9 @@
-import { BehaviorSubject, EMPTY, merge, Observable, of, OperatorFunction, throwError } from 'rxjs';
+import { BehaviorSubject, EMPTY, merge, Observable, of, OperatorFunction } from 'rxjs';
 import {
     EntityChangeOptions,
     EntityGetListOptions,
     EntityResponse,
+    EntitySchema,
     ObservableOrFactory,
     Page,
     Pagination,
@@ -10,14 +11,16 @@ import {
 } from '../../types';
 import { catchError, first, map, scan, switchMap, take, tap } from 'rxjs/operators';
 import { getObservable$, guardByOptions, guardIfLoading } from '../../utils';
-import { DEFAULT_PAGE_SIZE } from '../../constants';
 import { DispatchEntityMethods } from '../dispatch/types';
 import { SelectEntityMethods } from '../select/types';
 import { DeepPartial } from '../../../system-types';
+import { PainlessReduxSchema } from '../../../painless-redux/types';
 
 export const createMixedEntityMethodsUtils = <T>(
     dispatchMethods: DispatchEntityMethods<T>,
     selectMethods: SelectEntityMethods<T>,
+    schema: EntitySchema<T>,
+    prSchema: PainlessReduxSchema,
 ) => {
     const getPaginator = (
         config: any,
@@ -26,7 +29,7 @@ export const createMixedEntityMethodsUtils = <T>(
     ): Observable<Pagination> => {
         paginatorSubj = paginatorSubj ?? new BehaviorSubject<boolean>(false);
         const page$ = selectMethods.getPage$(config);
-        const loadingState$ = selectMethods.getPageLoadingState$(config, true);
+        const loadingState$ = selectMethods.getPageLoadingState$(config, prSchema.useAsapSchedulerInLoadingGuards);
         return paginatorSubj.pipe(
             switchMap((isNext) => guardIfLoading(loadingState$).pipe(map(() => isNext))),
             scan((
@@ -34,7 +37,7 @@ export const createMixedEntityMethodsUtils = <T>(
                 isNext: boolean,
             ) => isNext ? prevIndex + 1 : 0, -1),
             map((index: number) => {
-                const size = options?.pageSize ?? DEFAULT_PAGE_SIZE;
+                const size = options?.pageSize ?? schema.pageSize;
                 const from = index * size;
                 const to = from + size - 1;
                 return { index, size, from, to };
@@ -82,10 +85,6 @@ export const createMixedEntityMethodsUtils = <T>(
                 const successPipe = tap((result: R) => success(result));
                 const pipesToAffect: any = [
                     switchMap(() => remote$),
-                    catchError((err) => {
-                        console.log(err);
-                        return throwError(err);
-                    }),
                 ];
                 const resultPipes: OperatorFunction<any, any>[] = [];
 

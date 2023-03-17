@@ -60,15 +60,15 @@ export const createInstanceReducer = <T>(types: EntityActionTypes) => (
         }
         case types.RESOLVE_CHANGE: {
             if (!state) return state;
-            const { payload: { success, changeId, remotePatch } } = action;
-            let { unstableChanges = [] } = state;
+            const { payload: { success, changeId, remotePatch }, options: { merge } } = action;
+            let unstableChanges = state.unstableChanges ?? [];
             if (remotePatch) {
-                const change = createUnstableChange<T>(remotePatch, true);
+                const change = createUnstableChange<T>(remotePatch, true, merge, changeId);
                 unstableChanges = unstableChanges.concat(change);
             }
             if (success) {
                 unstableChanges = unstableChanges.map((change) => {
-                    if (change.id === changeId) return { ...change, success };
+                    if (change.id === changeId) return { ...change, stable: true };
                     return change;
                 });
             } else {

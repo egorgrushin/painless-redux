@@ -32,7 +32,7 @@ export const createEntity = <T>(
 
     const dispatchMethods = createDispatchEntityMethods<T>(dispatcher, idResolver);
     const selectMethods = createSelectEntityMethods<T>(selectManager, selectors);
-    const mixedMethods = createMixedEntityMethods<T>(dispatchMethods, selectMethods);
+    const mixedMethods = createMixedEntityMethods<T>(dispatchMethods, selectMethods, fullSchema, pr.schema);
 
     const { changeWithId, resolveChange, ...publicDispatchMethods } = dispatchMethods;
     const { get$, getDictionary$, getById$, ...publicSelectMethods } = selectMethods;
@@ -41,12 +41,6 @@ export const createEntity = <T>(
         ...publicDispatchMethods,
         ...mixedMethods,
         ...publicSelectMethods,
-        getPage$: selectMethods.getPage$,
-        getPageLoadingState$: selectMethods.getPageLoadingState$,
-        getLoadingStateById$: selectMethods.getLoadingStateById$,
-        getAll$: selectMethods.getAll$,
-        getLoadingState$: selectMethods.getLoadingState$,
-        getLoadingStates$: selectMethods.getLoadingStates$,
         // @ts-ignore
         actionCreators,
     };

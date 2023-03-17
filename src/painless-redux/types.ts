@@ -21,15 +21,16 @@ export interface PainlessReduxSchema {
     entityDomainName: string;
     workspaceDomainName: string;
     selector: Selector<any, any>;
+    useAsapSchedulerInLoadingGuards: boolean;
 }
 
 export type PainlessReduxRegister = StrictDictionary<SlotTypes, Dictionary<Reducer<any, AnyAction>>, SlotTypes>;
 
 export type PainlessReduxState = Dictionary<any>;
 
-
 export type PainlessRedux = {
     name: string;
+    schema: PainlessReduxSchema;
     registerSlot<TState, TActionTypes, TActions extends AnyAction>(
         type: SlotTypes,
         name: string,
