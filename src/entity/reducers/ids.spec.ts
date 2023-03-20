@@ -1,13 +1,13 @@
 import { createIdsReducer } from './ids';
 import { EntityActionTypes } from '../types';
-import { EntityActions } from '../actions';
-
+import { createEntityActionCreators } from '../action-creators';
 
 const types: EntityActionTypes = {
     ADD: 'ADD',
     ADD_LIST: 'ADD_LIST',
     REMOVE: 'REMOVE',
     CHANGE: 'CHANGE',
+    RESOLVE_CHANGE: 'RESOLVE_CHANGE',
     SET_STATE: 'SET_STATE',
     CREATE: 'CREATE',
 };
@@ -15,19 +15,13 @@ const types: EntityActionTypes = {
 describe('ids', () => {
 
     const reducer = createIdsReducer(types);
+    const actionCreators = createEntityActionCreators(types);
 
     describe('#ADD', () => {
         test('should add entity id', () => {
             // arrange
             const entity = { id: 1 };
-            const action: EntityActions = {
-                type: types.ADD,
-                payload: {
-                    entity,
-                    configHash: '',
-                },
-                options: {},
-            };
+            const action = actionCreators.ADD(entity, undefined);
             // act
             const actual = reducer(undefined, action);
             // assert
@@ -37,11 +31,7 @@ describe('ids', () => {
 
         test('should add entity id to options.pasteIndex', () => {
             // arrange
-            const action: EntityActions = {
-                type: types.ADD,
-                payload: { entity: { id: 99 }, configHash: '' },
-                options: { pasteIndex: 2 },
-            };
+            const action = actionCreators.ADD({ id: 99 }, undefined, { pasteIndex: 2 });
             // act
             const actual = reducer([1, 2, 3, 4], action);
             // assert
@@ -60,16 +50,7 @@ describe('ids', () => {
     test('should add entity ids from payload.$source', () => {
         // arrange
         const entities = [{ id: 1 }, { id: 2 }];
-        const action: EntityActions = {
-            type: types.ADD_LIST,
-            payload: {
-                entities,
-                configHash: '',
-                isReplace: false,
-                hasMore: false,
-            },
-            options: {},
-        };
+        const action = actionCreators.ADD_LIST(entities);
         // act
         const actual = reducer(undefined, action);
         // assert
@@ -80,12 +61,7 @@ describe('ids', () => {
     test('should remove entity id', () => {
         // arrange
         const entity = { id: 3 };
-        const action: EntityActions = {
-            type: types.REMOVE,
-            payload: { id: entity.id },
-            options: {},
-        };
-        // act
+        const action = actionCreators.REMOVE(entity.id);// act
         const actual = reducer([1, 2, entity.id, 4], action);
         // assert
         const expected = [1, 2, 4];
@@ -98,11 +74,7 @@ describe('ids', () => {
 		${false}
 	`('should add entity id when change if options.ifNotExist options passed and not exist($exist)', ({ exist }) => {
         // arrange
-        const action: EntityActions = {
-            type: types.CHANGE,
-            payload: { id: 1, patch: {} },
-            options: { ifNotExist: true, merge: true, },
-        };
+        const action = actionCreators.CHANGE(1, {}, undefined, { ifNotExist: true });
         const initialState = exist ? [1] : [];
         // act
         const actual = reducer(initialState, action);

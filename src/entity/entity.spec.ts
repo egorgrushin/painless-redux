@@ -375,15 +375,11 @@ describe('Entity', () => {
             expect(store.actions$).toBeObservable(actions$);
         });
 
-        // FIXME(yrgrushi): due to using of schedulers under the hood
-        //  this test is broken
         test('should page entities', () => {
             // arrange
             const remoteMarble = '    --a|   --a|   --a|   --a|  ';
-            // const paginationMarble = '-------a------b------b-----';
-            const paginationMarble = '-------a-----';
-            const actionsMarble = '   a-(bc)-a-(ec)';
-            // const actionsMarble = '   a-(bc)-a-(ec)-a-(bc)-a-(bc)';
+            const paginationMarble = '-------a------b------b-----';
+            const actionsMarble = '   a-(bc)-a-(ec)-a-(bc)-a-(bc)';
             const filter = null;
             const options = undefined;
             const users1 = [user, user2];
