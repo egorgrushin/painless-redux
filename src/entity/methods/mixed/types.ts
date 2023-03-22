@@ -6,8 +6,6 @@ import {
     EntityLoadListOptions,
     EntityLoadOptions,
     EntityRemoveOptions,
-    EntityResponse,
-    Response$,
     Response$Factory,
 } from '../../types';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -16,53 +14,53 @@ import { DeepPartial, Dictionary, Id } from '../../../system-types';
 export interface MixedEntityMethods<T> {
     loadList$(
         config: any,
-        dataSource: (Response$<T[]> | Response$Factory<T[]>),
+        dataSource: (Observable<T[]> | Response$Factory<T[]>),
         options?: EntityLoadListOptions,
         paginatorSubj?: BehaviorSubject<boolean>,
     ): Observable<never>;
 
     loadById$(
         id: Id,
-        dataSource$: Response$<T>,
+        dataSource$: Observable<T>,
         options?: EntityLoadOptions,
     ): Observable<never>;
 
     get$(
         config: any,
-        dataSource?: (Response$<T[]> | Response$Factory<T[]>),
+        dataSource?: (Observable<T[]> | Response$Factory<T[]>),
         options?: EntityGetListOptions,
         paginatorSubj?: BehaviorSubject<boolean>,
     ): Observable<T[] | undefined>;
 
     getDictionary$(
         config: any,
-        dataSource?: (Response$<T[]> | Response$Factory<T[]>),
+        dataSource?: (Observable<T[]> | Response$Factory<T[]>),
         options?: EntityGetListOptions,
         paginatorSubj?: BehaviorSubject<boolean>,
     ): Observable<Dictionary<T>>;
 
     getById$(
         id: Id,
-        dataSource?: Response$<T>,
+        dataSource?: Observable<T>,
         options?: EntityGetOptions,
     ): Observable<T | undefined>;
 
     createRemote$(
         config: any,
-        dataSource$: Response$<T>,
+        dataSource$: Observable<T>,
         options?: EntityAddOptions,
-    ): Response$<T>;
+    ): Observable<T>;
 
     changeRemote$(
         id: Id,
         patch: DeepPartial<T>,
         dataSource$: Observable<any>,
         options?: EntityChangeOptions,
-    ): Response$<DeepPartial<T>>;
+    ): Observable<DeepPartial<T>>;
 
     removeRemote$(
         id: Id,
-        observable: Observable<EntityResponse>,
+        observable: Observable<T>,
         options?: EntityRemoveOptions,
-    ): Observable<EntityResponse>;
+    ): Observable<T>;
 }
