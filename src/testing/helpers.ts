@@ -3,6 +3,10 @@ import { TestStore } from './store';
 // @ts-ignore
 import * as combineReducers from 'combine-reducers';
 import { PainlessRedux } from '../painless-redux/types';
+import { EntityActionTypes } from '../entity/types';
+import { createEntityActionCreators } from '../entity/action-creators';
+import { Reducer } from '../system-types';
+import { EntityActions } from '../entity/actions';
 
 export const initStoreWithPr = (
     store: TestStore<any>,
@@ -51,4 +55,22 @@ export const getOrderedMarbleStream = (...items: any) => {
         return memo;
     }, { marble: '', values: {} });
     return cold(marble, values);
+};
+
+export const createTestHelpers = <T>(
+    reducerFactory: <T>(types: EntityActionTypes) => Reducer<any, EntityActions>,
+) => {
+    const types: EntityActionTypes = {
+        ADD: 'ADD',
+        ADD_LIST: 'ADD_LIST',
+        REMOVE: 'REMOVE',
+        CHANGE: 'CHANGE',
+        SET_STATE: 'SET_STATE',
+        CREATE: 'CREATE',
+        RESOLVE_CHANGE: 'RESOLVE_CHANGE',
+    };
+
+    const actionCreators = createEntityActionCreators<T>(types);
+    const reducer = reducerFactory<T>(types);
+    return { actionCreators, reducer };
 };

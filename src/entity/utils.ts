@@ -7,7 +7,6 @@ import {
     ObservableOrFactory,
     PaginatedResponse,
     Pagination,
-    Response$,
     Response$Factory,
 } from './types';
 import { isNil } from 'lodash';
@@ -62,7 +61,7 @@ export const guardByOptions = <T>(
 );
 
 export const getPaginated$ = <T>(
-    dataSource: Response$<T[]> | Response$Factory<T[]>,
+    dataSource: Observable<T[]> | Response$Factory<T[]>,
     pagination: Pagination,
 ): Observable<PaginatedResponse<T>> => getObservable$(dataSource, pagination).pipe(
     map((response) => ({ ...pagination, response })),

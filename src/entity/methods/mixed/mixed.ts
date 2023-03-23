@@ -77,7 +77,7 @@ export const createMixedEntityMethods = <T>(
                 return dispatchMethods.add({
                     ...response,
                     id,
-                }, null, options);
+                }, undefined, options);
             },
         });
         const loadingState$ = selectMethods.getLoadingStateById$(id, prSchema.useAsapSchedulerInLoadingGuards);
