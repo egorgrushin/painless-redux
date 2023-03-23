@@ -218,9 +218,11 @@ describe('Entity', () => {
             // arrange
             const options = { optimistic: true };
             const removeAction = entity.actionCreators.REMOVE(user.id, options);
+            const resolveRemoveAction = entity.actionCreators.RESOLVE_REMOVE(user.id, true, options);
             const remote$ = cold(' --a| ', { a: null });
-            const actions$ = cold('a', {
+            const actions$ = cold('a-b', {
                 a: removeAction,
+                b: resolveRemoveAction,
             });
             // act
             entity.removeRemote$(user.id, remote$, options).subscribe();
@@ -228,20 +230,21 @@ describe('Entity', () => {
             expect(store.actions$).toBeObservable(actions$);
         });
 
-        xtest('should optimistic undo if failed', () => {
+        test('should optimistic undo if failed', () => {
             // arrange
             const options = { optimistic: true };
             const error = new Error('Failed');
-            const removeAction = entity.actionCreators.REMOVE(user.id, options);
-            const undoAction = { type: '[Store] Undo', payload: { action: removeAction }, options: {} };
+            const id = user.id;
+            const removeAction = entity.actionCreators.REMOVE(id, options);
+            const resolveRemoveAction = entity.actionCreators.RESOLVE_REMOVE(id, false, options);
             const remote$ = cold(' --#| ', undefined, error);
             const actions$ = cold('a-(bc)', {
                 a: removeAction,
-                b: undoAction,
-                c: setStateActionFactory<Error>({ isLoading: false, error }, user.id),
+                b: resolveRemoveAction,
+                c: setStateActionFactory<Error>({ isLoading: false, error }, id),
             });
             // act
-            entity.removeRemote$(user.id, remote$, options).subscribe();
+            entity.removeRemote$(id, remote$, options).subscribe();
             // assert
             expect(store.actions$).toBeObservable(actions$);
         });

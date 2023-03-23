@@ -38,14 +38,15 @@ const createPageReducer = (
             case types.ADD: {
                 return addList(state, [action.payload.entity]);
             }
-            case types.REMOVE: {
+            case types.RESOLVE_REMOVE: {
+                const { payload: { success, id } } = action;
+                if (!success) return state;
                 // this check needs to clear immutable reference updating.
                 // It means, no state mutating if this id doesn't exist here
-                const id = action.payload.id;
                 if (!state.ids?.includes(id)) return state;
                 return {
                     ...state,
-                    ids: state.ids.filter(existId => existId !== id),
+                    ids: state.ids.filter((existId) => existId !== id),
                 };
             }
             case types.SET_STATE: {
@@ -79,7 +80,7 @@ export const createPagesReducer = (
                     [hash]: pageReducer(state[hash], action),
                 };
             }
-            case types.REMOVE: {
+            case types.RESOLVE_REMOVE: {
                 return Object.keys(state).reduce((
                     memo: Dictionary<Page>,
                     hash: string,

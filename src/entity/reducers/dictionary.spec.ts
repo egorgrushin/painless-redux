@@ -126,7 +126,7 @@ describe('dictionary', () => {
                 const expected = ifNotExist ? {
                     [id]: { actual: { id, profile: { age: 18 } } },
                 } : {};
-                const expectedKeys = ifNotExist ? [id.toString()] : [];
+                const expectedKeys = ifNotExist ? [id] : [];
                 expect(Object.keys(actual)).toEqual(expectedKeys);
                 expect(actual).toEqual(expected);
             },

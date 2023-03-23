@@ -88,6 +88,14 @@ export const createResolveChange = <T>(types: EntityActionTypes) => (
     options = typedDefaultsDeep(options, { merge: true });
     return { type: types.RESOLVE_CHANGE, payload: { id, changeId, success, remotePatch }, options } as const;
 };
+export const createResolveRemove = <T>(types: EntityActionTypes) => (
+    id: Id,
+    success: boolean,
+    options?: EntityRemoveOptions,
+) => {
+    options = typedDefaultsDeep(options);
+    return { type: types.RESOLVE_REMOVE, payload: { id, success }, options } as const;
+};
 
 type SelfActionCreators = ReturnType<typeof createAdd>
     | ReturnType<typeof createAddList>
@@ -96,6 +104,7 @@ type SelfActionCreators = ReturnType<typeof createAdd>
     | ReturnType<typeof createSetState>
     | ReturnType<typeof createChange>
     | ReturnType<typeof createResolveChange>
+    | ReturnType<typeof createResolveRemove>
 
 export type EntityActions = ReturnType<SelfActionCreators>;
 

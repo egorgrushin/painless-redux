@@ -6,6 +6,7 @@ import {
     createCreate,
     createRemove,
     createResolveChange,
+    createResolveRemove,
     createSetState,
 } from './actions';
 
@@ -17,6 +18,7 @@ export const createEntityActionCreators = <T>(
     ADD_LIST: createAddList<T>(actionTypes),
     CHANGE: createChange<T>(actionTypes),
     RESOLVE_CHANGE: createResolveChange<T>(actionTypes),
+    RESOLVE_REMOVE: createResolveRemove<T>(actionTypes),
     REMOVE: createRemove(actionTypes),
     SET_STATE: createSetState(actionTypes),
 });
