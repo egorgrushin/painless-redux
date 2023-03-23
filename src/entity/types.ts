@@ -119,6 +119,7 @@ export interface EntityInstanceState<T> {
     actual: EntityType<T>;
     changes?: EntityChange<T>[];
     removed?: boolean;
+    loadingState?: LoadingState;
 }
 
 export interface EntityState<T> extends LoadingStateState {
@@ -151,7 +152,7 @@ export interface EntitySelectors<T> extends BaseEntitySelectors<T> {
     createPageLoadingState: (config: any) => LoadingStateSelector<EntityState<T>>;
     createPageIdsByConfig: (config: any) => IdsSelector<T>;
     all: ListSelector<T>;
-    createSelectorIdsList: (idsSelector: IdsSelector<T>) => ListSelector<T>;
+    createListSelectorByIds: (idsSelector: IdsSelector<T>) => ListSelector<T>;
     createPageListByConfig: (config: any) => ListSelector<T>;
 }
 

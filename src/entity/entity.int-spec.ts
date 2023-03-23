@@ -70,7 +70,6 @@ describe('[Integration] Entity', () => {
             // assert
             expect(remote$).toHaveNoSubscriptions();
         });
-
     });
 
     describe('getById$', () => {
@@ -114,6 +113,86 @@ describe('[Integration] Entity', () => {
             entity.getById$(user.id, remote$, { single: true }).subscribe();
             // assert
             expect(remote$).toHaveNoSubscriptions();
+        });
+    });
+
+    describe('getLoadingState$', () => {
+        test('should return loading state', () => {
+            // act
+            const actual$ = entity.getLoadingState$();
+            // assert
+            const expected$ = cold('a', { a: { isLoading: false } });
+            expect(actual$).toBeObservable(expected$);
+        });
+
+        test.each`
+            actionName         | action
+            ${'get$'}          | ${(remote$: any) => entity.get$(filter, remote$)}
+            ${'getById$'}      | ${(remote$: any) => entity.getById$(user.id, remote$)}
+            ${'createRemote$'} | ${(remote$: any) => entity.createRemote$(user.id, remote$)}
+            ${'changeRemote$'} | ${(remote$: any) => entity.changeRemote$(user.id, {}, remote$)}
+            ${'removeRemote$'} | ${(remote$: any) => entity.removeRemote$(user.id, remote$)}
+        `('should set loading state during remote$ for entity.$actionName', ({ action }) => {
+            // arrange
+            const remoteMarble = '      --a';
+            const loadingStateMarble = 'a-b';
+            const remote$ = cold(remoteMarble, { a: undefined });
+            // act
+            const actual$ = entity.getLoadingState$();
+            action(remote$).subscribe();
+            // assert
+            const expected$ = cold(loadingStateMarble, {
+                a: { isLoading: true },
+                b: { isLoading: false },
+            });
+            expect(actual$).toBeObservable(expected$);
+        });
+    });
+
+    describe('getLoadingStates$', () => {
+        test('should return loading states', () => {
+            // act
+            const actual$ = entity.getLoadingStates$();
+            // assert
+            const expected$ = cold('a', { a: {} });
+            expect(actual$).toBeObservable(expected$);
+        });
+
+        test.each`
+            actionName         | action
+            ${'getById$'}      | ${(remote$: any) => entity.getById$(user.id, remote$)}
+            ${'changeRemote$'} | ${(remote$: any) => entity.changeRemote$(user.id, {}, remote$)}
+        `('should set loading state during remote$ for entity.$actionName', ({ action }) => {
+            // arrange
+            const remoteMarble = '      --a';
+            const loadingStateMarble = 'a-b';
+            const remote$ = cold(remoteMarble, { a: undefined });
+            // act
+            const actual$ = entity.getLoadingStates$();
+            action(remote$).subscribe();
+            // assert
+            const expected$ = cold(loadingStateMarble, {
+                a: { [user.id]: { isLoading: true } },
+                b: { [user.id]: { isLoading: false } },
+            });
+            expect(actual$).toBeObservable(expected$);
+        });
+
+        test('should set and then remove loading state for entity.removeRemote$', () => {
+            // arrange
+            const remoteMarble = '      --a';
+            const loadingStateMarble = 'a-(bc)';
+            const remote$ = cold(remoteMarble, { a: undefined });
+            // act
+            const actual$ = entity.getLoadingStates$();
+            entity.removeRemote$(user.id, remote$).subscribe();
+            // assert
+            const expected$ = cold(loadingStateMarble, {
+                a: { [user.id]: { isLoading: true } },
+                b: { [user.id]: { isLoading: false } },
+                c: {},
+            });
+            expect(actual$).toBeObservable(expected$);
         });
     });
 

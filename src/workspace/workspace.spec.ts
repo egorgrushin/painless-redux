@@ -50,11 +50,10 @@ describe('Workspace', () => {
 
     describe('#getLoadingState$', () => {
         test('should return observable with loadingState', () => {
-            // arrange
-            const expected$ = cold('a', { a: undefined });
             // act
             const actual = workspace.getLoadingState$();
             // assert
+            const expected$ = cold('a', { a: { isLoading: false } });
             expect(actual).toBeObservable(expected$);
         });
     });

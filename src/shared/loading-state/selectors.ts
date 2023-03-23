@@ -5,5 +5,5 @@ export const createLoadingStateSelector = <T extends LoadingStateState>(
     selector: Selector<any, T>,
 ) => createSelector(
     selector,
-    (workspace: T) => workspace.loadingState,
+    (state: T) => state.loadingState ?? { isLoading: false },
 );
