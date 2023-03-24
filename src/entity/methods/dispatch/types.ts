@@ -58,6 +58,10 @@ export interface DispatchEntityMethods<T> {
         options?: EntityRemoveOptions,
     ): EntityActions;
 
+    restoreRemoved(
+        id: Id,
+    ): EntityActions;
+
     remove(
         id: Id,
         options?: EntityRemoveOptions,

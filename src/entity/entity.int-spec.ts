@@ -268,7 +268,6 @@ describe('[Integration] Entity', () => {
     });
 
     describe('#removeRemote', () => {
-
         beforeEach(() => {
             entity.add(user);
         });
@@ -288,9 +287,24 @@ describe('[Integration] Entity', () => {
             ).subscribe();
             // assert
             expect(actual$).toBeObservable(expected$);
-
         });
 
+        test('should undo if response fail', () => {
+            // arrange
+            const idleMarble = '    --a  ';
+            const remoteMarble = '    --#';
+            const expectedMarble = 'a-b-a';
+            const remote$ = cold(remoteMarble);
+            const expected$ = cold(expectedMarble, { a: [user], b: [] });
+            const actual$ = entity.get$(filter);
+            const options: EntityRemoveOptions = { optimistic: true };
+            // act
+            cold(idleMarble, { a: null }).pipe(
+                switchMap(() => entity.removeRemote$(user.id, remote$, options)),
+            ).subscribe();
+            // assert
+            expect(actual$).toBeObservable(expected$);
+        });
     });
 
 });
