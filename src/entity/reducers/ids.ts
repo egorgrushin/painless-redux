@@ -58,6 +58,14 @@ export const createIdsReducer = (
             if (!success || safe) return state;
             return state.filter(existId => existId !== id);
         }
+        case types.RESOLVE_ADD: {
+            const { payload: { success, result, tempId } } = action;
+            if (!success) return state.filter((existId) => existId !== tempId);
+            return state.map((id) => {
+                if (id === tempId) return result.id;
+                return id;
+            });
+        }
         default:
             return state;
     }

@@ -62,12 +62,12 @@ export const createTestHelpers = <T>(
 ) => {
     const types: EntityActionTypes = {
         ADD: 'ADD',
+        RESOLVE_ADD: 'RESOLVE_ADD',
         ADD_LIST: 'ADD_LIST',
-        REMOVE: 'REMOVE',
-        CHANGE: 'CHANGE',
         SET_STATE: 'SET_STATE',
-        CREATE: 'CREATE',
+        CHANGE: 'CHANGE',
         RESOLVE_CHANGE: 'RESOLVE_CHANGE',
+        REMOVE: 'REMOVE',
         RESOLVE_REMOVE: 'RESOLVE_REMOVE',
         RESTORE_REMOVED: 'RESTORE_REMOVED',
     };

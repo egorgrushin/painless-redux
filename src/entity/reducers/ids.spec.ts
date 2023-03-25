@@ -12,7 +12,7 @@ describe('ids', () => {
         test('should add entity id', () => {
             // arrange
             const entity = { id: 1 };
-            const action = actionCreators.ADD(entity, undefined);
+            const action = actionCreators.ADD(entity);
             // act
             const actual = reducer(undefined, action);
             // assert
@@ -22,7 +22,7 @@ describe('ids', () => {
 
         test('should add entity id to options.pasteIndex', () => {
             // arrange
-            const action = actionCreators.ADD({ id: 99 }, undefined, { pasteIndex: 2 });
+            const action = actionCreators.ADD({ id: 99 }, undefined, undefined, { pasteIndex: 2 });
             // act
             const actual = reducer([1, 2, 3, 4], action);
             // assert

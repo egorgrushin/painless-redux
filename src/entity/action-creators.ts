@@ -3,8 +3,8 @@ import {
     createAdd,
     createAddList,
     createChange,
-    createCreate,
     createRemove,
+    createResolveAdd,
     createResolveChange,
     createResolveRemove,
     createRestoreRemoved,
@@ -15,13 +15,13 @@ export const createEntityActionCreators = <T>(
     actionTypes: EntityActionTypes,
 ) => ({
     ADD: createAdd<T>(actionTypes),
-    CREATE: createCreate<T>(actionTypes),
+    RESOLVE_ADD: createResolveAdd<T>(actionTypes),
     ADD_LIST: createAddList<T>(actionTypes),
     CHANGE: createChange<T>(actionTypes),
     RESOLVE_CHANGE: createResolveChange<T>(actionTypes),
+    REMOVE: createRemove(actionTypes),
     RESOLVE_REMOVE: createResolveRemove<T>(actionTypes),
     RESTORE_REMOVED: createRestoreRemoved<T>(actionTypes),
-    REMOVE: createRemove(actionTypes),
     SET_STATE: createSetState(actionTypes),
 });
 

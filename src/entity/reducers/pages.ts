@@ -60,6 +60,20 @@ const createPageReducer = (
                     ids: state.ids.filter((existId) => existId !== id),
                 };
             }
+            case types.RESOLVE_ADD: {
+                const { payload: { success, tempId, result } } = action;
+                if (!success) return {
+                    ...state,
+                    ids: state.ids?.filter((id) => id !== tempId),
+                };
+                return {
+                    ...state,
+                    ids: state.ids?.map((id) => {
+                        if (id === tempId) return result.id;
+                        return id;
+                    }),
+                };
+            }
             case types.SET_STATE: {
                 return {
                     ...state,
@@ -91,6 +105,7 @@ export const createPagesReducer = (
                     [hash]: pageReducer(state[hash], action),
                 };
             }
+            case types.RESOLVE_ADD:
             case types.REMOVE:
             case types.RESOLVE_REMOVE: {
                 return Object.keys(state).reduce((

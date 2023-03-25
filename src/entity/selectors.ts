@@ -69,7 +69,7 @@ export const createBaseEntitySelectors = <T>(
 
 const getActual = <T>(instance: EntityInstanceState<T> | undefined) => {
     if (!instance || instance.removed) return undefined;
-    return getMergedChanges(instance).actual;
+    return getMergedChanges(instance)?.actual;
 };
 
 export const createCreateActualSelector = <T>(

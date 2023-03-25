@@ -17,18 +17,27 @@ export interface DispatchEntityMethods<T> {
         options?: EntityAddOptions,
     ): EntityActions;
 
+    addWithId(
+        data: T,
+        tempId: string,
+        config?: any,
+        options?: EntityAddOptions,
+    ): EntityActions;
+
+    resolveAdd(
+        data: T | undefined,
+        success: boolean,
+        tempId: string,
+        config?: any,
+        options?: EntityAddOptions,
+    ): EntityActions;
+
     addList(
         data: T[],
         config?: any,
         isReplace?: boolean,
         hasMore?: boolean,
         options?: EntityAddListOptions,
-    ): EntityActions;
-
-    create(
-        data: T,
-        config?: any,
-        options?: EntityAddOptions,
     ): EntityActions;
 
     change(

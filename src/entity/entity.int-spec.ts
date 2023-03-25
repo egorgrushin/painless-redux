@@ -1,11 +1,15 @@
 import { Id } from '../system-types';
-import { Entity, EntityRemoveOptions } from './types';
+import { Entity, EntityAddOptions, EntityRemoveOptions } from './types';
 import { createEntity } from './entity';
 import { PainlessRedux } from '../painless-redux/types';
 import { createPainlessRedux } from '../painless-redux/painless-redux';
 import { TestStore } from '../testing/store';
 import { cold } from 'jest-marbles';
 import { switchMap } from 'rxjs/operators';
+import { mocked } from 'ts-jest/utils';
+import * as uuid from 'uuid';
+
+jest.mock('uuid');
 
 type TestEntity = {
     id: Id;
@@ -32,7 +36,7 @@ describe('[Integration] Entity', () => {
 
         test('should emit created earlier instance ', () => {
             // arrange
-            entity.create(user);
+            entity.add(user);
             const expected$ = cold('a', { a: [user] });
             // act
             const actual$ = entity.get$(filter);
@@ -52,7 +56,7 @@ describe('[Integration] Entity', () => {
 
         test('should not load instance if exist with single option ', () => {
             // arrange
-            entity.create(user);
+            entity.add(user);
             const remote$ = cold('  --a', { a: [user] });
             const expected$ = cold('a   ', { a: [user] });
             // act
@@ -63,7 +67,7 @@ describe('[Integration] Entity', () => {
 
         test('should not subscribe to remote$ if exist with single option ', () => {
             // arrange
-            entity.create(user);
+            entity.add(user);
             const remote$ = cold('  --a', { a: [user] });
             // act
             entity.get$(filter, remote$, { single: true }).subscribe();
@@ -76,7 +80,7 @@ describe('[Integration] Entity', () => {
 
         test('should emit created earlier instance ', () => {
             // arrange
-            entity.create(user);
+            entity.add(user);
             const expected$ = cold('a', { a: user });
             // act
             const actual$ = entity.getById$(user.id);
@@ -96,7 +100,7 @@ describe('[Integration] Entity', () => {
 
         test('should not load instance if exist with single option ', () => {
             // arrange
-            entity.create(user);
+            entity.add(user);
             const remote$ = cold('  --a', { a: user });
             const expected$ = cold('a   ', { a: user });
             // act
@@ -107,7 +111,7 @@ describe('[Integration] Entity', () => {
 
         test('should not subscribe to remote$ if exist with single option ', () => {
             // arrange
-            entity.create(user);
+            entity.add(user);
             const remote$ = cold('  --a', { a: user });
             // act
             entity.getById$(user.id, remote$, { single: true }).subscribe();
@@ -129,7 +133,7 @@ describe('[Integration] Entity', () => {
             actionName         | action
             ${'get$'}          | ${(remote$: any) => entity.get$(filter, remote$)}
             ${'getById$'}      | ${(remote$: any) => entity.getById$(user.id, remote$)}
-            ${'createRemote$'} | ${(remote$: any) => entity.createRemote$(user.id, remote$)}
+            ${'addRemote$'}    | ${(remote$: any) => entity.addRemote$(user, user.id, remote$)}
             ${'changeRemote$'} | ${(remote$: any) => entity.changeRemote$(user.id, {}, remote$)}
             ${'removeRemote$'} | ${(remote$: any) => entity.removeRemote$(user.id, remote$)}
         `('should set loading state during remote$ for entity.$actionName', ({ action }) => {
@@ -272,35 +276,48 @@ describe('[Integration] Entity', () => {
             entity.add(user);
         });
 
-        test('should optimistic remove', () => {
+        test.each`
+            remoteMarble | expectedMarble
+            ${'--a'}     | ${'a-b-b'}
+            ${'--#'}     | ${'a-b-a'}
+        `('should optimistic remove or undo for $remoteMarble', ({ remoteMarble, expectedMarble }) => {
             // arrange
-            const idleMarble = '    --a  ';
-            const remoteMarble = '    --a';
-            const expectedMarble = 'a-b-b';
-            const remote$ = cold(remoteMarble, { a: null });
-            const expected$ = cold(expectedMarble, { a: [user], b: [] });
-            const actual$ = entity.get$(filter);
-            const options: EntityRemoveOptions = { optimistic: true };
-            // act
-            cold(idleMarble, { a: null }).pipe(
-                switchMap(() => entity.removeRemote$(user.id, remote$, options)),
-            ).subscribe();
-            // assert
-            expect(actual$).toBeObservable(expected$);
-        });
-
-        test('should undo if response fail', () => {
-            // arrange
-            const idleMarble = '    --a  ';
-            const remoteMarble = '    --#';
-            const expectedMarble = 'a-b-a';
             const remote$ = cold(remoteMarble);
             const expected$ = cold(expectedMarble, { a: [user], b: [] });
             const actual$ = entity.get$(filter);
             const options: EntityRemoveOptions = { optimistic: true };
             // act
-            cold(idleMarble, { a: null }).pipe(
+            cold('--a', { a: null }).pipe(
                 switchMap(() => entity.removeRemote$(user.id, remote$, options)),
+            ).subscribe();
+            // assert
+            expect(actual$).toBeObservable(expected$);
+        });
+    });
+
+    describe('#addRemote', () => {
+        test.each`
+            remoteMarble | expectedMarble
+            ${'--a'}     | ${'a-b-c'}
+            ${'--#'}     | ${'a-b-d'}
+        `('should optimistic add with response.id or undo for $remoteMarble', ({ remoteMarble, expectedMarble }) => {
+            // arrange
+            const newId = '999';
+            const tempId = '666';
+            mocked(uuid.v4).mockReturnValueOnce(tempId);
+            const response = { id: newId };
+            const remote$ = cold(remoteMarble, { a: response });
+            const expected$ = cold(expectedMarble, {
+                a: undefined,
+                b: [{ ...user, id: tempId }],
+                c: [{ ...user, id: newId }],
+                d: [],
+            });
+            const actual$ = entity.get$(filter);
+            const options: EntityAddOptions = { optimistic: true };
+            // act
+            cold('--a').pipe(
+                switchMap(() => entity.addRemote$(user, filter, remote$, options)),
             ).subscribe();
             // assert
             expect(actual$).toBeObservable(expected$);

@@ -61,7 +61,7 @@ describe('dictionary', () => {
         const entity = { id: 1, name: 'entity 1' };
         const action = actionCreators.ADD(entity);
         const entity2 = { id: 1, age: 1 };
-        const action2 = actionCreators.ADD(entity2, undefined, options);
+        const action2 = actionCreators.ADD(entity2, undefined, undefined, options);
         // act
         const instances = [action, action2].reduce(reducer, undefined);
         const actual = instances[entity.id].actual;

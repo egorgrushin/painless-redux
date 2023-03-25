@@ -254,10 +254,10 @@ describe('Entity', () => {
     describe('#create', () => {
         test('should create entity', () => {
             // arrange
-            const createAction = entity.actionCreators.CREATE(user);
+            const createAction = entity.actionCreators.ADD(user);
             const actions$ = cold('a', { a: createAction });
             // act
-            entity.create(user);
+            entity.add(user);
             // assert
             expect(store.actions$).toBeObservable(actions$);
         });
@@ -265,14 +265,14 @@ describe('Entity', () => {
         test('should remote create entity', () => {
             // arrange
             const remote$ = cold('--a|', { a: user });
-            const createAction = entity.actionCreators.CREATE(user);
+            const createAction = entity.actionCreators.ADD(user);
             const actions$ = cold('a-(bc)', {
                 a: setStateActionFactory({ isLoading: true }),
                 b: createAction,
                 c: setStateActionFactory({ isLoading: false }),
             });
             // act
-            const actual = entity.createRemote$(undefined, remote$);
+            const actual = entity.addRemote$(user, undefined, remote$);
             // assert
             expect(actual).toBeObservable(remote$);
             expect(store.actions$).toBeObservable(actions$);
