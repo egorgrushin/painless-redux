@@ -132,6 +132,13 @@ export const createDispatchEntityMethods = <T>(
         return dispatcher.createAndDispatch('SET_STATE', [state, undefined, id, key], options);
     };
 
+    const clear = (config: any) => {
+        return dispatcher.createAndDispatch('CLEAR', [config]);
+    };
+    const clearAll = () => {
+        return dispatcher.createAndDispatch('CLEAR_ALL', []);
+    };
+
     const setStateBus = (
         state: LoadingState,
         id?: Id,
@@ -198,6 +205,8 @@ export const createDispatchEntityMethods = <T>(
         resolveRemove,
         restoreRemoved,
         setState,
+        clear,
+        clearAll,
         setStateBus,
         setStateById,
         setStateForKey,

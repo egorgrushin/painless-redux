@@ -42,6 +42,9 @@ export const createByIdLoadingStatesReducer = (
                 const { payload: { success, id } } = action;
                 return removeState(state, id, !success);
             }
+            case types.CLEAR_ALL: {
+                return {};
+            }
             default:
                 return state;
         }

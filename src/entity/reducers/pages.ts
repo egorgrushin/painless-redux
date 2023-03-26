@@ -62,16 +62,16 @@ const createPageReducer = (
             }
             case types.RESOLVE_ADD: {
                 const { payload: { success, tempId, result } } = action;
-                if (!success) return {
-                    ...state,
-                    ids: state.ids?.filter((id) => id !== tempId),
-                };
-                return {
+                if (success) return {
                     ...state,
                     ids: state.ids?.map((id) => {
                         if (id === tempId) return result.id;
                         return id;
                     }),
+                };
+                return {
+                    ...state,
+                    ids: state.ids?.filter((id) => id !== tempId),
                 };
             }
             case types.SET_STATE: {
@@ -115,6 +115,14 @@ export const createPagesReducer = (
                     memo[hash] = pageReducer(state[hash], action);
                     return memo;
                 }, {});
+            }
+            case types.CLEAR: {
+                const hash = action.payload.configHash;
+                const { [hash]: deleted, ...rest } = state;
+                return rest;
+            }
+            case types.CLEAR_ALL: {
+                return {};
             }
             default:
                 return state;

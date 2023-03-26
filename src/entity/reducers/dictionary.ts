@@ -72,6 +72,9 @@ export const createDictionaryReducer = <T>(
                 const { [id]: deleted, ...rest } = state;
                 return rest;
             }
+            case types.CLEAR_ALL: {
+                return {};
+            }
             default:
                 return state;
         }

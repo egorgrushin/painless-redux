@@ -82,6 +82,10 @@ export interface DispatchEntityMethods<T> {
         options?: EntitySetStateOptions,
     ): EntityActions;
 
+    clear(config: any): EntityActions;
+
+    clearAll(): EntityActions;
+
     setStateById(
         id: Id,
         state: LoadingState,

@@ -163,6 +163,8 @@ export interface EntityActionTypes {
     REMOVE: 'REMOVE';
     RESOLVE_REMOVE: 'RESOLVE_REMOVE';
     RESTORE_REMOVED: 'RESTORE_REMOVED';
+    CLEAR: 'CLEAR';
+    CLEAR_ALL: 'CLEAR_ALL';
 }
 
 export type Entity<T> = {
