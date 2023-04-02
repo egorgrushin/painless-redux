@@ -1,24 +1,26 @@
 import { getHash } from './utils';
 import {
     EntityActionTypes,
-    EntityAddListOptions,
     EntityAddOptions,
     EntityChangeOptions,
+    EntityInternalAddListOptions,
+    EntityInternalAddOptions,
+    EntityInternalSetStateOptions,
     EntityRemoveOptions,
-    EntitySetStateOptions,
     EntityType,
 } from './types';
 import { DeepPartial, Id, LoadingState } from '../system-types';
 import { typedDefaultsDeep } from '../utils';
 import * as loadingStateActions from '../shared/loading-state/actions';
+import { MAX_PAGES_COUNT } from './constants';
 
 export const createAddByHash = <T>(types: EntityActionTypes) => (
     entity: EntityType<T>,
     configHash: string,
     tempId?: string,
-    options?: EntityAddOptions,
+    options?: EntityInternalAddOptions,
 ) => {
-    options = typedDefaultsDeep(options, { merge: true });
+    options = typedDefaultsDeep(options, { merge: true, maxPagesCount: MAX_PAGES_COUNT });
     const payload = { entity, configHash, tempId };
     return { type: types.ADD, payload, options } as const;
 };
@@ -27,10 +29,10 @@ export const createAdd = <T>(types: EntityActionTypes) => (
     entity: EntityType<T>,
     config?: any,
     tempId?: string,
-    options?: EntityAddOptions,
+    options?: EntityInternalAddOptions,
 ) => {
     const configHash = getHash(config);
-    options = typedDefaultsDeep(options);
+    options = typedDefaultsDeep(options, { maxPagesCount: MAX_PAGES_COUNT });
     tempId = options.optimistic ? tempId : undefined;
     entity = options.optimistic ? { ...entity, id: tempId as string } : entity;
     return createAddByHash(types)(entity, configHash, tempId, options);
@@ -54,10 +56,10 @@ export const createAddList = <T>(types: EntityActionTypes) => (
     config?: any,
     isReplace: boolean = false,
     hasMore: boolean = false,
-    options?: EntityAddListOptions,
+    options?: EntityInternalAddListOptions,
 ) => {
     const configHash = getHash(config);
-    options = typedDefaultsDeep(options, { merge: true });
+    options = typedDefaultsDeep(options, { merge: true, maxPagesCount: MAX_PAGES_COUNT });
     const payload = { entities, configHash, isReplace, hasMore };
     return { type: types.ADD_LIST, payload, options } as const;
 };
@@ -76,12 +78,16 @@ export const createSetState = (types: EntityActionTypes) => (
     config?: any,
     id?: Id,
     key?: string,
-    options?: EntitySetStateOptions,
+    options?: EntityInternalSetStateOptions,
 ) => {
     const actionCreator = loadingStateActions.createSetState(types);
     const action = actionCreator(state, key, options);
     const configHash = getHash(config);
-    return { ...action, payload: { ...action.payload, configHash, id } } as const;
+    return {
+        ...action,
+        payload: { ...action.payload, configHash, id },
+        options: { ...action.options, maxPagesCount: options?.maxPagesCount ?? MAX_PAGES_COUNT },
+    } as const;
 };
 
 export const createChange = <T>(types: EntityActionTypes) => (

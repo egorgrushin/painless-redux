@@ -3,13 +3,14 @@ import { Dictionary } from '../../system-types';
 import { EntityActions } from '../actions';
 import { isNil, uniq } from 'lodash';
 import { createLoadingStateReducer } from '../../shared/loading-state/reducers';
+import { MAX_PAGES_COUNT } from '../constants';
 
 const addList = (
-    state: Page,
+    state: Page | undefined,
     data: any[],
 ): Page => {
     const newIds = data.map(entity => entity.id);
-    const oldIds = state.ids ?? [];
+    const oldIds = state?.ids ?? [];
     return {
         ...state,
         ids: uniq(oldIds.concat(newIds)),
@@ -21,14 +22,14 @@ const createPageReducer = (
 ) => {
     const loadingStateReducer = createLoadingStateReducer(types);
     return (
-        state: Page = {},
+        state: Page | undefined,
         action: EntityActions,
-    ): Page => {
+    ): Page | undefined => {
         switch (action.type) {
             case types.ADD_LIST: {
-                let newState = state;
+                let newState = state ?? { ids: [] };
                 if (!isNil(action.payload.hasMore)) {
-                    newState = { ...state, hasMore: action.payload.hasMore };
+                    newState = { ...newState, hasMore: action.payload.hasMore };
                 }
                 if (action.payload.isReplace) {
                     newState = { ...newState, ids: undefined };
@@ -43,7 +44,7 @@ const createPageReducer = (
                 if (optimistic || safe) return state;
                 // this check needs to clear immutable reference updating.
                 // It means, no state mutating if this id doesn't exist here
-                if (!state.ids?.includes(id)) return state;
+                if (!state?.ids?.includes(id)) return state;
                 return {
                     ...state,
                     ids: state.ids.filter((existId) => existId !== id),
@@ -54,7 +55,7 @@ const createPageReducer = (
                 if (!success || safe) return state;
                 // this check needs to clear immutable reference updating.
                 // It means, no state mutating if this id doesn't exist here
-                if (!state.ids?.includes(id)) return state;
+                if (!state?.ids?.includes(id)) return state;
                 return {
                     ...state,
                     ids: state.ids.filter((existId) => existId !== id),
@@ -62,6 +63,7 @@ const createPageReducer = (
             }
             case types.RESOLVE_ADD: {
                 const { payload: { success, tempId, result } } = action;
+                if (!state) return state;
                 if (success) return {
                     ...state,
                     ids: state.ids?.map((id) => {
@@ -77,7 +79,8 @@ const createPageReducer = (
             case types.SET_STATE: {
                 return {
                     ...state,
-                    loadingState: loadingStateReducer(state.loadingState, action),
+                    ids: state?.ids,
+                    loadingState: loadingStateReducer(state?.loadingState, action),
                 };
             }
             default:
@@ -98,12 +101,29 @@ export const createPagesReducer = (
             case types.SET_STATE:
             case types.ADD_LIST:
             case types.ADD: {
-                const hash = action.payload.configHash;
-                if (isNil(hash)) return state;
-                return {
-                    ...state,
-                    [hash]: pageReducer(state[hash], action),
-                };
+                const {
+                    payload: { configHash },
+                    options: { maxPagesCount = MAX_PAGES_COUNT },
+                } = action;
+                if (isNil(configHash)) return state;
+                const pageExist = configHash in state;
+                const page = pageReducer(state[configHash], action);
+                if (!page) return state;
+                const newState = { ...state, [configHash]: page };
+                if (pageExist) return newState;
+                const pageHashes = Object.keys(newState);
+                const pagesCount = pageHashes.length;
+                page.order = pagesCount - 1;
+                if (pagesCount <= maxPagesCount) return newState;
+                return pageHashes.reduce((memo: Dictionary<Page>, hash: string) => {
+                    const existPage = newState[hash];
+                    if (existPage.order === 0) return memo;
+                    memo[hash] = {
+                        ...existPage,
+                        order: (existPage.order ?? pagesCount) - 1,
+                    };
+                    return memo;
+                }, {});
             }
             case types.RESOLVE_ADD:
             case types.REMOVE:
@@ -112,7 +132,9 @@ export const createPagesReducer = (
                     memo: Dictionary<Page>,
                     hash: string,
                 ) => {
-                    memo[hash] = pageReducer(state[hash], action);
+                    const page = pageReducer(state[hash], action);
+                    if (!page) return memo;
+                    memo[hash] = page;
                     return memo;
                 }, {});
             }

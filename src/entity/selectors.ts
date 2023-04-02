@@ -11,6 +11,7 @@ import {
     LoadingStatesSelector,
     Page,
     PageSelector,
+    PagesListSelector,
     PagesSelector,
 } from './types';
 import { PainlessReduxState } from '../painless-redux/types';
@@ -19,6 +20,7 @@ import { createLoadingStateSelector } from '../shared/loading-state/selectors';
 import { LoadingStateSelector } from '../shared/loading-state/types';
 import { isNil } from 'lodash';
 import { getMergedChanges } from './utils';
+import { values } from 'lodash/fp';
 
 export const createDictionarySelector = <T>(
     selector: Selector<PainlessReduxState, EntityState<T>>,
@@ -79,6 +81,12 @@ export const createCreateActualSelector = <T>(
 ): ActualSelector<T> => createSelector(
     dictionarySelector,
     (dictionary) => getActual(dictionary[id]),
+);
+export const createListSelectorFromPages = <T>(
+    pagesSelector: PagesSelector<T>,
+): PagesListSelector<T> => createSelector(
+    pagesSelector,
+    (pages) => values(pages),
 );
 
 export const createListSelector = <T>(
@@ -163,6 +171,7 @@ export const createEntitySelectors = <T>(
     } = createBaseEntitySelectors<T>(selector);
     const createListSelectorByIds = createListSelector(dictionary);
     const all = createListSelectorByIds(ids);
+    const allPages = createListSelectorFromPages(pages);
 
     const createActual = createCreateActualSelector(dictionary);
     const createPageIds = createCreatePageIdsSelector(pages);
@@ -190,5 +199,6 @@ export const createEntitySelectors = <T>(
         createPage,
         createPageLoadingState,
         createLoadingStateById,
+        allPages,
     };
 };
