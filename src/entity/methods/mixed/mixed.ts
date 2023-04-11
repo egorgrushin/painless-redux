@@ -1,6 +1,5 @@
 import {
     EntityAddOptions,
-    EntityChangeOptions,
     EntityGetListOptions,
     EntityGetOptions,
     EntityLoadListOptions,
@@ -14,12 +13,15 @@ import {
 import { BehaviorSubject, merge, Observable, of } from 'rxjs';
 import { DispatchEntityMethods } from '../dispatch/types';
 import { SelectEntityMethods } from '../select/types';
-import { getPaginated$, guardIfLoading } from '../../utils';
+import { getPaginated$ } from '../../utils';
 import { DeepPartial, Dictionary, Id, LoadingState } from '../../../system-types';
 import { createMixedEntityMethodsUtils } from './utils';
 import { MixedEntityMethods } from './types';
 import { v4 } from 'uuid';
 import { PainlessReduxSchema } from '../../../painless-redux/types';
+import { ChangeOptions } from '../../../shared/change/types';
+import { getPatchByOptions, getResolvePatchByOptions } from '../../../shared/change/utils';
+import { getRemotePipe, guardIfLoading } from '../../../shared/utils';
 
 export const createMixedEntityMethods = <T>(
     dispatchMethods: DispatchEntityMethods<T>,
@@ -29,11 +31,8 @@ export const createMixedEntityMethods = <T>(
 ): MixedEntityMethods<T> => {
 
     const {
-        getRemotePipe,
         getPaginator,
         tryInvoke,
-        getPatchByOptions,
-        getResolvePatchByOptions,
     } = createMixedEntityMethodsUtils(dispatchMethods, selectMethods, schema, prSchema);
 
     const loadList$ = (
@@ -43,8 +42,7 @@ export const createMixedEntityMethods = <T>(
         paginatorSubj?: BehaviorSubject<boolean>,
     ): Observable<never> => {
         const store$ = selectMethods.get$(config);
-        const sourcePipe = getRemotePipe<Pagination, PaginatedResponse<T>, never>({
-                config,
+        const sourcePipe = getRemotePipe<T, Pagination, PaginatedResponse<T>, never>({
                 options,
                 store$,
                 remoteObsOrFactory: (pagination) => getPaginated$(dataSource, pagination),
@@ -56,6 +54,7 @@ export const createMixedEntityMethods = <T>(
                     const hasMore = data.length >= size;
                     return dispatchMethods.addList(data, config, isReplace, hasMore, options);
                 },
+                setState: (state) => dispatchMethods.setStateBus(state, undefined, config),
             },
         );
         return getPaginator(config, paginatorSubj, options).pipe(sourcePipe);
@@ -67,8 +66,7 @@ export const createMixedEntityMethods = <T>(
         options?: EntityLoadOptions,
     ): Observable<never> => {
         const store$ = selectMethods.getById$(id);
-        const sourcePipe = getRemotePipe<LoadingState | undefined, T, never>({
-            id,
+        const sourcePipe = getRemotePipe<T, LoadingState | undefined, T, never>({
             options,
             store$,
             remoteObsOrFactory: dataSource$,
@@ -77,6 +75,7 @@ export const createMixedEntityMethods = <T>(
                 const entity = { ...response, id };
                 return dispatchMethods.add(entity, undefined, options);
             },
+            setState: (state) => dispatchMethods.setStateBus(state, id),
         });
         const loadingState$ = selectMethods.getLoadingStateById$(id, prSchema.useAsapSchedulerInLoadingGuards);
         return guardIfLoading(loadingState$).pipe(sourcePipe);
@@ -151,8 +150,7 @@ export const createMixedEntityMethods = <T>(
     ): Observable<T> => {
         const tempId = v4();
         const { addWithId, resolveAdd } = dispatchMethods;
-        const sourcePipe = getRemotePipe<null, T>({
-            config,
+        const sourcePipe = getRemotePipe<T, null, T>({
             options,
             remoteObsOrFactory: dataSource$,
             success: (result) => {
@@ -163,6 +161,7 @@ export const createMixedEntityMethods = <T>(
             emitOnSuccess: true,
             optimistic: options?.optimistic,
             optimisticResolve: (success, result) => resolveAdd(result, success, tempId, config, options),
+            setState: (state) => dispatchMethods.setStateBus(state, undefined, config),
         });
         return of(null).pipe(sourcePipe);
     };
@@ -171,14 +170,13 @@ export const createMixedEntityMethods = <T>(
         id: Id,
         patch: DeepPartial<T>,
         dataSource$: Observable<any>,
-        options?: EntityChangeOptions,
+        options?: ChangeOptions,
     ): Observable<DeepPartial<T>> => {
         const changeId = v4();
         const { changeWithId, resolveChange } = dispatchMethods;
         const { getLoadingStateById$ } = selectMethods;
 
-        const sourcePipe = getRemotePipe<LoadingState | undefined, DeepPartial<T>>({
-            id,
+        const sourcePipe = getRemotePipe<T, LoadingState | undefined, DeepPartial<T>>({
             options,
             remoteObsOrFactory: dataSource$,
             success: (
@@ -196,6 +194,7 @@ export const createMixedEntityMethods = <T>(
                 const patchToApply = getResolvePatchByOptions(patch, response, options);
                 return resolveChange(id, changeId, success, patchToApply, options);
             },
+            setState: (state) => dispatchMethods.setStateBus(state, id),
         });
         const loadingState$ = getLoadingStateById$(id, prSchema.useAsapSchedulerInLoadingGuards);
         return guardIfLoading(loadingState$).pipe(sourcePipe);
@@ -207,8 +206,7 @@ export const createMixedEntityMethods = <T>(
         options?: EntityRemoveOptions,
     ): Observable<T> => {
         const { remove, resolveRemove } = dispatchMethods;
-        const sourcePipe = getRemotePipe<LoadingState | undefined, T>({
-            id,
+        const sourcePipe = getRemotePipe<T, LoadingState | undefined, T>({
             options,
             remoteObsOrFactory: observable,
             success: () => remove(id, options),
@@ -216,6 +214,7 @@ export const createMixedEntityMethods = <T>(
             emitOnSuccess: true,
             optimistic: options?.optimistic,
             optimisticResolve: (success: boolean) => resolveRemove(id, success, options),
+            setState: (state) => dispatchMethods.setStateBus(state, id),
         });
         const loadingState$ = selectMethods.getLoadingStateById$(id, prSchema.useAsapSchedulerInLoadingGuards);
         return guardIfLoading(loadingState$).pipe(sourcePipe);

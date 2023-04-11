@@ -1,19 +1,11 @@
-import { BehaviorSubject, EMPTY, merge, Observable, of, OperatorFunction } from 'rxjs';
-import {
-    EntityChangeOptions,
-    EntityGetListOptions,
-    EntitySchema,
-    ObservableOrFactory,
-    Page,
-    Pagination,
-    RemotePipeConfig,
-} from '../../types';
-import { catchError, first, map, scan, switchMap, take, tap } from 'rxjs/operators';
-import { getObservable$, guardByOptions, guardIfLoading } from '../../utils';
+import { BehaviorSubject, EMPTY, merge, Observable, of } from 'rxjs';
+import { EntityGetListOptions, EntitySchema, Page, Pagination } from '../../types';
+import { map, scan, switchMap, take } from 'rxjs/operators';
 import { DispatchEntityMethods } from '../dispatch/types';
 import { SelectEntityMethods } from '../select/types';
-import { DeepPartial } from '../../../system-types';
 import { PainlessReduxSchema } from '../../../painless-redux/types';
+import { ObservableOrFactory } from '../../../shared/types';
+import { guardIfLoading } from '../../../shared/utils';
 
 export const createMixedEntityMethodsUtils = <T>(
     dispatchMethods: DispatchEntityMethods<T>,
@@ -49,64 +41,6 @@ export const createMixedEntityMethodsUtils = <T>(
         );
     };
 
-    const getRemotePipe = <S, R, F = R>(
-        {
-            config,
-            id,
-            store$,
-            remoteObsOrFactory,
-            options,
-            success,
-            emitSuccessOutsideAffectState,
-            emitOnSuccess,
-            optimistic,
-            optimisticResolve,
-        }: RemotePipeConfig<S, R>,
-    ): OperatorFunction<S, F> => {
-        const trailPipe: OperatorFunction<R, F> = emitOnSuccess
-            ? map((result: R) => result as unknown as F)
-            : switchMap(() => EMPTY);
-
-        return (source: Observable<S>): Observable<F> => source.pipe(
-            switchMap((value: S) => {
-                const remote$ = getObservable$<S, R>(remoteObsOrFactory, value);
-                if (optimistic) {
-                    success();
-                    return remote$.pipe(
-                        tap((response) => optimisticResolve?.(true, response)),
-                        catchError((error: any) => {
-                            optimisticResolve?.(false);
-                            dispatchMethods.setStateBus({ error, isLoading: false }, id, config);
-                            return EMPTY;
-                        }),
-                    );
-                }
-                const successPipe = tap((result: R) => success(result));
-                const pipesToAffect: any = [
-                    switchMap(() => remote$),
-                ];
-                const resultPipes: OperatorFunction<any, any>[] = [];
-
-                if (emitSuccessOutsideAffectState) {
-                    resultPipes.push(successPipe);
-                } else {
-                    pipesToAffect.push(successPipe);
-                }
-
-                const affectPipe = dispatchMethods.affectStateByConfigOrId(config, id, undefined, false)(...pipesToAffect);
-                resultPipes.unshift(affectPipe);
-
-                if (!store$) return (of(value) as any).pipe(...resultPipes) as Observable<R>;
-                return (store$ as any).pipe(
-                    first(),
-                    guardByOptions<T>(options),
-                    ...resultPipes,
-                ) as Observable<R>;
-            }),
-            trailPipe,
-        );
-    };
-
     const tryInvoke = <T, R, S>(
         store$: Observable<S>,
         invoker: (dataSource: ObservableOrFactory<T, R>) => Observable<never>,
@@ -119,23 +53,5 @@ export const createMixedEntityMethodsUtils = <T>(
         return store$;
     };
 
-    const getPatchByOptions = (
-        patch: DeepPartial<T>,
-        response: DeepPartial<T> | undefined,
-        options?: EntityChangeOptions,
-    ): DeepPartial<T> => {
-        if (options?.optimistic) return patch;
-        if (options?.useResponsePatch) return response ?? {};
-        return patch;
-    };
-
-    const getResolvePatchByOptions = (
-        patch: DeepPartial<T>,
-        response: DeepPartial<T> | undefined,
-        options?: EntityChangeOptions,
-    ): DeepPartial<T> | undefined => {
-        if (options?.useResponsePatch) return response;
-    };
-
-    return { getRemotePipe, getPaginator, tryInvoke, getPatchByOptions, getResolvePatchByOptions };
+    return { getPaginator, tryInvoke };
 };

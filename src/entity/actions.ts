@@ -2,7 +2,6 @@ import { getHash } from './utils';
 import {
     EntityActionTypes,
     EntityAddOptions,
-    EntityChangeOptions,
     EntityInternalAddListOptions,
     EntityInternalAddOptions,
     EntityInternalSetStateOptions,
@@ -12,7 +11,9 @@ import {
 import { DeepPartial, Id, LoadingState } from '../system-types';
 import { typedDefaultsDeep } from '../utils';
 import * as loadingStateActions from '../shared/loading-state/actions';
+import * as changeActions from '../shared/change/actions';
 import { MAX_PAGES_COUNT } from './constants';
+import { ChangeOptions } from '../shared/change/types';
 
 export const createAddByHash = <T>(types: EntityActionTypes) => (
     entity: EntityType<T>,
@@ -94,10 +95,15 @@ export const createChange = <T>(types: EntityActionTypes) => (
     id: Id,
     patch: DeepPartial<T>,
     changeId?: string,
-    options?: EntityChangeOptions,
+    options?: ChangeOptions,
 ) => {
-    options = typedDefaultsDeep(options, { merge: true });
-    return { type: types.CHANGE, payload: { patch, id, changeId }, options } as const;
+    const actionCreator = changeActions.createChange(types);
+    const action = actionCreator(patch, changeId, options);
+    return {
+        ...action,
+        type: types.CHANGE,
+        payload: { ...action.payload, id },
+    } as const;
 };
 
 export const createResolveChange = <T>(types: EntityActionTypes) => (
@@ -105,10 +111,15 @@ export const createResolveChange = <T>(types: EntityActionTypes) => (
     changeId: string,
     success: boolean,
     remotePatch?: DeepPartial<T>,
-    options?: EntityChangeOptions,
+    options?: ChangeOptions,
 ) => {
-    options = typedDefaultsDeep(options, { merge: true });
-    return { type: types.RESOLVE_CHANGE, payload: { id, changeId, success, remotePatch }, options } as const;
+    const actionCreator = changeActions.createResolveChange(types);
+    const action = actionCreator(changeId, success, remotePatch, options);
+    return {
+        ...action,
+        type: types.RESOLVE_CHANGE,
+        payload: { ...action.payload, id },
+    } as const;
 };
 
 export const createResolveRemove = <T>(types: EntityActionTypes) => (

@@ -1,33 +1,34 @@
-import { ChangeActionTypes } from '../shared/change/types';
+import { ChangeableState, ChangeActionTypes } from '../shared/change/types';
 import { LoadingStateActionTypes, LoadingStateSelectors, LoadingStateState } from '../shared/loading-state/types';
 import { Selector } from 'reselect';
 import { SelectWorkspaceMethods } from './methods/select/types';
 import { DispatchWorkspaceMethods } from './methods/dispatch/types';
 import { WorkspaceActionCreators } from './action-creators';
+import { MixedWorkspaceMethods } from './methods/mixed/types';
+
+export type PublicDispatchWorkspaceMethods<T> = Omit<DispatchWorkspaceMethods<T>, 'changeWithId' | 'resolveChange'>
 
 export type Workspace<T> = {
     actionCreators: WorkspaceActionCreators;
-} & DispatchWorkspaceMethods<T> & SelectWorkspaceMethods<T>;
+} & PublicDispatchWorkspaceMethods<T> & SelectWorkspaceMethods<T> & MixedWorkspaceMethods<T>;
 
 export interface WorkspaceState<T> extends LoadingStateState {
-    value: Partial<T>;
+    value: ChangeableState<T>;
 }
 
 export interface WorkspaceSchema<T> {
     name: string;
-    initialValue?: Partial<T>;
+    initialValue?: T;
 }
-
 
 export interface WorkspaceActionTypes extends ChangeActionTypes {
     SET_STATE: LoadingStateActionTypes['SET_STATE'];
 }
 
-
-export type ValueSelector<T> = Selector<WorkspaceState<T>, Partial<T>>;
+export type ValueSelector<T> = Selector<WorkspaceState<T>, T | undefined>;
 
 export interface WorkspaceSelectors<T> extends LoadingStateSelectors<WorkspaceState<T>> {
-    value: ValueSelector<T>;
+    actual: ValueSelector<T>;
 }
 
 export type BooleanMap<T> = {

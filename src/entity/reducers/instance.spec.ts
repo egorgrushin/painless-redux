@@ -1,6 +1,7 @@
 import { createTestHelpers } from '../../testing/helpers';
 import { createInstanceReducer } from './instance';
-import { EntityChange, EntityInstanceState, EntityType } from '../types';
+import { EntityInstanceState, EntityType } from '../types';
+import { Change } from '../../shared/change/types';
 
 const {
     reducer,
@@ -32,7 +33,7 @@ describe('instance', () => {
             // act
             const actual = reducer(state, action);
             // assert
-            const addChange: EntityChange<any> = { stable: true, patch: entity, merge };
+            const addChange: Change<any> = { stable: true, patch: entity, merge };
             const expected = {
                 actual: entity,
                 changes: [existChange, addChange],

@@ -13,24 +13,24 @@ export const affectStatePipeFactory = <T, E>(
     let stateCleared: boolean;
     return (source as any).pipe(
         tap((value: T) => {
-            setter({ isLoading: true }, false, value);
+            setter?.({ isLoading: true }, false, value);
             stateCleared = false;
         }),
         switchMap((value: T) => (of(value) as any).pipe(
             ...pipes,
             catchError((error: E) => {
-                setter({ isLoading: false, error }, false, undefined);
+                setter?.({ isLoading: false, error }, false, undefined);
                 stateCleared = true;
                 return rethrow ? throwError(error) : EMPTY;
             }),
         )),
         tap((value: T) => {
-            setter({ isLoading: false }, false, value);
+            setter?.({ isLoading: false }, false, value);
             stateCleared = true;
         }),
         finalize(() => {
             if (stateCleared) return;
-            setter({ isLoading: false }, true, undefined);
+            setter?.({ isLoading: false }, true, undefined);
         }),
     );
 };

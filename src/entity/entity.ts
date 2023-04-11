@@ -41,7 +41,6 @@ export const createEntity = <T>(
         ...publicDispatchMethods,
         ...mixedMethods,
         ...publicSelectMethods,
-        // @ts-ignore
         actionCreators,
     };
 };

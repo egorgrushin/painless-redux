@@ -9,14 +9,14 @@ export const createSelectWorkspaceMethods = <T>(
     selectors: WorkspaceSelectors<T>,
 ): SelectWorkspaceMethods<T> => {
 
-    const get$ = (): Observable<Partial<T>> => {
-        const selector = selectors.value;
+    const get$ = (): Observable<T | undefined> => {
+        const selector = selectors.actual;
         return select$(selector);
     };
 
-    const getLoadingState$ = (): Observable<LoadingState | undefined> => {
+    const getLoadingState$ = (isAsap?: boolean): Observable<LoadingState | undefined> => {
         const selector = selectors.loadingState;
-        return select$(selector);
+        return select$(selector, isAsap);
     };
 
     // const getByMap$ = <M extends BooleanMap<Partial<T>>>(
@@ -31,7 +31,7 @@ export const createSelectWorkspaceMethods = <T>(
 
     return {
         get$,
-        // getByMap$,
         getLoadingState$,
+        // getByMap$,
     };
 };

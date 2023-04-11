@@ -3,7 +3,6 @@ import {
     EntityActionTypes,
     EntityAddListOptions,
     EntityAddOptions,
-    EntityChangeOptions,
     EntityInternalAddListOptions,
     EntityInternalAddOptions,
     EntityInternalSetStateOptions,
@@ -88,7 +87,7 @@ export const createDispatchEntityMethods = <T>(
         id: Id,
         patch: DeepPartial<T>,
         changeId: string,
-        options?: EntityChangeOptions,
+        options?: ChangeOptions,
     ) => {
         return dispatcher.createAndDispatch('CHANGE', [id, patch, changeId], options);
     };
@@ -98,7 +97,7 @@ export const createDispatchEntityMethods = <T>(
         changeId: Id,
         success: boolean,
         remotePatch: DeepPartial<T>,
-        options?: EntityChangeOptions,
+        options?: ChangeOptions,
     ) => {
         return dispatcher.createAndDispatch('RESOLVE_CHANGE', [id, changeId, success, remotePatch], options);
     };
