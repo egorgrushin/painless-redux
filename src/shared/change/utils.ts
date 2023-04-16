@@ -22,7 +22,7 @@ export const getMergedChanges = <T>(
         if (onlyStable && !change.stable) break;
         changes = changes.slice(1);
         const { merge, patch } = change;
-        actual = merge ? mergeFn(actual, patch) : patch;
+        actual = merge ? mergeFn(actual, patch) : patch as T;
     }
 
     if (changes.length === 0) return { actual };

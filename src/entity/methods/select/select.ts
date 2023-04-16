@@ -10,7 +10,7 @@ export const createSelectEntityMethods = <T>(
     selectors: EntitySelectors<T>,
 ): SelectEntityMethods<T> => {
 
-    const get$ = (config: any): Observable<T[] | undefined> => {
+    const get$ = (config: unknown): Observable<T[] | undefined> => {
         const selector = selectors.createPageListByConfig(config);
         return selectManager.select$(selector);
     };
@@ -20,7 +20,7 @@ export const createSelectEntityMethods = <T>(
         return selectManager.select$(selector);
     };
 
-    const getDictionary$ = (config: any): Observable<Dictionary<T>> => {
+    const getDictionary$ = (config: unknown): Observable<Dictionary<T>> => {
         return get$(config).pipe(toDictionary());
     };
 
@@ -30,7 +30,7 @@ export const createSelectEntityMethods = <T>(
     };
 
     const getPage$ = (
-        config: any,
+        config: unknown,
         isAsap: boolean = false,
     ) => {
         const selector = selectors.createPage(config);
@@ -45,7 +45,7 @@ export const createSelectEntityMethods = <T>(
     };
 
     const getPageLoadingState$ = (
-        config: any,
+        config: unknown,
         isAsap: boolean = false,
     ) => {
         const selector = selectors.createPageLoadingState(config);

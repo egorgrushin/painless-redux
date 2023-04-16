@@ -1,13 +1,13 @@
-import { EntityActionTypes, Page } from '../types';
+import { EntityActionTypes, EntityType, Page } from '../types';
 import { Dictionary } from '../../system-types';
 import { EntityActions } from '../actions';
 import { isNil, uniq } from 'lodash';
 import { createLoadingStateReducer } from '../../shared/loading-state/reducers';
 import { MAX_PAGES_COUNT } from '../constants';
 
-const addList = (
+const addList = <T>(
     state: Page | undefined,
-    data: any[],
+    data: EntityType<T>[],
 ): Page => {
     const newIds = data.map(entity => entity.id);
     const oldIds = state?.ids ?? [];

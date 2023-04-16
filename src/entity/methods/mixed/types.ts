@@ -13,7 +13,7 @@ import { ChangeOptions } from '../../../shared/change/types';
 
 export interface MixedEntityMethods<T> {
     loadList$(
-        config: any,
+        config: unknown,
         dataSource: (Observable<T[]> | Response$Factory<T[]>),
         options?: EntityLoadListOptions,
         paginatorSubj?: BehaviorSubject<boolean>,
@@ -26,14 +26,14 @@ export interface MixedEntityMethods<T> {
     ): Observable<never>;
 
     get$(
-        config: any,
+        config: unknown,
         dataSource?: (Observable<T[]> | Response$Factory<T[]>),
         options?: EntityGetListOptions,
         paginatorSubj?: BehaviorSubject<boolean>,
     ): Observable<T[] | undefined>;
 
     getDictionary$(
-        config: any,
+        config: unknown,
         dataSource?: (Observable<T[]> | Response$Factory<T[]>),
         options?: EntityGetListOptions,
         paginatorSubj?: BehaviorSubject<boolean>,
@@ -47,7 +47,7 @@ export interface MixedEntityMethods<T> {
 
     addRemote$(
         entity: T,
-        config: any,
+        config: unknown,
         dataSource$: Observable<T>,
         options?: EntityAddOptions,
     ): Observable<T>;
@@ -55,7 +55,7 @@ export interface MixedEntityMethods<T> {
     changeRemote$(
         id: Id,
         patch: DeepPartial<T>,
-        dataSource$: Observable<any>,
+        dataSource$: Observable<DeepPartial<T> | undefined>,
         options?: ChangeOptions,
     ): Observable<DeepPartial<T>>;
 

@@ -17,7 +17,7 @@ export const createWorkspaceMixedMethods = <T>(
 
     const changeRemote$ = (
         patch: DeepPartial<T>,
-        dataSource$: Observable<any>,
+        dataSource$: Observable<DeepPartial<T> | undefined>,
         label: string,
         options?: ChangeOptions,
     ): Observable<DeepPartial<T>> => {
@@ -25,7 +25,7 @@ export const createWorkspaceMixedMethods = <T>(
         const { changeWithId, resolveChange, setState } = dispatchMethods;
         const { getLoadingState$ } = selectMethods;
 
-        const sourcePipe = getRemotePipe<T, LoadingState | undefined, DeepPartial<T>>({
+        const sourcePipe = getRemotePipe<LoadingState | undefined, unknown, DeepPartial<T> | undefined, DeepPartial<T>>({
             options,
             remoteObsOrFactory: dataSource$,
             success: (

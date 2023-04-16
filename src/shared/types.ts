@@ -3,17 +3,17 @@ import { Observable } from 'rxjs';
 
 export type ObservableOrFactory<S, R> = (Observable<R>) | ((value: S) => Observable<R>);
 
-export interface RemotePipeConfig<S, R> {
-    store$?: Observable<any>;
-    remoteObsOrFactory: ObservableOrFactory<S, R>;
+export interface RemotePipeConfig<TSource, TStore, TResponse> {
+    store$?: Observable<TStore>;
+    remoteObsOrFactory: ObservableOrFactory<TSource, TResponse>;
     options?: RemoteOptions;
-    success: (result?: R) => AnyAction | undefined;
+    success: (result?: TResponse) => AnyAction | undefined;
     emitSuccessOutsideAffectState?: boolean;
     emitOnSuccess?: boolean;
     optimistic?: boolean;
     optimisticResolve?: (
         success: boolean,
-        result?: R,
+        result?: TResponse,
     ) => AnyAction | undefined;
     setState?: (loadingState: LoadingState) => void;
 }

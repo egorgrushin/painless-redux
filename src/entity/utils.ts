@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { getObservable$ } from '../shared/utils';
 
-export const getHash = (config: any): string => hashIt(config);
+export const getHash = (config: unknown): string => hashIt(config);
 
 export const getFullEntitySchema = <T>(
     schema?: Partial<EntitySchema<T>>,

@@ -125,12 +125,12 @@ export interface BaseEntitySelectors<T> extends LoadingStateSelectors<EntityStat
 
 export interface EntitySelectors<T> extends BaseEntitySelectors<T> {
     createActual: (id: Id) => ActualSelector<T>;
-    createPage: (config: any) => PageSelector<T>;
+    createPage: (config: unknown) => PageSelector<T>;
     createPageIds: (hash: string) => IdsSelector<T>;
-    createPageLoadingState: (config: any) => LoadingStateSelector<EntityState<T>>;
-    createPageIdsByConfig: (config: any) => IdsSelector<T>;
+    createPageLoadingState: (config: unknown) => LoadingStateSelector<EntityState<T>>;
+    createPageIdsByConfig: (config: unknown) => IdsSelector<T>;
     createListSelectorByIds: (idsSelector: IdsSelector<T>) => ListSelector<T>;
-    createPageListByConfig: (config: any) => ListSelector<T>;
+    createPageListByConfig: (config: unknown) => ListSelector<T>;
     allPages: PagesListSelector<T>;
     all: ListSelector<T>;
 }
