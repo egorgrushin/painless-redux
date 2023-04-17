@@ -12,6 +12,7 @@ import {
     createRestoreRemoved,
     createSetState,
 } from './actions';
+import { createBatch } from '../shared/system/actions';
 
 export const createEntityActionCreators = <T>(
     actionTypes: EntityActionTypes,
@@ -27,6 +28,7 @@ export const createEntityActionCreators = <T>(
     SET_STATE: createSetState(actionTypes),
     CLEAR: createClear(actionTypes),
     CLEAR_ALL: createClearAll(actionTypes),
+    BATCH: createBatch(actionTypes),
 });
 
 export type EntityActionCreators = ReturnType<typeof createEntityActionCreators>;

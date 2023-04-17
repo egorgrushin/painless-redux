@@ -13,6 +13,7 @@ import { SelectEntityMethods } from './methods/select/types';
 import { DispatchEntityMethods } from './methods/dispatch/types';
 import { MixedEntityMethods } from './methods/mixed/types';
 import { EntityActionCreators } from './action-creators';
+import { SystemActionTypes } from '../shared/system/types';
 
 export type EntityType<T> = T & { id: Id };
 
@@ -135,7 +136,7 @@ export interface EntitySelectors<T> extends BaseEntitySelectors<T> {
     all: ListSelector<T>;
 }
 
-export interface EntityActionTypes {
+export interface EntityActionTypes extends SystemActionTypes {
     ADD: 'ADD';
     RESOLVE_ADD: 'RESOLVE_ADD';
     ADD_LIST: 'ADD_LIST';

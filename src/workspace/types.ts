@@ -1,10 +1,11 @@
-import { ChangeableState, ChangeActionTypes } from '../shared/change/types';
+import { ChangeableState } from '../shared/change/types';
 import { LoadingStateActionTypes, LoadingStateSelectors, LoadingStateState } from '../shared/loading-state/types';
 import { Selector } from 'reselect';
 import { SelectWorkspaceMethods } from './methods/select/types';
 import { DispatchWorkspaceMethods } from './methods/dispatch/types';
 import { WorkspaceActionCreators } from './action-creators';
 import { MixedWorkspaceMethods } from './methods/mixed/types';
+import { SystemActionTypes } from '../shared/system/types';
 
 export type PublicDispatchWorkspaceMethods<T> = Omit<DispatchWorkspaceMethods<T>, 'changeWithId' | 'resolveChange'>
 
@@ -21,8 +22,10 @@ export interface WorkspaceSchema<T> {
     initialValue?: T;
 }
 
-export interface WorkspaceActionTypes extends ChangeActionTypes {
+export interface WorkspaceActionTypes extends SystemActionTypes {
     SET_STATE: LoadingStateActionTypes['SET_STATE'];
+    CHANGE: 'CHANGE';
+    RESOLVE_CHANGE: 'RESOLVE_CHANGE';
 }
 
 export type ValueSelector<T> = Selector<WorkspaceState<T>, T | undefined>;

@@ -14,4 +14,5 @@ export const ENTITY_TYPE_NAMES: Array<keyof EntityActionTypes> = [
     'RESTORE_REMOVED',
     'CLEAR',
     'CLEAR_ALL',
+    'BATCH',
 ];

@@ -221,6 +221,12 @@ export const createDispatchEntityMethods = <T>(
         return affectStateFactory(setter, rethrow);
     };
 
+    const batch = (
+        actions: EntityActions[],
+    ) => {
+        return dispatcher.createAndDispatch('BATCH', [actions]);
+    };
+
     return {
         add,
         addWithId,
@@ -241,5 +247,6 @@ export const createDispatchEntityMethods = <T>(
         affectState,
         affectStateById,
         affectStateByConfigOrId,
+        batch,
     };
 };

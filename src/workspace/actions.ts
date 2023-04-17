@@ -3,6 +3,7 @@ import { LoadingStateActions } from '../shared/loading-state/actions';
 import { ChangeOptions } from '../shared/change/types';
 import { WorkspaceActionTypes } from './types';
 import { DeepPartial } from '../system-types';
+import { SystemActions } from '../shared/system/actions';
 
 export const createChange = <T>(types: WorkspaceActionTypes) => (
     patch: DeepPartial<T>,
@@ -32,5 +33,5 @@ type SelfActions = ReturnType<typeof createChange>
 
 export type WorkspaceChangeAction = ReturnType<SelfActions>
 
-export type WorkspaceActions = ReturnType<SelfActions> | LoadingStateActions
+export type WorkspaceActions = ReturnType<SelfActions> | LoadingStateActions | SystemActions
 
