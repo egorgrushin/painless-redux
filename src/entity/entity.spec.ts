@@ -28,10 +28,10 @@ describe('Entity', () => {
     let reducer: any;
     let idFn = jest.fn((data) => data.id);
 
-    const setStateActionFactory = <E>(
-        state: LoadingState<E>,
+    const setLoadingStateActionFactory = (
+        state: LoadingState,
         id?: Id,
-    ) => entity.actionCreators.SET_STATE(state, undefined, id);
+    ) => entity.actionCreators.SET_LOADING_STATE(state, undefined, id);
 
     beforeEach(() => {
         store = new TestStore(undefined, (state) => state);
@@ -136,9 +136,9 @@ describe('Entity', () => {
             const resolvePatch = useResponsePatch ? responsePatch : patch;
             const changeAction = entity.actionCreators.CHANGE(id, resolvePatch, changeId, options);
             const actions$ = cold('a-(bc)', {
-                a: setStateActionFactory({ isLoading: true }, id),
+                a: setLoadingStateActionFactory({ isLoading: true }, id),
                 b: changeAction,
-                c: setStateActionFactory({ isLoading: false }, id),
+                c: setLoadingStateActionFactory({ isLoading: false }, id),
             });
             // act
             entity.changeRemote$(id, patch, remote$, options).subscribe();
@@ -170,7 +170,7 @@ describe('Entity', () => {
 
             test('should resolve unsuccessfully if response failed', () => {
                 const options: ChangeOptions = { optimistic: true };
-                const error = new Error();
+                const error = 'Error';
                 const failedRemote$ = cold(' --#|', undefined, error);
                 const id = user.id;
                 const changeAction = entity.actionCreators.CHANGE(id, patch, changeId, options);
@@ -178,7 +178,7 @@ describe('Entity', () => {
                 const actions$ = cold('a-(bc)', {
                     a: changeAction,
                     b: resolveChangeAction,
-                    c: setStateActionFactory({ isLoading: false, error }, id),
+                    c: setLoadingStateActionFactory({ isLoading: false, error }, id),
                 });
                 // act
                 entity.changeRemote$(id, patch, failedRemote$, options).subscribe();
@@ -205,8 +205,8 @@ describe('Entity', () => {
             const removeAction = entity.actionCreators.REMOVE(user.id);
             const remote$ = cold(' --a| ', { a: null });
             const actions$ = cold('a-(bc)', {
-                a: setStateActionFactory({ isLoading: true }, user.id),
-                b: setStateActionFactory({ isLoading: false }, user.id),
+                a: setLoadingStateActionFactory({ isLoading: true }, user.id),
+                b: setLoadingStateActionFactory({ isLoading: false }, user.id),
                 c: removeAction,
             });
             // act
@@ -234,7 +234,7 @@ describe('Entity', () => {
         test('should optimistic undo if failed', () => {
             // arrange
             const options = { optimistic: true };
-            const error = new Error('Failed');
+            const error = 'Failed';
             const id = user.id;
             const removeAction = entity.actionCreators.REMOVE(id, options);
             const resolveRemoveAction = entity.actionCreators.RESOLVE_REMOVE(id, false, options);
@@ -242,7 +242,7 @@ describe('Entity', () => {
             const actions$ = cold('a-(bc)', {
                 a: removeAction,
                 b: resolveRemoveAction,
-                c: setStateActionFactory<Error>({ isLoading: false, error }, id),
+                c: setLoadingStateActionFactory({ isLoading: false, error }, id),
             });
             // act
             entity.removeRemote$(id, remote$, options).subscribe();
@@ -268,9 +268,9 @@ describe('Entity', () => {
             const remote$ = cold('--a|', { a: user });
             const createAction = entity.actionCreators.ADD(user);
             const actions$ = cold('a-(bc)', {
-                a: setStateActionFactory({ isLoading: true }),
+                a: setLoadingStateActionFactory({ isLoading: true }),
                 b: createAction,
-                c: setStateActionFactory({ isLoading: false }),
+                c: setLoadingStateActionFactory({ isLoading: false }),
             });
             // act
             const actual = entity.addRemote$(user, undefined, remote$);
@@ -295,9 +295,9 @@ describe('Entity', () => {
             const remote$ = cold('--a|', { a: user });
             const addAction = entity.actionCreators.ADD(user);
             const actions$ = cold('a-(bc)', {
-                a: setStateActionFactory({ isLoading: true }, user.id),
+                a: setLoadingStateActionFactory({ isLoading: true }, user.id),
                 b: addAction,
-                c: setStateActionFactory({ isLoading: false }, user.id),
+                c: setLoadingStateActionFactory({ isLoading: false }, user.id),
             });
             // act
             entity.getById$(user.id, remote$).subscribe();
@@ -312,9 +312,9 @@ describe('Entity', () => {
             const id = [data.objectId, data.type].toString();
             const addAction = entity.actionCreators.ADD({ id, ...data });
             const actions$ = cold('a-(bc)', {
-                a: setStateActionFactory({ isLoading: true }, id),
+                a: setLoadingStateActionFactory({ isLoading: true }, id),
                 b: addAction,
-                c: setStateActionFactory({ isLoading: false }, id),
+                c: setLoadingStateActionFactory({ isLoading: false }, id),
             });
             // act
             entity.getById$(id, remote$).subscribe();
@@ -341,9 +341,9 @@ describe('Entity', () => {
             const filter = null;
             const addAction = entity.actionCreators.ADD_LIST(users, filter, true, false);
             const actions$ = cold('a-(bc)', {
-                a: setStateActionFactory({ isLoading: true }),
+                a: setLoadingStateActionFactory({ isLoading: true }),
                 b: addAction,
-                c: setStateActionFactory({ isLoading: false }),
+                c: setLoadingStateActionFactory({ isLoading: false }),
             });
             // act
             entity.get$(filter, remote$).subscribe();
@@ -364,11 +364,11 @@ describe('Entity', () => {
 
         test('should set error if observable source throws error', () => {
             // arrange
-            const error = new Error('Some error');
+            const error = 'Some error';
             const remote$ = cold('--#|', null, error);
             const actions$ = cold('a-b', {
-                a: setStateActionFactory({ isLoading: true }),
-                b: setStateActionFactory<Error>({ isLoading: false, error }),
+                a: setLoadingStateActionFactory({ isLoading: true }),
+                b: setLoadingStateActionFactory({ isLoading: false, error }),
             });
             // act
             entity.get$(null, remote$).subscribe();
@@ -392,8 +392,8 @@ describe('Entity', () => {
             const addAction = entity.actionCreators.ADD_LIST(users1, filter, true, true);
             const addAction2 = entity.actionCreators.ADD_LIST(users2, filter);
             const paginator = new BehaviorSubject<boolean>(true);
-            const setStateTrueAction = setStateActionFactory({ isLoading: true });
-            const setStateFalseAction = setStateActionFactory({ isLoading: false });
+            const setLoadingStateTrueAction = setLoadingStateActionFactory({ isLoading: true });
+            const setLoadingStateFalseAction = setLoadingStateActionFactory({ isLoading: false });
 
             cold(paginationMarble, {
                 a: true,
@@ -403,9 +403,9 @@ describe('Entity', () => {
             });
 
             const actions$ = cold(actionsMarble, {
-                a: setStateTrueAction,
+                a: setLoadingStateTrueAction,
                 b: addAction,
-                c: setStateFalseAction,
+                c: setLoadingStateFalseAction,
                 e: addAction2,
             });
             // act

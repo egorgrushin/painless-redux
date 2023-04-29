@@ -4,7 +4,7 @@ export type Dictionary<T> = Record<string, T>;
 
 export type Id = string | number;
 
-export interface LoadingState<E = any> {
+export interface LoadingState<E = string> {
     byKeys?: Dictionary<LoadingState>;
     isLoading: boolean;
     error?: E;
@@ -46,7 +46,6 @@ export type StrictDictionary<K extends Key,
     V,
     K2 extends Key = string,
     > = Record<K, V> & Record<K2, V>;
-
 
 export type DeepPartial<T> = {
     [P in keyof T]?: T[P] extends Array<infer U>

@@ -9,8 +9,9 @@ import { createPagesReducer } from './reducers/pages';
 import { EntityActions } from './actions';
 import { createByIdLoadingStatesReducer } from './reducers/loading-states';
 import { createEntityLoadingStateReducer } from './reducers/loading-state';
+import { batchActionsReducerFactory } from '../shared/system/reducers';
 
-export const createEntityReducer = <T>(
+const createBaseReducer = <T>(
     actionTypes: EntityActionTypes,
 ): Reducer<EntityState<T>, EntityActions> => combineReducers<EntityState<T>, EntityActions>({
     dictionary: createDictionaryReducer(actionTypes),
@@ -19,3 +20,10 @@ export const createEntityReducer = <T>(
     loadingStates: createByIdLoadingStatesReducer(actionTypes),
     loadingState: createEntityLoadingStateReducer(actionTypes),
 });
+
+export const createEntityReducer = <T>(
+    actionTypes: EntityActionTypes,
+): Reducer<EntityState<T>, EntityActions> => {
+    const baseReducer = createBaseReducer<T>(actionTypes);
+    return batchActionsReducerFactory(actionTypes, baseReducer);
+};

@@ -10,7 +10,7 @@ export interface LoadingStateSetOptions {
 }
 
 export interface LoadingStateActionTypes {
-    SET_STATE: 'SET_STATE';
+    SET_LOADING_STATE: 'SET_LOADING_STATE';
 }
 
 export type LoadingStateSelector<T> = Selector<T, LoadingState | undefined>

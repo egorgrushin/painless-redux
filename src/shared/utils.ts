@@ -3,7 +3,7 @@ import { catchError, filter, first, map, switchMap, tap } from 'rxjs/operators';
 import { ObservableOrFactory, RemoteOptions, RemotePipeConfig } from './types';
 import { isNil } from 'lodash';
 import { LoadingState } from '../system-types';
-import { affectStateFactory } from '../affect-state/affect-state';
+import { affectLoadingStateFactory } from '../affect-loading-state/affect-loading-state';
 
 export const getObservable$ = <S, R>(
     observableOrFactory: ObservableOrFactory<S, R>,
@@ -30,7 +30,7 @@ export const getRemotePipe = <TSource, TStore, TResponse, TOutput>(
         emitOnSuccess,
         optimistic,
         optimisticResolve,
-        setState,
+        setLoadingState,
     }: RemotePipeConfig<TSource, TStore, TResponse>,
 ): OperatorFunction<TSource, TOutput> => {
     const trailPipe: OperatorFunction<TResponse, TOutput> = emitOnSuccess
@@ -46,7 +46,7 @@ export const getRemotePipe = <TSource, TStore, TResponse, TOutput>(
                     tap((response) => optimisticResolve?.(true, response)),
                     catchError((error: any) => {
                         optimisticResolve?.(false);
-                        setState?.({ error, isLoading: false });
+                        setLoadingState?.({ error, isLoading: false });
                         return EMPTY;
                     }),
                 );
@@ -63,8 +63,8 @@ export const getRemotePipe = <TSource, TStore, TResponse, TOutput>(
                 pipesToAffect.push(successPipe);
             }
 
-            if (setState) {
-                const affectStateObsFactory = affectStateFactory(setState, false);
+            if (setLoadingState) {
+                const affectStateObsFactory = affectLoadingStateFactory(setLoadingState, false);
                 const affectPipe = affectStateObsFactory(...pipesToAffect);
                 resultPipes.unshift(affectPipe);
             } else {

@@ -1,6 +1,6 @@
 import { WorkspaceActionTypes } from './types';
 import { createChange, createResolveChange } from './actions';
-import { createSetState } from '../shared/loading-state/actions';
+import { createSetLoadingState } from '../shared/loading-state/actions';
 import { createBatch } from '../shared/system/actions';
 
 export const createWorkspaceActionCreators = <T>(
@@ -8,7 +8,7 @@ export const createWorkspaceActionCreators = <T>(
 ) => ({
     CHANGE: createChange<T>(actionTypes),
     RESOLVE_CHANGE: createResolveChange<T>(actionTypes),
-    SET_STATE: createSetState(actionTypes),
+    SET_LOADING_STATE: createSetLoadingState(actionTypes),
     BATCH: createBatch(actionTypes),
 });
 

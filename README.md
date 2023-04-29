@@ -9,6 +9,8 @@ General features:
 - It provides loading state management (i.e. isLoading and error).
 - Underhood it uses any redux-like library you want to (e.g. [@ngrx/store](https://github.com/ngrx/platform)), so it means you can use [Redux DevTools](https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd?hl=ru) but with this library you don't have to create boilerplate code (e.g. reducers, actions, selectors, action creators etc.).
 - All methods working with outer data sources (e.g. requests passed to `get$` method) are [RxJS](https://github.com/ReactiveX/rxjs) powered.
+- It supports optimistic change, remove, add
+- It provides Workspace (documentation will be ready soon) which allows you store filter, sorting, ui states etc.
 
 # Requirements
 1. To be familiar with [redux](https://github.com/reduxjs/redux)
@@ -17,25 +19,25 @@ General features:
 # Plain use
 
 1. install using npm:
-	`npm install -S painless-redux`
+	`npm i painless-redux`
 
 2. create an store:
     ```typescript
-	import { PainlessRedux, IRxStore } from 'painless-redux';
-	const store: IRxStore = <use any implementation you want>;
-    export const PAINLESS_REDUX_STORE = new PainlessRedux(store);
+	import { createPainlessRedux, RxStore } from 'painless-redux';
+	const store: RxStore = <use any implementation you want>;
+    export const PAINLESS_REDUX_STORE = createPainlessRedux(store);
     ```
 
 3. create an entity:
 	```typescript
-	import { Entity } from 'painless-redux';
+	import { createEntity } from 'painless-redux';
 	import { PAINLESS_REDUX_STORE } from './store';
-	export interface IPainter {
+	export interface Painter {
 		id: number | string;
 		fullName: string;
 		born: number;
 	}
-	const PaintersEntity = new Entity<IPainter>({ name: 'painters' });
+	const PaintersEntity = createEntity<Painter>({ name: 'painters' });
 	PAINLESS_REDUX_STORE.registerSlots(PaintersEntity);
 	export PaintersEntity;
 	```
@@ -46,9 +48,14 @@ General features:
     ```
 5. get entity or all entities
     ```typescript
-    PaintersEntity.getById$(1).subscribe((painter: IPainter) => {});
-    PaintersEntity.get$().subscribe((painters: IPainter[]) => {});
+    PaintersEntity.getById$(1).subscribe((painter: Painter) => {});
+    PaintersEntity.get$().subscribe((painters: Painter[]) => {});
     ```
+   
+# Use with Angular
+
+[This adapter](https://github.com/egorgrushin/ngx-painless-redux) will help you to connect `painless-redux` to your angular project, who uses [@ngrx/store](https://github.com/ngrx/platform).
+
 # Common use
 
 This part can be difficult to understand, but this is main feature of this library.
@@ -57,35 +64,34 @@ Commonly you need to load some entities from outer source (e.g. your backend api
 
 ```typescript
     import { Observable, of } from 'rxjs';
-    import { IResponseArray } from 'painless-redux';
     import { PaintersEntity } from './painters';
 
     const init = () => {
-        const filterObj = {};
-        getPainters(filterObj).subscribe((painters: IPainter[]) => {
+        const config = {};
+        getPainters$(config).subscribe((painters: Painter[]) => {
             // emits:
             // 1. undefined immediately
-            // 2. painters array when getPaintersFromApi's observable emits.
+            // 2. painters array when getPaintersFromApi$'s observable emits.
         });
     }
 
-    const getPainters = (filterObj: object): Observable<IPainter[]> {
-        const dataSource = getPaintersFromApi(filterObj);
-        return PaintersEntity.get$(filterObj, dataSource);
+    const getPainters$ = (config: unknown): Observable<Painter[]> {
+        const dataSource$ = getPaintersFromApi$(config);
+        return PaintersEntity.get$(config, dataSource$);
     }
 
-    const getPaintersFromApi = (filterObj: object): Observable<IResponseArray<IPainter>> => {
+    const getPaintersFromApi$ = (config: unknown): Observable<Painter[]> => {
         // use can use any data source you need, this is for demo purposes.
-        const painters: IPainter[] = [
+        const painters: Painter[] = [
            { id: 1, fullName: 'Leonardo da Vinci', born: 1452 },
            { id: 2, fullName: 'Vincent van Gogh', born: 1853 },
            { id: 3, fullName: 'Pablo Picasso', born: 1881 },
         ];
-        return of({ data: painters });
+        return of(painters);
     }
 ```
 
-Using `Entity.get$` method with provided `filterObj` and `dataSource` the library follows next steps:
+Using `Entity.get$` method with provided `filterObj` and `dataSource$` the library follows next steps:
 1. It reserves place in store and places with key equals `filterObj`'s MD5 hash using [object-hash](https://github.com/puleos/object-hash/) library (use [crypto-js](https://github.com/brix/crypto-js) in cases when filterObj is string)
 2. It creates selector for reserved place in store
 3. It immediately return Observable that listen to reserved place using selector. It means you will get:
@@ -96,7 +102,7 @@ Using `Entity.get$` method with provided `filterObj` and `dataSource` the librar
 5. It subscribes to given `dataSource`
 6. When given `dataSource` emits value, `Entity` will store this result at reserved place.
 7. It sets loadingState to `{ isLoading: false, error: null }`
-8. In case of error from given `dataSource` `Entity` will set loadingState to `{ isLoading: false, error: <error from IResponseArray.error prop> }`
+8. In case of error from given `dataSource` `Entity` will set loadingState to `{ isLoading: false, error: <error from dataSource.error> }`
 9. It will emit updated array
 10. From this point, returned `Observable` will emit actual entity array if it is changed from other places even if some entity is changed by its id (using `Entity.change`)
 
@@ -108,18 +114,18 @@ The algorithm you can always see in Redux DevTools panel.
 
 ```typescript
     import { Observable, of, BehaviorSubject } from 'rxjs';
-    import { IResponseArray, IPagination } from 'painless-redux';
+    import { Pagination } from 'painless-redux';
     import { PaintersEntity } from './painters';
 
     const init = () => {
         const paginator = new BehaviorSubject(false);
-        const filterObj = {};
-        getPainters(filterObj, paginator).subscribe((painters: IPainter[]) => {
+        const config = {};
+        getPainters$(config, paginator).subscribe((painters: Painter[]) => {
             // emits:
             // 1. undefined immediately
-            // 2. painters array when getPaintersFromApi's observable emits.
-            // 3000ms idle
-            // 3. painters array from second emit merged with another getPaintersFromApi's observable emits.
+            // 2. painters array when getPaintersFromApi$'s observable emits.
+            // idle 3000ms
+            // 3. painters array from second emit merged with another getPaintersFromApi$'s observable emits.
         });
 
         setTimeout(() => {
@@ -127,18 +133,18 @@ The algorithm you can always see in Redux DevTools panel.
         }, 3000)
     }
 
-    const getPainters = (filterObj: object, paginator: BehaviorSubject<boolean>): Observable<IPainter[]> {
-        const dataSource = ({ from, to, size, index }: IPagination) => getPaintersFromApi(filterObj, from, to);
-        return PaintersEntity.get$(filterObj, dataSource, null, paginator);
+    const getPainters$ = (config: unknown, paginator: BehaviorSubject<boolean>): Observable<Painter[]> {
+        const dataSource = ({ from, to, size, index }: Pagination) => getPaintersFromApi$(config, from, to);
+        return PaintersEntity.get$(config, dataSource, null, paginator);
     }
 
-    const getPaintersFromApi = (filterObj: object, from: number, to: number): Observable<IResponseArray<IPainter>> => {
+    const getPaintersFromApi$ = (config: unknown, from: number, to: number): Observable<Painter[]> => {
         // use can use any data source you need, this is for demo purposes.
-        const painters: IPainter[] = [
+        const painters: Painter[] = [
            { id: 1, fullName: 'Leonardo da Vinci', born: 1452 },
            { id: 2, fullName: 'Vincent van Gogh', born: 1853 },
            { id: 3, fullName: 'Pablo Picasso', born: 1881 },
         ].slice(from, to);
-        return of({ data: painters });
+        return of(painters);
     }
 

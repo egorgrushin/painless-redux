@@ -4,9 +4,8 @@ import { LoadingStateActionTypes } from './types';
 import { LoadingStateActions } from './actions';
 
 const types: LoadingStateActionTypes = {
-    SET_STATE: 'SET_STATE',
+    SET_LOADING_STATE: 'SET_LOADING_STATE',
 };
-
 
 describe('loadingState', () => {
     let initialState: any;
@@ -30,7 +29,7 @@ describe('loadingState', () => {
         test('should correct set state', () => {
             // arrange
             const action: LoadingStateActions = {
-                type: types.SET_STATE,
+                type: types.SET_LOADING_STATE,
                 payload: {
                     state: newState,
                     key: undefined,

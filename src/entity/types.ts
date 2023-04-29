@@ -63,9 +63,9 @@ export interface EntityRemoveOptions extends EntityOptimisticOptions {
     safe?: boolean;
 }
 
-export interface EntitySetStateOptions extends LoadingStateSetOptions {}
+export interface EntitySetLoadingStateOptions extends LoadingStateSetOptions {}
 
-export interface EntityInternalSetStateOptions extends EntitySetStateOptions, EntityInternalOptions {}
+export interface EntityInternalSetLoadingStateOptions extends EntitySetLoadingStateOptions, EntityInternalOptions {}
 
 export interface EntityInsertOptions {
     pasteIndex?: number;
@@ -140,7 +140,7 @@ export interface EntityActionTypes extends SystemActionTypes {
     ADD: 'ADD';
     RESOLVE_ADD: 'RESOLVE_ADD';
     ADD_LIST: 'ADD_LIST';
-    SET_STATE: LoadingStateActionTypes['SET_STATE'];
+    SET_LOADING_STATE: LoadingStateActionTypes['SET_LOADING_STATE'];
     CHANGE: 'CHANGE';
     RESOLVE_CHANGE: 'RESOLVE_CHANGE';
     REMOVE: 'REMOVE';
@@ -150,7 +150,8 @@ export interface EntityActionTypes extends SystemActionTypes {
     CLEAR_ALL: 'CLEAR_ALL';
 }
 
-export type PublicDispatchEntityMethods<T> = Omit<DispatchEntityMethods<T>, 'changeWithId' | 'resolveChange'>
+export type PublicDispatchEntityMethods<T> = Omit<DispatchEntityMethods<T>,
+    'changeWithId' | 'resolveChange' | 'resolveAdd' | 'resolveRemove'>
 export type PublicSelectEntityMethods<T> = Omit<SelectEntityMethods<T>, 'get$' | 'getDictionary$' | 'getById$'>
 
 export type Entity<T> = {

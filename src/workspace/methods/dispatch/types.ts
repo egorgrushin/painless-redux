@@ -22,7 +22,7 @@ export interface DispatchWorkspaceMethods<T> {
         remotePatch?: DeepPartial<T>,
         options?: ChangeOptions,
     ) => WorkspaceActions;
-    setState: (
+    setLoadingState: (
         state: LoadingState,
         key?: string,
         options?: LoadingStateSetOptions,

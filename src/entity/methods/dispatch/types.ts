@@ -1,4 +1,4 @@
-import { EntityAddListOptions, EntityAddOptions, EntityRemoveOptions, EntitySetStateOptions } from '../../types';
+import { EntityAddListOptions, EntityAddOptions, EntityRemoveOptions, EntitySetLoadingStateOptions } from '../../types';
 import { DeepPartial, Id, LoadingState } from '../../../system-types';
 import { EntityActions } from '../../actions';
 import { Observable, OperatorFunction } from 'rxjs';
@@ -70,30 +70,30 @@ export interface DispatchEntityMethods<T> {
         options?: EntityRemoveOptions,
     ): EntityActions;
 
-    setState(
+    setLoadingState(
         state: LoadingState,
         config?: unknown,
-        options?: EntitySetStateOptions,
+        options?: EntitySetLoadingStateOptions,
     ): EntityActions;
 
     clear(config: unknown): EntityActions;
 
     clearAll(): EntityActions;
 
-    setStateById(
+    setLoadingStateById(
         id: Id,
         state: LoadingState,
-        options?: EntitySetStateOptions,
+        options?: EntitySetLoadingStateOptions,
     ): EntityActions;
 
-    setStateForKey(
+    setLoadingStateForKey(
         id: Id,
         key: string,
         state: LoadingState,
-        options?: EntitySetStateOptions,
+        options?: EntitySetLoadingStateOptions,
     ): EntityActions;
 
-    setStateBus(
+    setLoadingStateBus(
         state: LoadingState,
         id?: Id,
         config?: unknown,
@@ -104,19 +104,19 @@ export interface DispatchEntityMethods<T> {
         actions: EntityActions[],
     ): EntityActions;
 
-    affectState(
+    affectLoadingState(
         config?: unknown,
         key?: string,
         rethrow?: boolean,
     ): (...pipes: Array<OperatorFunction<any, any> | Observable<T>>) => any;
 
-    affectStateById(
+    affectLoadingStateById(
         id?: Id,
         key?: string,
         rethrow?: boolean,
     ): (...pipes: Array<OperatorFunction<any, any> | Observable<T>>) => any;
 
-    affectStateByConfigOrId(
+    affectLoadingStateByConfigOrId(
         config?: unknown,
         id?: Id,
         key?: string,

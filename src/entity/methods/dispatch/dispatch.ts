@@ -5,17 +5,17 @@ import {
     EntityAddOptions,
     EntityInternalAddListOptions,
     EntityInternalAddOptions,
-    EntityInternalSetStateOptions,
+    EntityInternalSetLoadingStateOptions,
     EntityRemoveOptions,
     EntitySchema,
-    EntitySetStateOptions,
+    EntitySetLoadingStateOptions,
     EntityType,
 } from '../../types';
 import { EntityActions } from '../../actions';
 import { DeepPartial, Id, LoadingState } from '../../../system-types';
 import { DispatchEntityMethods } from './types';
 import { isNil } from 'lodash';
-import { affectStateFactory } from '../../../affect-state/affect-state';
+import { affectLoadingStateFactory } from '../../../affect-loading-state/affect-loading-state';
 import { ChangeOptions } from '../../../shared/change/types';
 
 export const createDispatchEntityMethods = <T>(
@@ -123,41 +123,41 @@ export const createDispatchEntityMethods = <T>(
         return dispatcher.createAndDispatch('RESTORE_REMOVED', [id]);
     };
 
-    const setState = (
+    const setLoadingState = (
         state: LoadingState,
         config?: unknown,
-        options?: EntitySetStateOptions,
+        options?: EntitySetLoadingStateOptions,
     ) => {
-        const internalOptions: EntityInternalSetStateOptions = {
+        const internalOptions: EntityInternalSetLoadingStateOptions = {
             ...options,
             maxPagesCount: schema.maxPagesCount,
         };
-        return dispatcher.createAndDispatch('SET_STATE', [state, config, undefined, undefined], internalOptions);
+        return dispatcher.createAndDispatch('SET_LOADING_STATE', [state, config, undefined, undefined], internalOptions);
     };
 
-    const setStateById = (
+    const setLoadingStateById = (
         id: Id,
         state: LoadingState,
-        options?: EntitySetStateOptions,
+        options?: EntitySetLoadingStateOptions,
     ) => {
-        const internalOptions: EntityInternalSetStateOptions = {
+        const internalOptions: EntityInternalSetLoadingStateOptions = {
             ...options,
             maxPagesCount: schema.maxPagesCount,
         };
-        return dispatcher.createAndDispatch('SET_STATE', [state, undefined, id, undefined], internalOptions);
+        return dispatcher.createAndDispatch('SET_LOADING_STATE', [state, undefined, id, undefined], internalOptions);
     };
 
-    const setStateForKey = (
+    const setLoadingStateForKey = (
         id: Id,
         key: string,
         state: LoadingState,
-        options?: EntitySetStateOptions,
+        options?: EntitySetLoadingStateOptions,
     ) => {
-        const internalOptions: EntityInternalSetStateOptions = {
+        const internalOptions: EntityInternalSetLoadingStateOptions = {
             ...options,
             maxPagesCount: schema.maxPagesCount,
         };
-        return dispatcher.createAndDispatch('SET_STATE', [state, undefined, id, key], internalOptions);
+        return dispatcher.createAndDispatch('SET_LOADING_STATE', [state, undefined, id, key], internalOptions);
     };
 
     const clear = (config: unknown) => {
@@ -167,7 +167,7 @@ export const createDispatchEntityMethods = <T>(
         return dispatcher.createAndDispatch('CLEAR_ALL', []);
     };
 
-    const setStateBus = (
+    const setLoadingStateBus = (
         state: LoadingState,
         id?: Id,
         config?: unknown,
@@ -175,50 +175,50 @@ export const createDispatchEntityMethods = <T>(
     ) => {
         if (!isNil(id)) {
             if (!isNil(key)) {
-                return setStateForKey(id, key, state);
+                return setLoadingStateForKey(id, key, state);
             } else {
-                return setStateById(id, state);
+                return setLoadingStateById(id, state);
             }
         } else {
             if (state.error) {
                 console.error(state.error);
             }
-            return setState(state, config);
+            return setLoadingState(state, config);
         }
     };
 
-    const affectState = (
+    const affectLoadingState = (
         config?: unknown,
         key?: string,
         rethrow?: boolean,
     ) => {
         const setter = (state: LoadingState) => {
-            setStateBus(state, undefined, config, key);
+            setLoadingStateBus(state, undefined, config, key);
         };
-        return affectStateFactory(setter, rethrow);
+        return affectLoadingStateFactory(setter, rethrow);
     };
 
-    const affectStateById = (
+    const affectLoadingStateById = (
         id?: Id,
         key?: string,
         rethrow?: boolean,
     ) => {
         const setter = (state: LoadingState) => {
-            setStateBus(state, id, undefined, key);
+            setLoadingStateBus(state, id, undefined, key);
         };
-        return affectStateFactory(setter, rethrow);
+        return affectLoadingStateFactory(setter, rethrow);
     };
 
-    const affectStateByConfigOrId = (
+    const affectLoadingStateByConfigOrId = (
         config?: unknown,
         id?: Id,
         key?: string,
         rethrow?: boolean,
     ) => {
         const setter = (state: LoadingState) => {
-            setStateBus(state, id, config, key);
+            setLoadingStateBus(state, id, config, key);
         };
-        return affectStateFactory(setter, rethrow);
+        return affectLoadingStateFactory(setter, rethrow);
     };
 
     const batch = (
@@ -238,15 +238,15 @@ export const createDispatchEntityMethods = <T>(
         remove,
         resolveRemove,
         restoreRemoved,
-        setState,
+        setLoadingState,
         clear,
         clearAll,
-        setStateBus,
-        setStateById,
-        setStateForKey,
-        affectState,
-        affectStateById,
-        affectStateByConfigOrId,
+        setLoadingStateBus,
+        setLoadingStateById,
+        setLoadingStateForKey,
+        affectLoadingState,
+        affectLoadingStateById,
+        affectLoadingStateByConfigOrId,
         batch,
     };
 };

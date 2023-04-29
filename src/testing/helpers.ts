@@ -64,7 +64,7 @@ export const createTestHelpers = <T>(
         ADD: 'ADD',
         RESOLVE_ADD: 'RESOLVE_ADD',
         ADD_LIST: 'ADD_LIST',
-        SET_STATE: 'SET_STATE',
+        SET_LOADING_STATE: 'SET_LOADING_STATE',
         CHANGE: 'CHANGE',
         RESOLVE_CHANGE: 'RESOLVE_CHANGE',
         REMOVE: 'REMOVE',
