@@ -154,6 +154,6 @@ export type PublicDispatchEntityMethods<T> = Omit<DispatchEntityMethods<T>,
     'changeWithId' | 'resolveChange' | 'resolveAdd' | 'resolveRemove'>
 export type PublicSelectEntityMethods<T> = Omit<SelectEntityMethods<T>, 'get$' | 'getDictionary$' | 'getById$'>
 
-export type Entity<T> = {
+export interface Entity<T> extends PublicSelectEntityMethods<T>, PublicDispatchEntityMethods<T>, MixedEntityMethods<T> {
     actionCreators: EntityActionCreators;
-} & PublicSelectEntityMethods<T> & PublicDispatchEntityMethods<T> & MixedEntityMethods<T>
+}

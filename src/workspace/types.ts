@@ -9,9 +9,9 @@ import { SystemActionTypes } from '../shared/system/types';
 
 export type PublicDispatchWorkspaceMethods<T> = Omit<DispatchWorkspaceMethods<T>, 'changeWithId' | 'resolveChange'>
 
-export type Workspace<T> = {
+export interface Workspace<T> extends PublicDispatchWorkspaceMethods<T>, SelectWorkspaceMethods<T>, MixedWorkspaceMethods<T> {
     actionCreators: WorkspaceActionCreators;
-} & PublicDispatchWorkspaceMethods<T> & SelectWorkspaceMethods<T> & MixedWorkspaceMethods<T>;
+}
 
 export interface WorkspaceState<T> extends LoadingStateState {
     value: ChangeableState<T>;

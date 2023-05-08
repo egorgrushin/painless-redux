@@ -1,6 +1,7 @@
 import { DeepPartial } from '../../system-types';
 import { Change, ChangeableState, ChangeOptions } from './types';
-import { merge as mergeFn } from '../../utils';
+import { merge as mergeFn, snapshot } from '../../utils';
+import { Observable } from 'rxjs';
 
 export const createEntityChange = <T>(
     patch: DeepPartial<T>,
@@ -74,4 +75,15 @@ export const getResolvePatchByOptions = <T>(
     options?: ChangeOptions,
 ): DeepPartial<T> | undefined => {
     if (options?.useResponsePatch) return response;
+};
+
+export const normalizePatch = <T>(
+    patch: DeepPartial<T> | ((value: DeepPartial<T> | undefined) => DeepPartial<T>),
+    oldValue$: Observable<DeepPartial<T> | undefined>,
+): DeepPartial<T> => {
+    if (typeof patch === 'function') {
+        const oldValue = snapshot(oldValue$);
+        return patch(oldValue as DeepPartial<T>);
+    }
+    return patch;
 };

@@ -4,9 +4,10 @@ import { WorkspaceActionTypes } from '../../types';
 import { DispatchWorkspaceMethods } from './types';
 import { DeepPartial, Id, LoadingState } from '../../../system-types';
 import { SelectWorkspaceMethods } from '../select/types';
-import { getHeadedActionName, snapshot } from '../../../utils';
+import { getHeadedActionName } from '../../../utils';
 import { ChangeOptions } from '../../../shared/change/types';
 import { LoadingStateSetOptions } from '../../../shared/loading-state/types';
+import { normalizePatch } from '../../../shared/change/utils';
 
 export const createDispatchWorkspaceMethods = <T>(
     dispatcher: Dispatcher<WorkspaceActionTypes, WorkspaceActions>,
@@ -20,13 +21,9 @@ export const createDispatchWorkspaceMethods = <T>(
         changeId?: string,
         options?: ChangeOptions,
     ) => {
-        if (typeof patch === 'function') {
-            const oldValue$ = selectMethods.get$();
-            const oldValue = snapshot(oldValue$);
-            patch = patch(oldValue as unknown as DeepPartial<T>);
-        }
+        const normalizedPatch = normalizePatch(patch, selectMethods.get$());
         label = getHeadedActionName(name, label);
-        return dispatcher.createAndDispatch('CHANGE', [patch, label, changeId, options]);
+        return dispatcher.createAndDispatch('CHANGE', [normalizedPatch, label, changeId, options]);
     };
 
     const resolveChange = (

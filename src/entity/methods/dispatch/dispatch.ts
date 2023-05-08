@@ -17,10 +17,13 @@ import { DispatchEntityMethods } from './types';
 import { isNil } from 'lodash';
 import { affectLoadingStateFactory } from '../../../affect-loading-state/affect-loading-state';
 import { ChangeOptions } from '../../../shared/change/types';
+import { normalizePatch } from '../../../shared/change/utils';
+import { SelectEntityMethods } from '../select/types';
 
 export const createDispatchEntityMethods = <T>(
     dispatcher: Dispatcher<EntityActionTypes, EntityActions>,
     idResolver: (data: T) => EntityType<T>,
+    selectMethods: SelectEntityMethods<T>,
     schema: EntitySchema<T>,
 ): DispatchEntityMethods<T> => {
 
@@ -75,21 +78,22 @@ export const createDispatchEntityMethods = <T>(
         return dispatcher.createAndDispatch('ADD_LIST', [entities, config, isReplace, hasMore], internalOptions);
     };
 
-    const change = (
-        id: Id,
-        patch: DeepPartial<T>,
-        options?: ChangeOptions,
-    ) => {
-        return dispatcher.createAndDispatch('CHANGE', [id, patch, undefined], options);
-    };
-
     const changeWithId = (
         id: Id,
-        patch: DeepPartial<T>,
-        changeId: string,
+        patch: DeepPartial<T> | ((value: DeepPartial<T> | undefined) => DeepPartial<T>),
+        changeId: string | undefined,
         options?: ChangeOptions,
     ) => {
-        return dispatcher.createAndDispatch('CHANGE', [id, patch, changeId], options);
+        const normalizedPatch = normalizePatch(patch, selectMethods.getById$(id));
+        return dispatcher.createAndDispatch('CHANGE', [id, normalizedPatch, changeId], options);
+    };
+
+    const change = (
+        id: Id,
+        patch: DeepPartial<T> | ((value: DeepPartial<T> | undefined) => DeepPartial<T>),
+        options?: ChangeOptions,
+    ) => {
+        return changeWithId(id, patch, undefined, options);
     };
 
     const resolveChange = (
