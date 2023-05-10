@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 import { Selector } from 'reselect';
-import { Dictionary, HashFn, Id, LoadingState } from '../system-types';
-import { ChangeableState } from '../shared/change/types';
+import { DeepPartial, Dictionary, HashFn, Id, LoadingState } from '../system-types';
+import { ChangeableState, PatchRequest } from '../shared/change/types';
 import {
     LoadingStateActionTypes,
     LoadingStateSelector,
@@ -12,8 +12,8 @@ import {
 import { SelectEntityMethods } from './methods/select/types';
 import { DispatchEntityMethods } from './methods/dispatch/types';
 import { MixedEntityMethods } from './methods/mixed/types';
-import { EntityActionCreators } from './action-creators';
 import { SystemActionTypes } from '../shared/system/types';
+import { EntityActionCreators } from './action-creators.types';
 
 export type EntityType<T> = T & { id: Id };
 
@@ -96,6 +96,16 @@ export interface Page {
     loadingState?: LoadingState;
 }
 
+export interface IdPatchRequest<T> {
+    id: Id;
+    patch: PatchRequest<T>;
+}
+
+export interface IdPatch<T> {
+    id: Id;
+    patch: DeepPartial<T>;
+}
+
 export interface EntityInstanceState<T> extends ChangeableState<EntityType<T>> {
     removed?: boolean;
 }
@@ -122,6 +132,7 @@ export interface BaseEntitySelectors<T> extends LoadingStateSelectors<EntityStat
     pages: PagesSelector<T>;
     loadingStates: LoadingStatesSelector<T>;
     createLoadingStateById: (id: Id) => LoadingStateSelector<EntityState<T>>;
+    createLoadingStateByIds: (ids: Id[]) => LoadingStateSelector<EntityState<T>>;
 }
 
 export interface EntitySelectors<T> extends BaseEntitySelectors<T> {
@@ -148,12 +159,15 @@ export interface EntityActionTypes extends SystemActionTypes {
     RESTORE_REMOVED: 'RESTORE_REMOVED';
     CLEAR: 'CLEAR';
     CLEAR_ALL: 'CLEAR_ALL';
+    CHANGE_LIST: 'CHANGE_LIST';
+    RESOLVE_CHANGE_LIST: 'RESOLVE_CHANGE_LIST';
+    SET_LOADING_STATES: 'SET_LOADING_STATES';
 }
 
 export type PublicDispatchEntityMethods<T> = Omit<DispatchEntityMethods<T>,
-    'changeWithId' | 'resolveChange' | 'resolveAdd' | 'resolveRemove'>
+    'changeWithId' | 'changeListWithId' | 'resolveChange' | 'resolveAdd' | 'resolveRemove' | 'resolveChangeList'>
 export type PublicSelectEntityMethods<T> = Omit<SelectEntityMethods<T>, 'get$' | 'getDictionary$' | 'getById$'>
 
 export interface Entity<T> extends PublicSelectEntityMethods<T>, PublicDispatchEntityMethods<T>, MixedEntityMethods<T> {
-    actionCreators: EntityActionCreators;
+    actionCreators: EntityActionCreators<T>;
 }

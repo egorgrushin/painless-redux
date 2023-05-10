@@ -16,7 +16,7 @@ import {
     PagesSelector,
 } from './types';
 import { PainlessReduxState } from '../painless-redux/types';
-import { HashFn, Id } from '../system-types';
+import { HashFn, Id, LoadingState } from '../system-types';
 import { createLoadingStateSelector } from '../shared/loading-state/selectors';
 import { LoadingStateSelector } from '../shared/loading-state/types';
 import { isNil } from 'lodash';
@@ -49,6 +49,17 @@ const createCreateLoadingStateById = <T>(
     selector,
     (loadingStates) => loadingStates[id],
 );
+const createCreateLoadingStateByIds = <T>(
+    selector: LoadingStatesSelector<T>,
+) => (ids: Id[]) => createSelector(
+    selector,
+    (loadingStates) => ids.reduce((memo: LoadingState, id: Id) => {
+        const loadingState = loadingStates[id];
+        memo.isLoading = memo.isLoading || (loadingState?.isLoading ?? false);
+        memo.error = memo.error || loadingState?.error;
+        return memo;
+    }, { isLoading: false }),
+);
 
 export const createBaseEntitySelectors = <T>(
     selector: Selector<PainlessReduxState, EntityState<T>>,
@@ -59,6 +70,7 @@ export const createBaseEntitySelectors = <T>(
     const loadingState = createLoadingStateSelector<EntityState<T>>(selector);
     const loadingStates = createLoadingStatesSelector(selector);
     const createLoadingStateById = createCreateLoadingStateById(loadingStates);
+    const createLoadingStateByIds = createCreateLoadingStateByIds(loadingStates);
 
     return {
         ids,
@@ -67,6 +79,7 @@ export const createBaseEntitySelectors = <T>(
         loadingState,
         loadingStates,
         createLoadingStateById,
+        createLoadingStateByIds,
     };
 };
 
@@ -171,6 +184,7 @@ export const createEntitySelectors = <T>(
         pages,
         ids,
         createLoadingStateById,
+        createLoadingStateByIds,
     } = createBaseEntitySelectors<T>(selector);
     const createListSelectorByIds = createListSelector(dictionary);
     const all = createListSelectorByIds(ids);
@@ -202,6 +216,7 @@ export const createEntitySelectors = <T>(
         createPage,
         createPageLoadingState,
         createLoadingStateById,
+        createLoadingStateByIds,
         allPages,
     };
 };

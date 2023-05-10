@@ -10,13 +10,15 @@ import {
     EntitySchema,
     EntitySetLoadingStateOptions,
     EntityType,
+    IdPatch,
+    IdPatchRequest,
 } from '../../types';
 import { EntityActions } from '../../actions';
 import { DeepPartial, Id, LoadingState } from '../../../system-types';
 import { DispatchEntityMethods } from './types';
 import { isNil } from 'lodash';
 import { affectLoadingStateFactory } from '../../../affect-loading-state/affect-loading-state';
-import { ChangeOptions } from '../../../shared/change/types';
+import { ChangeOptions, PatchRequest } from '../../../shared/change/types';
 import { normalizePatch } from '../../../shared/change/utils';
 import { SelectEntityMethods } from '../select/types';
 
@@ -80,7 +82,7 @@ export const createDispatchEntityMethods = <T>(
 
     const changeWithId = (
         id: Id,
-        patch: DeepPartial<T> | ((value: DeepPartial<T> | undefined) => DeepPartial<T>),
+        patch: PatchRequest<T>,
         changeId: string | undefined,
         options?: ChangeOptions,
     ) => {
@@ -90,10 +92,29 @@ export const createDispatchEntityMethods = <T>(
 
     const change = (
         id: Id,
-        patch: DeepPartial<T> | ((value: DeepPartial<T> | undefined) => DeepPartial<T>),
+        patch: PatchRequest<T>,
         options?: ChangeOptions,
     ) => {
         return changeWithId(id, patch, undefined, options);
+    };
+
+    const changeListWithId = (
+        patches: IdPatchRequest<T>[],
+        changeId: string | undefined,
+        options?: ChangeOptions,
+    ) => {
+        const normalizedPatches: IdPatch<T>[] = patches.map((patch) => ({
+            ...patch,
+            patch: normalizePatch(patch.patch, selectMethods.getById$(patch.id)),
+        }));
+        return dispatcher.createAndDispatch('CHANGE_LIST', [normalizedPatches, changeId], options);
+    };
+
+    const changeList = (
+        patches: IdPatchRequest<T>[],
+        options?: ChangeOptions,
+    ) => {
+        return changeListWithId(patches, undefined, options);
     };
 
     const resolveChange = (
@@ -104,6 +125,15 @@ export const createDispatchEntityMethods = <T>(
         options?: ChangeOptions,
     ) => {
         return dispatcher.createAndDispatch('RESOLVE_CHANGE', [id, changeId, success, remotePatch], options);
+    };
+
+    const resolveChangeList = (
+        patches: IdPatch<T>[],
+        changeId: string,
+        success: boolean,
+        options?: ChangeOptions,
+    ) => {
+        return dispatcher.createAndDispatch('RESOLVE_CHANGE_LIST', [patches, changeId, success], options);
     };
 
     const remove = (
@@ -162,6 +192,18 @@ export const createDispatchEntityMethods = <T>(
             maxPagesCount: schema.maxPagesCount,
         };
         return dispatcher.createAndDispatch('SET_LOADING_STATE', [state, undefined, id, key], internalOptions);
+    };
+
+    const setLoadingStateByIds = (
+        ids: Id[],
+        state: LoadingState,
+        options?: EntitySetLoadingStateOptions,
+    ) => {
+        const internalOptions: EntityInternalSetLoadingStateOptions = {
+            ...options,
+            maxPagesCount: schema.maxPagesCount,
+        };
+        return dispatcher.createAndDispatch('SET_LOADING_STATES', [state, ids], internalOptions);
     };
 
     const clear = (config: unknown) => {
@@ -236,8 +278,11 @@ export const createDispatchEntityMethods = <T>(
         addWithId,
         addList,
         change,
+        changeList,
+        changeListWithId,
         changeWithId,
         resolveChange,
+        resolveChangeList,
         resolveAdd,
         remove,
         resolveRemove,
@@ -252,5 +297,6 @@ export const createDispatchEntityMethods = <T>(
         affectLoadingStateById,
         affectLoadingStateByConfigOrId,
         batch,
+        setLoadingStateByIds,
     };
 };

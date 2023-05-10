@@ -18,6 +18,11 @@ export interface SelectEntityMethods<T> {
         isAsap?: boolean,
     ): Observable<LoadingState | undefined>;
 
+    getLoadingStateByIds$(
+        ids: Id[],
+        isAsap?: boolean,
+    ): Observable<LoadingState | undefined>;
+
     getPage$(
         config: unknown,
         isAsap?: boolean,
