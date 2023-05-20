@@ -134,22 +134,22 @@ export interface DispatchEntityMethods<T> {
         actions: EntityActions[],
     ): EntityActions;
 
-    affectLoadingState<R>(
+    affectLoadingState(
         config?: unknown,
         key?: string,
         rethrow?: boolean,
-    ): (...pipes: Array<OperatorFunction<any, any> | Observable<R>>) => any;
+    ): <R>(...pipes: Array<OperatorFunction<any, any> | Observable<R>>) => any;
 
-    affectLoadingStateById<R>(
+    affectLoadingStateById(
         id?: Id,
         key?: string,
         rethrow?: boolean,
-    ): (...pipes: Array<OperatorFunction<any, any> | Observable<R>>) => any;
+    ): <R>(...pipes: Array<OperatorFunction<any, any> | Observable<R>>) => any;
 
-    affectLoadingStateByConfigOrId<R>(
+    affectLoadingStateByConfigOrId(
         config?: unknown,
         id?: Id,
         key?: string,
         rethrow?: boolean,
-    ): (...pipes: Array<OperatorFunction<any, any> | Observable<R>>) => any;
+    ): <R>(...pipes: Array<OperatorFunction<any, any> | Observable<R>>) => any;
 }
