@@ -337,7 +337,7 @@ describe('Entity', () => {
         test('should load entities', () => {
             // arrange
             const users = [user];
-            const remote$ = cold('--a|', { a: users });
+            const remote$ = cold('--a|', { a: { data: users} });
             const filter = null;
             const addAction = entity.actionCreators.ADD_LIST(users, filter, true, false);
             const actions$ = cold('a-(bc)', {
@@ -387,7 +387,7 @@ describe('Entity', () => {
             const users2 = [user3];
             const remote$ = (value: Pagination) => {
                 const users = value.index ? users2 : users1;
-                return cold('--a|', { a: users });
+                return cold('--a|', { a: { data: users } });
             };
             const addAction = entity.actionCreators.ADD_LIST(users1, filter, true, true);
             const addAction2 = entity.actionCreators.ADD_LIST(users2, filter);

@@ -1,5 +1,13 @@
 import { createActionTypes, hashIt, typedDefaultsDeep } from '../utils';
-import { EntityActionTypes, EntitySchema, EntityType, PaginatedResponse, Pagination, Response$Factory } from './types';
+import {
+    EntityActionTypes,
+    EntitySchema,
+    EntityType,
+    PaginatedResponse,
+    Pagination,
+    Response$Factory,
+    ResponseArray,
+} from './types';
 import { DEFAULT_PAGE_SIZE, ENTITY_TYPE_NAMES, MAX_PAGES_COUNT } from './constants';
 import { v4 } from 'uuid';
 import { Observable } from 'rxjs';
@@ -30,7 +38,7 @@ export const createEntityActionTypes = (
 ): EntityActionTypes => createActionTypes(ENTITY_TYPE_NAMES, entityName);
 
 export const getPaginated$ = <T>(
-    dataSource: Observable<T[]> | Response$Factory<T[]>,
+    dataSource: Observable<ResponseArray<T>> | Response$Factory<T>,
     pagination: Pagination,
 ): Observable<PaginatedResponse<T>> => getObservable$(dataSource, pagination).pipe(
     map((response) => ({ ...pagination, response })),
