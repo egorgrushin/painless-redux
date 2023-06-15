@@ -8,6 +8,7 @@ import { getRemotePipe, guardIfLoading } from '../../../shared/utils';
 import { SelectWorkspaceMethods } from '../select/types';
 import { DispatchWorkspaceMethods } from '../dispatch/types';
 import { MixedWorkspaceMethods } from './types';
+import { typedDefaultsDeep } from '../../../utils';
 
 export const createWorkspaceMixedMethods = <T>(
     prSchema: PainlessReduxSchema,
@@ -21,6 +22,7 @@ export const createWorkspaceMixedMethods = <T>(
         label: string,
         options?: ChangeOptions,
     ): Observable<DeepPartial<T>> => {
+        options = typedDefaultsDeep(options, { rethrow: true });
         const changeId = v4();
         const { changeWithId, resolveChange, setLoadingState } = dispatchMethods;
         const { getLoadingState$, get$ } = selectMethods;
