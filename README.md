@@ -17,7 +17,7 @@ General features:
 2. To be familiar with [RxJS](https://github.com/ReactiveX/rxjs)
 
 # Documentation
-[Wiki](https://github.com/egorgrushin/painless-redux/wiki)
+[Here](https://github.com/egorgrushin/painless-redux/wiki)
 
 # Plain use
 
