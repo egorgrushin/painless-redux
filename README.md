@@ -94,22 +94,7 @@ Commonly you need to load some entities from outer source (e.g. your backend api
     }
 ```
 
-Using `Entity.get$` method with provided `filterObj` and `dataSource$` the library follows next steps:
-1. It reserves place in store and places with key equals `filterObj`'s MD5 hash using [object-hash](https://github.com/puleos/object-hash/) library (use [crypto-js](https://github.com/brix/crypto-js) in cases when filterObj is string)
-2. It creates selector for reserved place in store
-3. It immediately return Observable that listen to reserved place using selector. It means you will get:
-   1. undefined in case of new `filterObj`'s hash
-   2. previously stored array of entities associated with given `filterObj`
-   3. updated array of entities, which will be resolving from next steps (TL;DR: entities will be resolved from `dataSource`)
-4. It sets loadingState (will be described later) to `{ isLoading: true, error: null }`
-5. It subscribes to given `dataSource`
-6. When given `dataSource` emits value, `Entity` will store this result at reserved place.
-7. It sets loadingState to `{ isLoading: false, error: null }`
-8. In case of error from given `dataSource` `Entity` will set loadingState to `{ isLoading: false, error: <error from dataSource.error> }`
-9. It will emit updated array
-10. From this point, returned `Observable` will emit actual entity array if it is changed from other places even if some entity is changed by its id (using `Entity.change`)
-
-The algorithm you can always see in Redux DevTools panel.
+More detailed [here](https://github.com/egorgrushin/painless-redux/wiki/Entity#get_observable)
 
 # Pagination
 
