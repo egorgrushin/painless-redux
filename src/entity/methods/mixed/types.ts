@@ -4,8 +4,13 @@ import {
     EntityGetOptions,
     EntityLoadListOptions,
     EntityLoadOptions,
-    EntityRemoveOptions, IdPatch, IdPatchRequest, PaginatedResponse,
-    Response$Factory, ResponseArray,
+    EntityRemoveListOptions,
+    EntityRemoveOptions,
+    IdPatch,
+    IdPatchRequest,
+    PaginatedResponse,
+    Response$Factory,
+    ResponseArray,
 } from '../../types';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { DeepPartial, Dictionary, Id } from '../../../system-types';
@@ -69,5 +74,11 @@ export interface MixedEntityMethods<T> {
         id: Id,
         observable: Observable<R>,
         options?: EntityRemoveOptions,
+    ): Observable<R>;
+
+    removeListRemote$<R>(
+        ids: Id[],
+        observable: Observable<R>,
+        options?: EntityRemoveListOptions,
     ): Observable<R>;
 }

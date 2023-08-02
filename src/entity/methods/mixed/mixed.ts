@@ -4,13 +4,15 @@ import {
     EntityGetOptions,
     EntityLoadListOptions,
     EntityLoadOptions,
+    EntityRemoveListOptions,
     EntityRemoveOptions,
     EntitySchema,
     IdPatch,
     IdPatchRequest,
     PaginatedResponse,
     Pagination,
-    Response$Factory, ResponseArray,
+    Response$Factory,
+    ResponseArray,
 } from '../../types';
 import { BehaviorSubject, EMPTY, merge, Observable, of } from 'rxjs';
 import { DispatchEntityMethods } from '../dispatch/types';
@@ -24,7 +26,7 @@ import { PainlessReduxSchema } from '../../../painless-redux/types';
 import { ChangeOptions, PatchRequest } from '../../../shared/change/types';
 import { getPatchByOptions, getResolvePatchByOptions, normalizePatch } from '../../../shared/change/utils';
 import { getRemotePipe, guardIfLoading } from '../../../shared/utils';
-import { switchMap, take } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 import { typedDefaultsDeep } from '../../../utils';
 
 export const createMixedEntityMethods = <T>(
@@ -280,6 +282,27 @@ export const createMixedEntityMethods = <T>(
         return guardIfLoading(loadingState$).pipe(sourcePipe);
     };
 
+    const removeListRemote$ = <R>(
+        ids: Id[],
+        observable: Observable<R>,
+        options?: EntityRemoveListOptions,
+    ): Observable<R> => {
+        options = typedDefaultsDeep(options, { rethrow: true });
+        const { removeList, setLoadingStateByIds, resolveRemoveList } = dispatchMethods;
+        const sourcePipe = getRemotePipe<LoadingState | undefined, unknown, R, R>({
+            options,
+            remoteObsOrFactory: observable,
+            success: () => removeList(ids, options),
+            emitSuccessOutsideAffectState: true,
+            emitOnSuccess: true,
+            optimistic: options?.optimistic,
+            optimisticResolve: (success: boolean) => resolveRemoveList(ids, success, options),
+            setLoadingState: (state) => setLoadingStateByIds(ids, state),
+        });
+        const loadingState$ = selectMethods.getLoadingStateByIds$(ids, prSchema.useAsapSchedulerInLoadingGuards);
+        return guardIfLoading(loadingState$).pipe(sourcePipe);
+    };
+
     return {
         loadList$,
         loadById$,
@@ -289,6 +312,7 @@ export const createMixedEntityMethods = <T>(
         addRemote$,
         changeRemote$,
         removeRemote$,
+        removeListRemote$,
         changeListRemote$,
     };
 };
