@@ -56,6 +56,10 @@ export interface EntityRemoveOptions extends EntityOptimisticOptions, RequestOpt
     safe?: boolean;
 }
 
+export interface EntityRemoveListOptions extends EntityOptimisticOptions, RequestOptions {
+    safe?: boolean;
+}
+
 export interface EntitySetLoadingStateOptions extends LoadingStateSetOptions {}
 
 export interface EntityInternalSetLoadingStateOptions extends EntitySetLoadingStateOptions, EntityInternalOptions {}
@@ -155,6 +159,9 @@ export interface EntityActionTypes extends SystemActionTypes {
     REMOVE: 'REMOVE';
     RESOLVE_REMOVE: 'RESOLVE_REMOVE';
     RESTORE_REMOVED: 'RESTORE_REMOVED';
+    REMOVE_LIST: 'REMOVE_LIST';
+    RESOLVE_REMOVE_LIST: 'RESOLVE_REMOVE_LIST';
+    RESTORE_REMOVED_LIST: 'RESTORE_REMOVED_LIST';
     CLEAR: 'CLEAR';
     CLEAR_ALL: 'CLEAR_ALL';
     CHANGE_LIST: 'CHANGE_LIST';

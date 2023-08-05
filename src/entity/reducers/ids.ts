@@ -2,6 +2,7 @@ import { EntityActionTypes, EntityInsertOptions } from '../types';
 import { EntityActions } from '../actions';
 import { Id } from '../../system-types';
 import { isNil } from 'lodash';
+import { removeFromArray } from '../../utils';
 
 const getOnlyNewIds = (
     state: Id[],
@@ -51,16 +52,21 @@ export const createIdsReducer = (
         case types.REMOVE: {
             const { payload: { id }, options: { safe, optimistic } } = action;
             if (optimistic || safe) return state;
-            return state.filter(existId => existId !== id);
+            return removeFromArray(state, [id]);
+        }
+        case types.REMOVE_LIST: {
+            const { payload: { ids }, options: { safe, optimistic } } = action;
+            if (optimistic || safe) return state;
+            return removeFromArray(state, ids);
         }
         case types.RESOLVE_REMOVE: {
             const { payload: { success, id }, options: { safe } } = action;
             if (!success || safe) return state;
-            return state.filter(existId => existId !== id);
+            return removeFromArray(state, [id]);
         }
         case types.RESOLVE_ADD: {
             const { payload: { success, result, tempId } } = action;
-            if (!success) return state.filter((existId) => existId !== tempId);
+            if (!success) return removeFromArray(state, [tempId]);
             return state.map((id) => {
                 if (id === tempId) return result.id;
                 return id;
