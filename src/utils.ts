@@ -50,7 +50,7 @@ export const merge = <T>(
     if (Array.isArray(objValue) && Array.isArray(srcValue)) return srcValue;
     // solution for undefined values proposed by https://github.com/savelucky
     if (srcValue === undefined) {
-        object[key] = undefined;
+        delete object[key];
     }
 }, obj, newValue);
 
