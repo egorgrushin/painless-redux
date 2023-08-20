@@ -2,7 +2,6 @@ import { DeepPartial } from '../../system-types';
 import { Change, ChangeableState, ChangeOptions, PatchRequest } from './types';
 import { merge as mergeFn, snapshot } from '../../utils';
 import { Observable } from 'rxjs';
-import { IdPatch } from '../..';
 
 export const createEntityChange = <T>(
     patch: DeepPartial<T>,

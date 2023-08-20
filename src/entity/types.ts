@@ -27,9 +27,9 @@ export interface EntitySchema<T> {
     id?(data: T): Id;
 }
 
-export interface EntityLoadOptions extends EntityInsertOptions, RequestOptions { }
+export interface EntityLoadOptions extends EntityInsertOptions, RequestOptions {}
 
-export interface EntityGetOptions extends EntityAddOptions { }
+export interface EntityGetOptions extends EntityAddOptions {}
 
 export interface EntityGetListOptions extends EntityLoadListOptions {
 }

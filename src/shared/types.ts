@@ -24,6 +24,7 @@ export interface OptimisticOptions {
 
 export interface RequestOptions {
     rethrow?: boolean;
+    globalLoadingState?: boolean;
 }
 
 export interface RemoteOptions extends OptimisticOptions, RequestOptions {
