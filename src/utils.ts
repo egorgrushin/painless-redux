@@ -1,7 +1,6 @@
 import md5 from 'md5-hash';
 import { MD5 as objectMD5 } from 'object-hash';
-import { mergeWith } from 'lodash/fp';
-import { capitalize, defaultsDeep, keyBy, lowerCase } from 'lodash';
+import { capitalize, defaultsDeep, isObject, keyBy, lowerCase } from 'lodash';
 import { Observable, OperatorFunction } from 'rxjs';
 import { distinctUntilChanged, map, take } from 'rxjs/operators';
 import { DeepPartial, Dictionary, Id } from './system-types';
@@ -39,20 +38,24 @@ export const createActionTypes = <T>(
 };
 
 export const merge = <T>(
-    obj: T,
-    newValue: DeepPartial<T>,
-): T => mergeWith((
-    objValue,
-    srcValue,
-    key,
-    object,
-) => {
-    if (Array.isArray(objValue) && Array.isArray(srcValue)) return srcValue;
-    // solution for undefined values proposed by https://github.com/savelucky
-    if (srcValue === undefined) {
-        delete object[key];
+    src: T,
+    patch: DeepPartial<T>,
+): T => {
+    if (Array.isArray(src) && Array.isArray(patch)) return patch as unknown as T;
+    const newObject: T = { ...src };
+    for (const key in patch) {
+        const srcValue = src[key];
+        const patchValue = patch[key];
+        if (patchValue === undefined) {
+            delete newObject[key];
+        } else if (isObject(patchValue) && !Array.isArray(patchValue)) {
+            newObject[key] = merge(srcValue, patchValue);
+        } else {
+            (newObject[key] as unknown) = patchValue;
+        }
     }
-}, obj, newValue);
+    return newObject;
+};
 
 export const typedDefaultsDeep = <T>(
     obj: Partial<T> | undefined,
