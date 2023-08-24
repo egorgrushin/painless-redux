@@ -41,7 +41,6 @@ export const merge = <T>(
     src: T,
     patch: DeepPartial<T>,
 ): T => {
-    if (Array.isArray(src) && Array.isArray(patch)) return patch as unknown as T;
     const newObject: T = { ...src };
     for (const key in patch) {
         const srcValue = src[key];
