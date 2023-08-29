@@ -1,6 +1,6 @@
 import md5 from 'md5-hash';
 import { MD5 as objectMD5 } from 'object-hash';
-import { capitalize, defaultsDeep, isObject, keyBy, lowerCase } from 'lodash';
+import { capitalize, defaultsDeep, isNil, isObject, keyBy, lowerCase } from 'lodash';
 import { Observable, OperatorFunction } from 'rxjs';
 import { distinctUntilChanged, map, take } from 'rxjs/operators';
 import { DeepPartial, Dictionary, Id } from './system-types';
@@ -41,6 +41,7 @@ export const merge = <T>(
     src: T,
     patch: DeepPartial<T>,
 ): T => {
+    if (isNil(src)) return { ...patch } as T;
     const newObject: T = { ...src };
     for (const key in patch) {
         const srcValue = src[key];
