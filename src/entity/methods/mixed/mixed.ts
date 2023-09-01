@@ -254,7 +254,7 @@ export const createMixedEntityMethods = <T>(
                 });
                 return resolveChangeList(patchesToApply, changeId, success, options);
             },
-            setLoadingState: (state) => setLoadingStateByIds(ids, state),
+            setLoadingState: (state) => setLoadingStateByIds(ids, state, options),
         });
 
         const loadingState$ = getLoadingStateByIds$(ids, prSchema.useAsapSchedulerInLoadingGuards);
