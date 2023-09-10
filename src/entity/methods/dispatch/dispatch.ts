@@ -241,18 +241,19 @@ export const createDispatchEntityMethods = <T>(
         id?: Id,
         config?: unknown,
         key?: string,
+        options?: EntitySetLoadingStateOptions,
     ) => {
         if (!isNil(id)) {
             if (!isNil(key)) {
-                return setLoadingStateForKey(id, key, state);
+                return setLoadingStateForKey(id, key, state, options);
             } else {
-                return setLoadingStateById(id, state);
+                return setLoadingStateById(id, state, options);
             }
         } else {
             if (state.error) {
                 console.error(state.error);
             }
-            return setLoadingState(state, config);
+            return setLoadingState(state, config, options);
         }
     };
 
