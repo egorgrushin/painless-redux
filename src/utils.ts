@@ -49,7 +49,7 @@ export const merge = <T>(
         if (patchValue === undefined) {
             delete newObject[key];
         } else if (isObject(patchValue) && !Array.isArray(patchValue)) {
-            newObject[key] = merge(srcValue, patchValue);
+            newObject[key] = merge(srcValue, patchValue as any);
         } else {
             (newObject[key] as unknown) = patchValue;
         }
