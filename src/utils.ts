@@ -1,4 +1,4 @@
-import md5 from 'md5-hash';
+import * as hasha from 'hasha';
 import { MD5 as objectMD5 } from 'object-hash';
 import { capitalize, defaultsDeep, isNil, isObject, keyBy, lowerCase } from 'lodash';
 import { Observable, OperatorFunction } from 'rxjs';
@@ -8,7 +8,7 @@ import { DeepPartial, Dictionary, Id } from './system-types';
 export const capitalizeAll = (str: string | number | symbol): string =>
     lowerCase(str.toString()).split(' ').map((part: string) => capitalize(part)).join(' ');
 
-export const hashString = (value: string): string => md5(value).toString();
+export const hashString = (value: string): string => hasha(value, { algorithm: 'md5' }).toString();
 
 export const hashIt = (value?: unknown): string => {
     if (typeof value === 'string') return hashString(value);
