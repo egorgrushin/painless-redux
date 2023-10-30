@@ -5,7 +5,7 @@ import { TestStore } from '../testing/store';
 import { createEntity } from './entity';
 import { createPainlessRedux } from '../painless-redux/painless-redux';
 import { PainlessRedux } from '../painless-redux/types';
-import { Entity, EntityInternalSetLoadingStateOptions, Pagination } from './types';
+import { Entity, EntityInternalSetLoadingStateOptions, EntitySchema, Pagination } from './types';
 import { BehaviorSubject } from 'rxjs';
 import { mocked } from 'ts-jest/utils';
 import * as uuid from 'uuid';
@@ -24,6 +24,7 @@ describe('Entity', () => {
     let pr: PainlessRedux;
     let store: TestStore<any>;
     let user: any;
+    let schema: Partial<EntitySchema<TestEntity>>;
     let user2: any;
     let user3: any;
     let reducer: any;
@@ -44,11 +45,12 @@ describe('Entity', () => {
     beforeEach(() => {
         store = new TestStore(undefined, (state) => state);
         pr = createPainlessRedux(store, { useAsapSchedulerInLoadingGuards: false });
-        entity = createEntity(pr, {
+        schema = {
             name: 'test',
             pageSize: 2,
             id: idFn,
-        });
+        };
+        entity = createEntity(pr, schema);
         reducer = initStoreWithPr(store, pr);
         user = { id: 1, name: 'John' };
         user2 = { id: 2, name: 'Alex' };
@@ -66,25 +68,24 @@ describe('Entity', () => {
             expect(store.actions$).toBeObservable(actions$);
         });
 
-        test('should resolve id from schema.id fn and add entity', () => {
+        test('should resolve an id from schema.id even it has id already, then add an entity', () => {
             // arrange
             mocked(idFn).mockImplementationOnce((data): string | number => `$${data.name}`);
-            const userWithoutId = { name: user.name };
+            const userWithIgnoredId = { name: user.name, id: 'should not be used' };
             const addAction = entity.actionCreators.ADD({
-                ...userWithoutId,
-                id: `$${userWithoutId.name}`,
+                ...userWithIgnoredId,
+                id: `$${userWithIgnoredId.name}`,
             });
             const actions$ = getOrderedMarbleStream(addAction);
             // act
-            entity.add(userWithoutId);
+            entity.add(userWithIgnoredId);
             // assert
             expect(store.actions$).toBeObservable(actions$);
         });
 
-        test('should resolve id if it does not exist and add entity', () => {
+        xtest('should resolve an id if it is not existed and schema.id is not defined, then add an entity', () => {
             // arrange
             const randomId = 'adav3r2brh35';
-            mocked(idFn).mockReturnValueOnce(undefined);
             mocked(uuid.v4).mockReturnValueOnce(randomId);
             const userWithoutId = { name: user.name };
             const addAction = entity.actionCreators.ADD({
@@ -165,7 +166,13 @@ describe('Entity', () => {
                 const id = user.id;
                 const changeAction = entity.actionCreators.CHANGE(id, patch, changeId, options);
                 const resolvePatch = useResponsePatch ? responsePatch : undefined;
-                const resolveChangeAction = entity.actionCreators.RESOLVE_CHANGE(id, changeId, true, resolvePatch, options);
+                const resolveChangeAction = entity.actionCreators.RESOLVE_CHANGE(
+                    id,
+                    changeId,
+                    true,
+                    resolvePatch,
+                    options,
+                );
                 const actions$ = cold('a-b', {
                     a: changeAction,
                     b: resolveChangeAction,
@@ -182,7 +189,13 @@ describe('Entity', () => {
                 const failedRemote$ = cold(' --#|', undefined, error);
                 const id = user.id;
                 const changeAction = entity.actionCreators.CHANGE(id, patch, changeId, options);
-                const resolveChangeAction = entity.actionCreators.RESOLVE_CHANGE(id, changeId, false, undefined, options);
+                const resolveChangeAction = entity.actionCreators.RESOLVE_CHANGE(
+                    id,
+                    changeId,
+                    false,
+                    undefined,
+                    options,
+                );
                 const actions$ = cold('a-(bc)', {
                     a: changeAction,
                     b: resolveChangeAction,

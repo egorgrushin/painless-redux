@@ -28,9 +28,9 @@ export const getFullEntitySchema = <T>(
 export const createIdResolver = <T>(
     schema: EntitySchema<T>,
 ) => (data: T): EntityType<T> => {
+    if (schema.id) return { ...data, id: schema.id(data) };
     if ('id' in data) return data as EntityType<T>;
-    const id = schema.id?.(data) ?? v4();
-    return { ...data, id };
+    return { ...data, id: v4() };
 };
 
 export const createEntityActionTypes = (
