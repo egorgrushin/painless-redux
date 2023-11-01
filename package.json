@@ -27,7 +27,7 @@
     "combine-reducers": "^1.0.0",
     "lodash": "^4.17.13",
     "object-hash": "^2.0.3",
-    "reselect": "^4.0.0",
+    "reselect": "4.0.0",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
