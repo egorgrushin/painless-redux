@@ -1,16 +1,16 @@
 import { EMPTY, MonoTypeOperatorFunction, Observable, of, OperatorFunction } from 'rxjs';
 import { catchError, filter, first, map, switchMap, tap } from 'rxjs/operators';
 import { ObservableOrFactory, RemoteOptions, RemotePipeConfig } from './types';
-import { isNil } from 'lodash';
-import { LoadingState } from '../system-types';
+import { isFunction, isNil } from 'lodash';
+import { AnyAction, CombinedReducers, LoadingState, Reducer } from '../system-types';
 import { affectLoadingStateFactory } from '../affect-loading-state/affect-loading-state';
 
 export const getObservable$ = <S, R>(
     observableOrFactory: ObservableOrFactory<S, R>,
     value: S,
-): Observable<R> => observableOrFactory instanceof Observable
-    ? observableOrFactory
-    : observableOrFactory(value);
+): Observable<R> => isFunction(observableOrFactory)
+    ? observableOrFactory(value)
+    : observableOrFactory;
 
 export const guardByOptions = <T>(
     options?: RemoteOptions,
@@ -92,3 +92,22 @@ export const guardIfLoading = (
     filter((loadingState: LoadingState | undefined) => !loadingState?.isLoading),
 );
 
+export const combineReducers = <TState extends object, TAction extends AnyAction>(
+    reducers: CombinedReducers<TState>,
+): Reducer<TState, TAction> => {
+    const reducerKeys = Object.keys(reducers) as (keyof TState)[];
+
+    return (state: TState, action: any) => {
+        state = state ?? {};
+        let hasChanged = false;
+        const nextState: Partial<TState> = {};
+
+        reducerKeys.forEach((reducerKey) => {
+            const subReducer = reducers[reducerKey];
+            const subState = state[reducerKey];
+            nextState[reducerKey] = subReducer(subState, action);
+            hasChanged = hasChanged || nextState[reducerKey] !== subState;
+        })
+        return hasChanged ? nextState as TState : state;
+    };
+}

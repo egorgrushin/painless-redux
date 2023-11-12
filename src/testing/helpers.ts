@@ -1,7 +1,6 @@
 import { cold } from 'jest-marbles';
 import { TestStore } from './store';
-// @ts-ignore
-import * as combineReducers from 'combine-reducers';
+import { combineReducers } from '../shared/utils';
 import { PainlessRedux } from '../painless-redux/types';
 import { EntityActionTypes } from '../entity/types';
 import { createEntityActionCreators } from '../entity/action-creators';
@@ -13,7 +12,7 @@ export const initStoreWithPr = (
     pr: PainlessRedux,
 ) => {
     const reducer = pr.getReducer();
-    const globalReducer = combineReducers<any>({ [pr.name]: reducer });
+    const globalReducer = combineReducers({ [pr.name]: reducer });
     const state = globalReducer({}, { type: 'any' });
     store.setState(state);
     return globalReducer;

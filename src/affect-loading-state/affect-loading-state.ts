@@ -1,6 +1,7 @@
 import { EMPTY, Observable, of, OperatorFunction, throwError } from 'rxjs';
 import { catchError, finalize, switchMap, tap } from 'rxjs/operators';
 import { AffectLoadingStateFactory, AffectStateSetter } from './types';
+import { isFunction } from 'lodash';
 
 export const affectLoadingStateOperatorFactory = <T, E>(
     setter: AffectStateSetter<T, E>,
@@ -40,9 +41,9 @@ export const affectLoadingStateFactory = <T, E>(
     rethrow: boolean = true,
 ): AffectLoadingStateFactory => (...pipesOrObs: any) => {
     const obs = pipesOrObs[0];
-    const isObs = obs instanceof Observable;
+    const isPipes = isFunction(obs);
     const operatorFactory = affectLoadingStateOperatorFactory(setter, rethrow);
-    if (!isObs) return operatorFactory(...pipesOrObs as OperatorFunction<T, T>[]);
+    if (isPipes) return operatorFactory(...pipesOrObs as OperatorFunction<T, T>[]);
     const operator = operatorFactory(switchMap(() => obs));
     return (of(undefined) as any).pipe(operator);
 };

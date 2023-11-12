@@ -1,10 +1,13 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
+    "target": "ES2015",
+    "module": "ES2020",
     "declaration": true,
     "outDir": "./dist",
     "strict": true,
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
     "lib": [
       "dom",
       "es2015",

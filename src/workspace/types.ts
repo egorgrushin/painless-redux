@@ -14,7 +14,7 @@ export interface Workspace<T> extends PublicDispatchWorkspaceMethods<T>, SelectW
 }
 
 export interface WorkspaceState<T> extends LoadingStateState {
-    value: ChangeableState<T>;
+    value: ChangeableState<T> | undefined;
 }
 
 export interface WorkspaceSchema<T> {
