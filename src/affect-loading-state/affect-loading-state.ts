@@ -1,7 +1,7 @@
 import { EMPTY, Observable, of, OperatorFunction, throwError } from 'rxjs';
 import { catchError, finalize, switchMap, tap } from 'rxjs/operators';
 import { AffectLoadingStateFactory, AffectStateSetter } from './types';
-import { isFunction } from 'lodash';
+import isFunction from 'lodash/isFunction';
 
 export const affectLoadingStateOperatorFactory = <T, E>(
     setter: AffectStateSetter<T, E>,
