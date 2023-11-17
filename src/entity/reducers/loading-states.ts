@@ -2,7 +2,7 @@ import { EntityActionTypes } from '../types';
 import { Dictionary, Id, LoadingState } from '../../system-types';
 import { EntityActions } from '../actions';
 import { createLoadingStateReducer } from '../../shared/loading-state/reducers';
-import { isNil } from 'lodash';
+import isNil from 'lodash/isNil';
 import { removeFromObject } from '../../utils';
 
 const removeState = (

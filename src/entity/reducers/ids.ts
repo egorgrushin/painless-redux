@@ -1,7 +1,7 @@
 import { EntityActionTypes, EntityInsertOptions } from '../types';
 import { EntityActions } from '../actions';
 import { Id } from '../../system-types';
-import { isNil } from 'lodash';
+import isNil from 'lodash/isNil';
 import { removeFromArray } from '../../utils';
 
 const getOnlyNewIds = (
