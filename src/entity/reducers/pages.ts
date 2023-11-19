@@ -1,8 +1,7 @@
 import { EntityActionTypes, EntityType, Page } from '../types';
 import { Dictionary } from '../../system-types';
 import { EntityActions } from '../actions';
-import isNil from 'lodash/isNil';
-import uniq from 'lodash/uniq';
+import { isNil, uniq } from 'lodash-es';
 import { createLoadingStateReducer } from '../../shared/loading-state/reducers';
 import { MAX_PAGES_COUNT } from '../constants';
 import { removeFromArray } from '../../utils';

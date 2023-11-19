@@ -1,8 +1,7 @@
 import { EMPTY, MonoTypeOperatorFunction, Observable, of, OperatorFunction } from 'rxjs';
 import { catchError, filter, first, map, switchMap, tap } from 'rxjs/operators';
 import { ObservableOrFactory, RemoteOptions, RemotePipeConfig } from './types';
-import isFunction from 'lodash/isFunction';
-import isNil from 'lodash/isNil';
+import { isFunction, isNil } from 'lodash-es';
 import { AnyAction, CombinedReducers, LoadingState, Reducer } from '../system-types';
 import { affectLoadingStateFactory } from '../affect-loading-state/affect-loading-state';
 
