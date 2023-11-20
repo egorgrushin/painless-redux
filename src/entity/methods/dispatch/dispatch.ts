@@ -17,7 +17,7 @@ import {
 import { EntityActions } from '../../actions';
 import { DeepPartial, Id, LoadingState } from '../../../system-types';
 import { DispatchEntityMethods } from './types';
-import isNil from 'lodash/isNil';
+import { isNil } from 'lodash-es';
 import { affectLoadingStateFactory } from '../../../affect-loading-state/affect-loading-state';
 import { ChangeOptions, PatchRequest } from '../../../shared/change/types';
 import { normalizePatch } from '../../../shared/change/utils';

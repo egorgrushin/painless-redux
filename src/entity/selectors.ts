@@ -19,8 +19,7 @@ import { PainlessReduxState } from '../painless-redux/types';
 import { HashFn, Id, LoadingState } from '../system-types';
 import { createLoadingStateSelector } from '../shared/loading-state/selectors';
 import { LoadingStateSelector } from '../shared/loading-state/types';
-import isNil from 'lodash/isNil';
-import values from 'lodash/values';
+import { isNil, values } from 'lodash-es';
 import { getChangeableActual } from '../shared/change/selectors';
 
 export const createDictionarySelector = <T>(
