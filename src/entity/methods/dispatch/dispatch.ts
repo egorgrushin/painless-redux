@@ -24,12 +24,12 @@ import { normalizePatch } from '../../../shared/change/utils';
 import { SelectEntityMethods } from '../select/types';
 import { AffectLoadingStateFactory } from '../../..';
 
-export const createDispatchEntityMethods = <T>(
+export const createDispatchEntityMethods = <T, TPageMetadata>(
     dispatcher: Dispatcher<EntityActionTypes, EntityActions>,
     idResolver: (data: T) => EntityType<T>,
-    selectMethods: SelectEntityMethods<T>,
+    selectMethods: SelectEntityMethods<T, TPageMetadata>,
     schema: EntitySchema<T>,
-): DispatchEntityMethods<T> => {
+): DispatchEntityMethods<T, TPageMetadata> => {
 
     const add = (
         entity: T,
@@ -72,6 +72,7 @@ export const createDispatchEntityMethods = <T>(
         config?: unknown,
         isReplace: boolean = false,
         hasMore: boolean = false,
+        metadata?: TPageMetadata,
         options?: EntityAddListOptions,
     ) => {
         const internalOptions: EntityInternalAddListOptions = {
@@ -79,7 +80,7 @@ export const createDispatchEntityMethods = <T>(
             maxPagesCount: schema.maxPagesCount,
         };
         entities = entities.map((entity) => idResolver(entity));
-        return dispatcher.createAndDispatch('ADD_LIST', [entities, config, isReplace, hasMore], internalOptions);
+        return dispatcher.createAndDispatch('ADD_LIST', [entities, config, isReplace, hasMore, metadata], internalOptions);
     };
 
     const changeWithId = (

@@ -9,9 +9,9 @@ import { createByIdLoadingStatesReducer } from './reducers/loading-states';
 import { createEntityLoadingStateReducer } from './reducers/loading-state';
 import { batchActionsReducerFactory } from '../shared/system/reducers';
 
-const createBaseReducer = <T>(
+const createBaseReducer = <T, TPageMetadata>(
     actionTypes: EntityActionTypes,
-): Reducer<EntityState<T>, EntityActions> => combineReducers<EntityState<T>, EntityActions>({
+): Reducer<EntityState<T, TPageMetadata>, EntityActions> => combineReducers<EntityState<T, TPageMetadata>, EntityActions>({
     dictionary: createDictionaryReducer(actionTypes),
     ids: createIdsReducer(actionTypes),
     pages: createPagesReducer(actionTypes),
@@ -19,11 +19,11 @@ const createBaseReducer = <T>(
     loadingState: createEntityLoadingStateReducer(actionTypes),
 });
 
-const createListReducer = <T>(
+const createListReducer = <T, TPageMetadata>(
     actionTypes: EntityActionTypes,
-): Reducer<EntityState<T>, EntityActions> => {
-    const baseReducer = createBaseReducer<T>(actionTypes);
-    return (state: EntityState<T>, action: EntityActions) => {
+): Reducer<EntityState<T, TPageMetadata>, EntityActions> => {
+    const baseReducer = createBaseReducer<T, TPageMetadata>(actionTypes);
+    return (state: EntityState<T, TPageMetadata>, action: EntityActions) => {
         switch (action.type) {
             case actionTypes.CHANGE_LIST: {
                 const actionCreator = createChange(actionTypes);
@@ -66,9 +66,9 @@ const createListReducer = <T>(
     };
 };
 
-export const createEntityReducer = <T>(
+export const createEntityReducer = <T, TPageMetadata>(
     actionTypes: EntityActionTypes,
-): Reducer<EntityState<T>, EntityActions> => {
-    const listReducer = createListReducer<T>(actionTypes);
+): Reducer<EntityState<T, TPageMetadata>, EntityActions> => {
+    const listReducer = createListReducer<T, TPageMetadata>(actionTypes);
     return batchActionsReducerFactory(actionTypes, listReducer);
 };

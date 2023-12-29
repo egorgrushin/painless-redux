@@ -7,9 +7,9 @@ import { PainlessReduxSchema } from '../../../painless-redux/types';
 import { ObservableOrFactory } from '../../../shared/types';
 import { guardIfLoading } from '../../../shared/utils';
 
-export const createMixedEntityMethodsUtils = <T>(
-    dispatchMethods: DispatchEntityMethods<T>,
-    selectMethods: SelectEntityMethods<T>,
+export const createMixedEntityMethodsUtils = <T, TPageMetadata>(
+    dispatchMethods: DispatchEntityMethods<T, TPageMetadata>,
+    selectMethods: SelectEntityMethods<T, TPageMetadata>,
     schema: EntitySchema<T>,
     prSchema: PainlessReduxSchema,
 ) => {
@@ -37,7 +37,7 @@ export const createMixedEntityMethodsUtils = <T>(
             }),
             switchMap((paging: Pagination) => page$.pipe(
                 take(1),
-                map((page: Page | undefined) => !page || page.hasMore !== false),
+                map((page: Page<TPageMetadata> | undefined) => !page || page.hasMore !== false),
                 switchMap((hasMore: boolean) => paging.index === 0 || hasMore ? of(paging) : EMPTY),
             )),
         );

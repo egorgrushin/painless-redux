@@ -62,7 +62,6 @@ export const getRemotePipe = <TSource, TStore, TResponse, TOutput>(
             } else {
                 pipesToAffect.push(successPipe);
             }
-
             if (setLoadingState) {
                 const rethrow = options?.rethrow ?? false;
                 const affectStateObsFactory = affectLoadingStateFactory(setLoadingState, rethrow);

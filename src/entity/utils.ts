@@ -37,9 +37,9 @@ export const createEntityActionTypes = (
     entityName: string,
 ): EntityActionTypes => createActionTypes(ENTITY_TYPE_NAMES, entityName);
 
-export const getPaginated$ = <T>(
-    dataSource: Observable<ResponseArray<T>> | Response$Factory<T>,
+export const getPaginated$ = <T, TPageMetadata>(
+    dataSource: Observable<ResponseArray<T, TPageMetadata>> | Response$Factory<T, TPageMetadata>,
     pagination: Pagination,
-): Observable<PaginatedResponse<T>> => getObservable$(dataSource, pagination).pipe(
+): Observable<PaginatedResponse<T, TPageMetadata>> => getObservable$(dataSource, pagination).pipe(
     map((response) => ({ ...pagination, response })),
 );

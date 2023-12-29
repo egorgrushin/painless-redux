@@ -55,16 +55,17 @@ export const createResolveAdd = <T>(types: EntityActionTypes) => (
     return { type: types.RESOLVE_ADD, payload, options } as const;
 };
 
-export const createAddList = <T>(types: EntityActionTypes) => (
+export const createAddList = <T, TPageMetadata>(types: EntityActionTypes) => (
     entities: EntityType<T>[],
     config?: unknown,
     isReplace: boolean = false,
     hasMore: boolean = false,
+    metadata?: TPageMetadata,
     options?: EntityInternalAddListOptions,
 ) => {
     const configHash = getHash(config);
     options = typedDefaultsDeep(options, { merge: true, maxPagesCount: MAX_PAGES_COUNT });
-    const payload = { entities, configHash, isReplace, hasMore };
+    const payload = { entities, configHash, isReplace, hasMore, metadata };
     return { type: types.ADD_LIST, payload, options } as const;
 };
 

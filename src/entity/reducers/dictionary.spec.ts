@@ -10,10 +10,12 @@ type TestEntity = {
         name?: string;
     },
 }
+type TPageMetadata = any;
+
 const {
     reducer,
     actionCreators,
-} = createTestHelpers<TestEntity>(createDictionaryReducer);
+} = createTestHelpers<TestEntity, TPageMetadata>(createDictionaryReducer);
 
 describe('dictionary', () => {
 
