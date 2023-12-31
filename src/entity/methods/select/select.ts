@@ -5,10 +5,10 @@ import { Dictionary, Id } from '../../../system-types';
 import { SelectEntityMethods } from './types';
 import { toDictionary } from '../../../utils';
 
-export const createSelectEntityMethods = <T>(
+export const createSelectEntityMethods = <T, TPageMetadata>(
     selectManager: SelectManager,
-    selectors: EntitySelectors<T>,
-): SelectEntityMethods<T> => {
+    selectors: EntitySelectors<T, TPageMetadata>,
+): SelectEntityMethods<T, TPageMetadata> => {
 
     const get$ = (config: unknown): Observable<T[] | undefined> => {
         const selector = selectors.createPageListByConfig(config);
