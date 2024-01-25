@@ -1,4 +1,4 @@
-import { EntityActionTypes } from './types';
+import { EntityActionTypes, EntitySchema } from './types';
 import {
     createAdd,
     createAddList,
@@ -23,10 +23,11 @@ import { EntityActionCreators } from './action-creators.types';
 
 export const createEntityActionCreators = <T, TPageMetadata>(
     actionTypes: EntityActionTypes,
+    schema: EntitySchema<T>,
 ): EntityActionCreators<T, TPageMetadata> => ({
-    ADD: createAdd<T>(actionTypes),
-    RESOLVE_ADD: createResolveAdd<T>(actionTypes),
-    ADD_LIST: createAddList<T, TPageMetadata>(actionTypes),
+    ADD: createAdd<T>(actionTypes, schema),
+    RESOLVE_ADD: createResolveAdd<T>(actionTypes, schema),
+    ADD_LIST: createAddList<T, TPageMetadata>(actionTypes, schema),
     CHANGE: createChange<T>(actionTypes),
     RESOLVE_CHANGE: createResolveChange<T>(actionTypes),
     REMOVE: createRemove(actionTypes),
@@ -35,8 +36,8 @@ export const createEntityActionCreators = <T, TPageMetadata>(
     REMOVE_LIST: createRemoveList(actionTypes),
     RESOLVE_REMOVE_LIST: createResolveRemoveList(actionTypes),
     RESTORE_REMOVED_LIST: createRestoreRemovedList<T>(actionTypes),
-    SET_LOADING_STATE: createSetLoadingState(actionTypes),
-    CLEAR: createClear(actionTypes),
+    SET_LOADING_STATE: createSetLoadingState(actionTypes, schema),
+    CLEAR: createClear(actionTypes, schema),
     CLEAR_ALL: createClearAll(actionTypes),
     BATCH: createBatch<T>(actionTypes),
     CHANGE_LIST: createChangeList<T>(actionTypes),
