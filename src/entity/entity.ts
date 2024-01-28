@@ -15,8 +15,8 @@ export const createEntity = <T, TPageMetadata = void>(
 ): Entity<T, TPageMetadata> => {
     const fullSchema = getFullEntitySchema<T>(schema);
     const actionTypes = createEntityActionTypes(fullSchema.name);
-    const actionCreators = createEntityActionCreators<T, TPageMetadata>(actionTypes);
-    const reducer = createEntityReducer<T, TPageMetadata>(actionTypes);
+    const actionCreators = createEntityActionCreators<T, TPageMetadata>(actionTypes, fullSchema);
+    const reducer = createEntityReducer<T, TPageMetadata>(actionTypes, fullSchema);
     const {
         selector,
         dispatcher,
