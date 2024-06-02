@@ -6,6 +6,7 @@ import { EntityActionTypes } from '../entity/types';
 import { createEntityActionCreators } from '../entity/action-creators';
 import { Reducer } from '../system-types';
 import { EntityActions } from '../entity/actions';
+import { getHash } from '../entity/utils';
 
 export const initStoreWithPr = (
     store: TestStore<any>,
@@ -80,7 +81,10 @@ export const createTestHelpers = <T, TPageMetadata>(
         RESOLVE_CHANGE_LIST: 'RESOLVE_CHANGE_LIST',
     };
 
-    const actionCreators = createEntityActionCreators<T, TPageMetadata>(types);
+    const actionCreators = createEntityActionCreators<T, TPageMetadata>(
+        types,
+        { hashFn: getHash, name: 'test', pageSize: 10, maxPagesCount: 10 },
+    );
     const reducer = reducerFactory<T>(types);
     return { actionCreators, reducer };
 };
