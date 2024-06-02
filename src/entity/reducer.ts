@@ -1,4 +1,4 @@
-import { EntityActionTypes, EntityState } from './types';
+import { EntityActionTypes, EntitySchema, EntityState } from './types';
 import { Reducer } from '../system-types';
 import { combineReducers } from '../shared/utils';
 import { createDictionaryReducer } from './reducers/dictionary';
@@ -21,6 +21,7 @@ const createBaseReducer = <T, TPageMetadata>(
 
 const createListReducer = <T, TPageMetadata>(
     actionTypes: EntityActionTypes,
+    schema: EntitySchema<T>,
 ): Reducer<EntityState<T, TPageMetadata>, EntityActions> => {
     const baseReducer = createBaseReducer<T, TPageMetadata>(actionTypes);
     return (state: EntityState<T, TPageMetadata>, action: EntityActions) => {
@@ -49,7 +50,7 @@ const createListReducer = <T, TPageMetadata>(
                 return actions.reduce(baseReducer, state);
             }
             case actionTypes.SET_LOADING_STATES: {
-                const actionCreator = createSetLoadingState(actionTypes);
+                const actionCreator = createSetLoadingState(actionTypes, schema);
                 const { payload: { ids, state: loadingState }, options } = action;
                 const actions = ids.map((id) => actionCreator(
                     loadingState,
@@ -68,7 +69,8 @@ const createListReducer = <T, TPageMetadata>(
 
 export const createEntityReducer = <T, TPageMetadata>(
     actionTypes: EntityActionTypes,
+    schema: EntitySchema<T>,
 ): Reducer<EntityState<T, TPageMetadata>, EntityActions> => {
-    const listReducer = createListReducer<T, TPageMetadata>(actionTypes);
+    const listReducer = createListReducer<T, TPageMetadata>(actionTypes, schema);
     return batchActionsReducerFactory(actionTypes, listReducer);
 };
