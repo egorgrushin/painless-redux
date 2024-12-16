@@ -15,27 +15,26 @@ export const createInstanceReducer = <T>(types: EntityActionTypes) => {
             case types.ADD: {
                 const {
                     options: { optimistic, merge },
-                    payload: { entity, tempId },
+                    payload: { idEntityPair, tempId },
                 } = action;
+                const changeId = tempId;
                 const instance = createInstanceByChanges(
                     state,
-                    entity as EntityType<T>,
+                    idEntityPair.entity as EntityType<T>,
                     merge,
                     !optimistic,
-                    tempId,
+                    changeId,
                 );
                 return getMergedChanges(instance, true);
             }
             case types.CHANGE: {
                 const {
                     options,
-                    payload: { id, patch, changeId },
+                    payload: { patch, changeId },
                 } = action;
                 const { ifNotExist } = options;
                 if (!ifNotExist && !state) return state;
-                const patchWithId = { id, ...patch };
-                const resultPatch = ifNotExist ? patchWithId : patch;
-                const changeAction = createChangeAction(resultPatch, changeId, options);
+                const changeAction = createChangeAction(patch, changeId, options);
                 return changeReducer(state, changeAction) as EntityInstanceState<T>;
             }
             case types.RESOLVE_CHANGE: {

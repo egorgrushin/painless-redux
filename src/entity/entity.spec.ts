@@ -5,7 +5,7 @@ import { TestStore } from '../testing/store';
 import { createEntity } from './entity';
 import { createPainlessRedux } from '../painless-redux/painless-redux';
 import { PainlessRedux } from '../painless-redux/types';
-import { Entity, EntityInternalSetLoadingStateOptions, EntitySchema, Pagination } from './types';
+import { Entity, EntityInternalSetLoadingStateOptions, EntitySchema, IdEntityPair, Pagination } from './types';
 import { BehaviorSubject } from 'rxjs';
 import { mocked } from 'ts-jest/utils';
 import * as uuid from 'uuid';
@@ -60,7 +60,8 @@ describe('Entity', () => {
     describe('#add', () => {
         test('should add entity', () => {
             // arrange
-            const addAction = entity.actionCreators.ADD(user);
+            const pair: IdEntityPair<any> = { entity: user, id: user.id };
+            const addAction = entity.actionCreators.ADD(pair);
             const actions$ = getOrderedMarbleStream(addAction);
             // act
             entity.add(user);
@@ -68,14 +69,12 @@ describe('Entity', () => {
             expect(store.actions$).toBeObservable(actions$);
         });
 
-        test('should resolve an id from schema.id even it has id already, then add an entity', () => {
+        test('should add an entity using the schema.id despite of existing entity id', () => {
             // arrange
             mocked(idFn).mockImplementationOnce((data): string | number => `$${data.name}`);
             const userWithIgnoredId = { name: user.name, id: 'should not be used' };
-            const addAction = entity.actionCreators.ADD({
-                ...userWithIgnoredId,
-                id: `$${userWithIgnoredId.name}`,
-            });
+            const pair: IdEntityPair<any> = { entity: userWithIgnoredId, id: `$${userWithIgnoredId.name}` };
+            const addAction = entity.actionCreators.ADD(pair);
             const actions$ = getOrderedMarbleStream(addAction);
             // act
             entity.add(userWithIgnoredId);
@@ -88,10 +87,12 @@ describe('Entity', () => {
             const randomId = 'adav3r2brh35';
             mocked(uuid.v4).mockReturnValueOnce(randomId);
             const userWithoutId = { name: user.name };
-            const addAction = entity.actionCreators.ADD({
+            const userWithoutIdEntity = {
                 ...userWithoutId,
                 id: randomId,
-            });
+            };
+            const pair: IdEntityPair<any> = { entity: userWithoutIdEntity, id: userWithoutIdEntity.id };
+            const addAction = entity.actionCreators.ADD(pair);
             const actions$ = getOrderedMarbleStream(addAction);
             // act
             entity.add(userWithoutId);
@@ -104,7 +105,11 @@ describe('Entity', () => {
         test('should add entities', () => {
             // arrange
             const users = [user, user2];
-            const addListAction = entity.actionCreators.ADD_LIST(users);
+            const pairs: IdEntityPair<any>[] = users.map((user) => ({
+                entity: user,
+                id: user.id,
+            }));
+            const addListAction = entity.actionCreators.ADD_LIST(pairs);
             const actions$ = getOrderedMarbleStream(addListAction);
             // act
             entity.addList(users);
@@ -157,10 +162,10 @@ describe('Entity', () => {
 
         describe('#optimistic', () => {
             test.each`
-	        	useResponsePatch
-		        ${false}
-		        ${true}
-	            `('should change entity remotely with useResponsePatch: $useResponsePatch', ({ useResponsePatch }) => {
+                useResponsePatch
+                ${false}
+                ${true}
+                `('should change entity remotely with useResponsePatch: $useResponsePatch', ({ useResponsePatch }) => {
                 const options: ChangeOptions = { optimistic: true, useResponsePatch, rethrow: false };
                 const remote$ = cold(' --a| ', { a: responsePatch });
                 const id = user.id;
@@ -344,7 +349,8 @@ describe('Entity', () => {
     describe('#create', () => {
         test('should create entity', () => {
             // arrange
-            const createAction = entity.actionCreators.ADD(user);
+            const pair: IdEntityPair<any> = { entity: user, id: user.id };
+            const createAction = entity.actionCreators.ADD(pair);
             const actions$ = cold('a', { a: createAction });
             // act
             entity.add(user);
@@ -356,7 +362,8 @@ describe('Entity', () => {
             // arrange
             const options = { rethrow: false };
             const remote$ = cold('--a|', { a: user });
-            const createAction = entity.actionCreators.ADD(user, undefined, undefined, options);
+            const pair: IdEntityPair<any> = { entity: user, id: user.id };
+            const createAction = entity.actionCreators.ADD(pair, undefined, undefined, options);
             const actions$ = cold('a-(bc)', {
                 a: setLoadingStateActionFactory({ isLoading: true }, undefined, options),
                 b: createAction,
@@ -383,7 +390,8 @@ describe('Entity', () => {
         test('should load entity', () => {
             // arrange
             const remote$ = cold('--a|', { a: user });
-            const addAction = entity.actionCreators.ADD(user);
+            const pair: IdEntityPair<any> = { entity: user, id: user.id };
+            const addAction = entity.actionCreators.ADD(pair);
             const actions$ = cold('a-(bc)', {
                 a: setLoadingStateActionFactory({ isLoading: true }, user.id),
                 b: addAction,
@@ -400,7 +408,9 @@ describe('Entity', () => {
             const data = { objectId: '23a4123', type: 5, name: 'Some object 1' };
             const remote$ = cold('--a|', { a: data });
             const id = [data.objectId, data.type].toString();
-            const addAction = entity.actionCreators.ADD({ id, ...data });
+            const dataEntity = { id, ...data };
+            const pair: IdEntityPair<any> = { entity: dataEntity, id: dataEntity.id };
+            const addAction = entity.actionCreators.ADD(pair);
             const actions$ = cold('a-(bc)', {
                 a: setLoadingStateActionFactory({ isLoading: true }, id),
                 b: addAction,
@@ -429,7 +439,11 @@ describe('Entity', () => {
             const users = [user];
             const remote$ = cold('--a|', { a: { data: users } });
             const filter = null;
-            const addAction = entity.actionCreators.ADD_LIST(users, filter, true, false);
+            const pairs: IdEntityPair<TestEntity>[] = users.map((user) => ({
+                entity: user,
+                id: user.id,
+            }));
+            const addAction = entity.actionCreators.ADD_LIST(pairs, filter, true, false);
             const actions$ = cold('a-(bc)', {
                 a: setLoadingStateActionFactory({ isLoading: true }),
                 b: addAction,
@@ -479,8 +493,17 @@ describe('Entity', () => {
                 const users = value.index ? users2 : users1;
                 return cold('--a|', { a: { data: users } });
             };
-            const addAction = entity.actionCreators.ADD_LIST(users1, filter, true, true);
-            const addAction2 = entity.actionCreators.ADD_LIST(users2, filter);
+
+            const pairs1: IdEntityPair<TestEntity>[] = users1.map((user) => ({
+                entity: user,
+                id: user.id,
+            }));
+            const pairs2: IdEntityPair<TestEntity>[] = users2.map((user) => ({
+                entity: user,
+                id: user.id,
+            }));
+            const addAction = entity.actionCreators.ADD_LIST(pairs1, filter, true, true);
+            const addAction2 = entity.actionCreators.ADD_LIST(pairs2, filter);
             const paginator = new BehaviorSubject<boolean>(true);
             const setLoadingStateTrueAction = setLoadingStateActionFactory({ isLoading: true });
             const setLoadingStateFalseAction = setLoadingStateActionFactory({ isLoading: false });

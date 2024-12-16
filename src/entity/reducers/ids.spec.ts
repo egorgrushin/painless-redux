@@ -1,5 +1,6 @@
 import { createIdsReducer } from './ids';
 import { createTestHelpers } from '../../testing/helpers';
+import { IdEntityPair } from '../types';
 
 const {
     reducer,
@@ -12,7 +13,8 @@ describe('ids', () => {
         test('should add entity id', () => {
             // arrange
             const entity = { id: 1 };
-            const action = actionCreators.ADD(entity);
+            const pair: IdEntityPair<any> = { entity, id: entity.id };
+            const action = actionCreators.ADD(pair);
             // act
             const actual = reducer(undefined, action);
             // assert
@@ -22,7 +24,9 @@ describe('ids', () => {
 
         test('should add entity id to options.pasteIndex', () => {
             // arrange
-            const action = actionCreators.ADD({ id: 99 }, undefined, undefined, { pasteIndex: 2 });
+            const entity = { id: 99 };
+            const pair: IdEntityPair<any> = { entity, id: entity.id };
+            const action = actionCreators.ADD(pair, undefined, undefined, { pasteIndex: 2 });
             // act
             const actual = reducer([1, 2, 3, 4], action);
             // assert
@@ -41,7 +45,11 @@ describe('ids', () => {
     test('should add entity ids from payload.$source', () => {
         // arrange
         const entities = [{ id: 1 }, { id: 2 }];
-        const action = actionCreators.ADD_LIST(entities);
+        const pairs: IdEntityPair<any>[] = entities.map((entity) => ({
+            entity,
+            id: entity.id,
+        }));
+        const action = actionCreators.ADD_LIST(pairs);
         // act
         const actual = reducer(undefined, action);
         // assert

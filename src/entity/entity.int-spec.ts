@@ -313,7 +313,7 @@ describe('[Integration] Entity', () => {
             const remote$ = cold(remoteMarble, {a: response});
             const expected$ = cold(expectedMarble, {
                 a: undefined,
-                b: [{...user, id: tempId}],
+                b: [user],
                 c: [{...user, id: newId}],
                 d: [],
             });

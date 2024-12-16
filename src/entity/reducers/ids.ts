@@ -33,8 +33,8 @@ export const createIdsReducer = (
 ): Id[] => {
     switch (action.type) {
         case types.ADD: {
-            const entity = action.payload.entity;
-            return addIds(state, [entity.id], action.options);
+            const id = action.payload.idEntityPair.id;
+            return addIds(state, [id], action.options);
         }
         case types.CHANGE: {
             const index = state.indexOf(action.payload.id);
@@ -45,8 +45,7 @@ export const createIdsReducer = (
             return state;
         }
         case types.ADD_LIST: {
-            const entities = action.payload.entities;
-            const ids = entities.map((e) => e.id);
+            const ids = action.payload.idEntityPairs.map(({ id }) => id);
             return addIds(state, ids, action.options);
         }
         case types.REMOVE: {
@@ -65,10 +64,10 @@ export const createIdsReducer = (
             return removeFromArray(state, [id]);
         }
         case types.RESOLVE_ADD: {
-            const { payload: { success, result, tempId } } = action;
+            const { payload: { success, idEntityPair, tempId } } = action;
             if (!success) return removeFromArray(state, [tempId]);
             return state.map((id) => {
-                if (id === tempId) return result.id;
+                if (id === tempId) return idEntityPair.id;
                 return id;
             });
         }

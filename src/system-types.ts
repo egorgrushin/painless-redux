@@ -40,6 +40,7 @@ export type CombinedReducers<TState> = {
 export type ActionCreator<TActionTypes, TActions> = (...args: any) => TActions;
 
 export type HashFn = (ob: any) => string;
+export type IdFn<T> = (data: T) => Id
 
 export type SameShaped<T, V> = {
     [K in keyof T]: V

@@ -1,4 +1,4 @@
-import { DeepPartial } from '../../system-types';
+import { DeepPartial, Id } from '../../system-types';
 import { RequestOptions } from '../types';
 
 export interface ChangeOptions extends RequestOptions {

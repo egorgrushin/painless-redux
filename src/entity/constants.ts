@@ -22,3 +22,5 @@ export const ENTITY_TYPE_NAMES: Array<keyof EntityActionTypes> = [
     'CHANGE_LIST',
     'SET_LOADING_STATES',
 ];
+
+// export const ID_PROPERTY_NAME = Symbol('KEY_PROPERTY_NAME');

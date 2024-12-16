@@ -1,6 +1,7 @@
 import { Id } from '../../system-types';
 import { createTestHelpers } from '../../testing/helpers';
 import { createDictionaryReducer } from './dictionary';
+import { IdEntityPair } from '../types';
 
 type TestEntity = {
     id: Id;
@@ -29,7 +30,8 @@ describe('dictionary', () => {
     test('should add entity', () => {
         // arrange
         const entity: TestEntity = { id: 1 };
-        const action = actionCreators.ADD(entity);
+        const pair: IdEntityPair<TestEntity> = { entity, id: entity.id };
+        const action = actionCreators.ADD(pair);
         // act
         const actual = reducer(undefined, action);
         // assert
@@ -40,7 +42,11 @@ describe('dictionary', () => {
     test('should add entities', () => {
         // arrange
         const entities = [{ id: 1 }, { id: 2 }];
-        const action = actionCreators.ADD_LIST(entities, null);
+        const pairs: IdEntityPair<TestEntity>[] = entities.map((entity) => ({
+            entity,
+            id: entity.id,
+        }));
+        const action = actionCreators.ADD_LIST(pairs, null);
         // act
         const actual = reducer(undefined, action);
         // assert
@@ -61,9 +67,11 @@ describe('dictionary', () => {
 	`('should merge entity with the same if options.merge option passed, otherwise replace ($options)', ({ options }) => {
         // arrange
         const entity = { id: 1, name: 'entity 1' };
-        const action = actionCreators.ADD(entity);
+        const pair1: IdEntityPair<TestEntity> = { entity, id: entity.id };
+        const action = actionCreators.ADD(pair1);
         const entity2 = { id: 1, age: 1 };
-        const action2 = actionCreators.ADD(entity2, undefined, undefined, options);
+        const pair2: IdEntityPair<TestEntity> = { entity: entity2, id: entity2.id };
+        const action2 = actionCreators.ADD(pair2, undefined, undefined, options);
         // act
         const instances = [action, action2].reduce(reducer, undefined);
         const actual = instances[entity.id].actual;
@@ -133,10 +141,10 @@ describe('dictionary', () => {
         });
 
         test.each`
-			ifNotExist
-			${undefined}
-			${true}
-		`(
+            ifNotExist
+            ${undefined}
+            ${true}
+        `(
             'should either create entity or ignore based on options.ifNotExist=$ifNotExist',
             ({ ifNotExist }) => {
                 // arrange
@@ -147,7 +155,7 @@ describe('dictionary', () => {
                 const actual = reducer(undefined, action);
                 // assert
                 const expected = ifNotExist ? {
-                    [id]: { actual: { id, profile: { age: 18 } } },
+                    [id]: { actual: { profile: { age: 18 } } },
                 } : {};
                 const expectedKeys = ifNotExist ? [id.toString()] : [];
                 expect(Object.keys(actual)).toEqual(expectedKeys);

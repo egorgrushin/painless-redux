@@ -7,7 +7,7 @@ import {
     EntityRemoveListOptions,
     EntityRemoveOptions,
     EntitySchema,
-    EntityType,
+    IdEntityPair,
     IdPatch,
 } from './types';
 import { DeepPartial, Id, LoadingState } from '../system-types';
@@ -19,18 +19,18 @@ import { ChangeOptions } from '../shared/change/types';
 import { SystemActions } from '../shared/system/actions';
 
 export const createAddByHash = <T>(types: EntityActionTypes) => (
-    entity: EntityType<T>,
+    idEntityPair: IdEntityPair<T>,
     configHash: string,
     tempId?: string,
     options?: EntityInternalAddOptions,
 ) => {
     options = typedDefaultsDeep(options, { merge: true, maxPagesCount: MAX_PAGES_COUNT });
-    const payload = { entity, configHash, tempId };
+    const payload = { idEntityPair, configHash, tempId };
     return { type: types.ADD, payload, options } as const;
 };
 
 export const createAdd = <T>(types: EntityActionTypes, schema: EntitySchema<T>) => (
-    entity: EntityType<T>,
+    idEntityPair: IdEntityPair<T>,
     config?: unknown,
     tempId?: string,
     options?: EntityInternalAddOptions,
@@ -38,12 +38,12 @@ export const createAdd = <T>(types: EntityActionTypes, schema: EntitySchema<T>) 
     const configHash = schema.hashFn(config);
     options = typedDefaultsDeep(options, { maxPagesCount: MAX_PAGES_COUNT });
     tempId = options.optimistic ? tempId : undefined;
-    entity = options.optimistic ? { ...entity, id: tempId as string } : entity;
-    return createAddByHash(types)(entity, configHash, tempId, options);
+    idEntityPair.id = options.optimistic ? tempId as string : idEntityPair.id;
+    return createAddByHash<T>(types)(idEntityPair, configHash, tempId, options);
 };
 
 export const createResolveAdd = <T>(types: EntityActionTypes, schema: EntitySchema<T>) => (
-    result: EntityType<T>,
+    idEntityPair: IdEntityPair<T>,
     success: boolean,
     tempId: string,
     config?: unknown,
@@ -51,12 +51,12 @@ export const createResolveAdd = <T>(types: EntityActionTypes, schema: EntitySche
 ) => {
     const configHash = schema.hashFn(config);
     options = typedDefaultsDeep(options, { merge: true });
-    const payload = { result, configHash, tempId, success };
+    const payload = { idEntityPair, configHash, tempId, success };
     return { type: types.RESOLVE_ADD, payload, options } as const;
 };
 
 export const createAddList = <T, TPageMetadata>(types: EntityActionTypes, schema: EntitySchema<T>) => (
-    entities: EntityType<T>[],
+    idEntityPairs: IdEntityPair<T>[],
     config?: unknown,
     isReplace: boolean = false,
     hasMore: boolean = false,
@@ -65,7 +65,7 @@ export const createAddList = <T, TPageMetadata>(types: EntityActionTypes, schema
 ) => {
     const configHash = schema.hashFn(config);
     options = typedDefaultsDeep(options, { merge: true, maxPagesCount: MAX_PAGES_COUNT });
-    const payload = { entities, configHash, isReplace, hasMore, metadata };
+    const payload = { idEntityPairs, configHash, isReplace, hasMore, metadata };
     return { type: types.ADD_LIST, payload, options } as const;
 };
 
@@ -97,7 +97,7 @@ export const createResolveRemoveList = (types: EntityActionTypes) => (
     return { type: types.RESOLVE_REMOVE_LIST, payload, options } as const;
 };
 
-export const createSetLoadingState = (types: EntityActionTypes, schema: EntitySchema<unknown>) => (
+export const createSetLoadingState = <T>(types: EntityActionTypes, schema: EntitySchema<T>) => (
     state: LoadingState,
     config?: unknown,
     id?: Id,
@@ -184,7 +184,7 @@ export const createResolveChangeList = <T>(types: EntityActionTypes) => (
     } as const;
 };
 
-export const createResolveRemove = <T>(types: EntityActionTypes) => (
+export const createResolveRemove = (types: EntityActionTypes) => (
     id: Id,
     success: boolean,
     options?: EntityRemoveOptions,
@@ -193,19 +193,19 @@ export const createResolveRemove = <T>(types: EntityActionTypes) => (
     return { type: types.RESOLVE_REMOVE, payload: { id, success }, options } as const;
 };
 
-export const createRestoreRemoved = <T>(types: EntityActionTypes) => (
+export const createRestoreRemoved = (types: EntityActionTypes) => (
     id: Id,
 ) => {
     return { type: types.RESTORE_REMOVED, payload: { id } } as const;
 };
 
-export const createRestoreRemovedList = <T>(types: EntityActionTypes) => (
+export const createRestoreRemovedList = (types: EntityActionTypes) => (
     ids: Id[],
 ) => {
     return { type: types.RESTORE_REMOVED_LIST, payload: { ids } } as const;
 };
 
-export const createClear = (types: EntityActionTypes, schema: EntitySchema<unknown>) => (config: unknown) => {
+export const createClear = <T>(types: EntityActionTypes, schema: EntitySchema<T>) => (config: unknown) => {
     const configHash = schema.hashFn(config);
     return { type: types.CLEAR, payload: { configHash } } as const;
 };

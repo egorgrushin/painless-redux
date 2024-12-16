@@ -5,7 +5,7 @@ import {
     EntityInternalSetLoadingStateOptions,
     EntityRemoveListOptions,
     EntityRemoveOptions,
-    EntityType,
+    EntityType, IdEntityPair,
     IdPatch,
 } from './types';
 import {DeepPartial, Id, LoadingState} from '../system-types';
@@ -14,27 +14,27 @@ import {ChangeOptions} from '../shared/change/types';
 // this types for public use
 export interface EntityActionCreators<T, TPageMetadata> {
     ADD_LIST: (
-        entities: EntityType<T>[],
+        idEntityPairs: IdEntityPair<T>[],
         config?: unknown,
         isReplace?: boolean,
         hasMore?: boolean,
         metadata?: TPageMetadata,
         options?: EntityInternalAddListOptions,
-    ) => { payload: { entities: EntityType<T>[]; isReplace: boolean; hasMore: boolean; configHash: string; metadata: TPageMetadata | undefined }; options: EntityInternalAddListOptions; type: 'ADD_LIST' };
+    ) => { payload: { idEntityPairs: IdEntityPair<T>[]; isReplace: boolean; hasMore: boolean; configHash: string; metadata: TPageMetadata | undefined }; options: EntityInternalAddListOptions; type: 'ADD_LIST' };
     RESTORE_REMOVED: (id: Id) => { payload: { id: Id }; type: 'RESTORE_REMOVED' };
     ADD: (
-        entity: EntityType<T>,
+        idEntityPair: IdEntityPair<T>,
         config?: unknown,
         tempId?: string,
         options?: EntityInternalAddOptions,
-    ) => { payload: { configHash: string; tempId: string | undefined; entity: { id: Id } }; options: EntityInternalAddOptions; type: 'ADD' };
+    ) => { payload: { idEntityPair: IdEntityPair<T>; configHash: string; tempId: string | undefined }; options: EntityInternalAddOptions; type: 'ADD' };
     RESOLVE_ADD: (
-        result: EntityType<T>,
+        idEntityPair: IdEntityPair<T>,
         success: boolean,
         tempId: string,
         config?: unknown,
         options?: EntityAddOptions,
-    ) => { payload: { result: EntityType<T>; success: boolean; configHash: string; tempId: string }; options: EntityAddOptions; type: 'RESOLVE_ADD' };
+    ) => { payload: { idEntityPair: IdEntityPair<T>; success: boolean; configHash: string; tempId: string }; options: EntityAddOptions; type: 'RESOLVE_ADD' };
     CLEAR_ALL: () => { type: 'CLEAR_ALL' };
     RESOLVE_REMOVE: (
         id: Id,

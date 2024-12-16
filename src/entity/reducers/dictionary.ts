@@ -1,14 +1,16 @@
 import { Dictionary } from '../../system-types';
 import { createAddByHash, createResolveChange, EntityActions } from '../actions';
-import { EntityActionTypes, EntityInstanceState } from '../types';
-import { keyBy } from 'lodash-es';
+import { EntityActionTypes, EntityInstanceState, EntityType, IdInstancePair } from '../types';
 import { createInstanceReducer } from './instance';
 
 const addInstances = <T>(
     state: Dictionary<EntityInstanceState<T>>,
-    instances: EntityInstanceState<T>[],
+    instancePairs: IdInstancePair<T>[],
 ): Dictionary<EntityInstanceState<T>> => {
-    const newInstances = keyBy<EntityInstanceState<T>>(instances, 'actual.id');
+    const newInstances = instancePairs.reduce((memo: Dictionary<EntityInstanceState<T>>, instancePair) => {
+        memo[instancePair.id] = instancePair.instance;
+        return memo;
+    }, {});
     return { ...state, ...newInstances };
 };
 
@@ -22,37 +24,47 @@ export const createDictionaryReducer = <T>(
     ): Dictionary<EntityInstanceState<T>> => {
         switch (action.type) {
             case types.ADD: {
-                const entity = action.payload.entity;
-                const instanceState = state[entity.id];
+                const id = action.payload.idEntityPair.id;
+                const instanceState = state[id];
                 const instance = instanceReducer(instanceState, action);
                 if (!instance) return state;
-                return addInstances(state, [instance]);
+                const instancePairs: IdInstancePair<T>[] = [{ id, instance }];
+                return addInstances(state, instancePairs);
             }
             case types.RESOLVE_ADD: {
                 const {
-                    payload: { success, result, tempId },
+                    payload: { idEntityPair, success, tempId },
                     options,
                 } = action;
                 const optimisticCreated = state[tempId];
                 if (!optimisticCreated) return state;
                 const { [tempId]: deleted, ...rest } = state;
                 if (!success) return rest;
-                const id = result.id;
-                const patch = { ...optimisticCreated.actual, id };
-                const resolveChangeAction = createResolveChange(types)(tempId, tempId, true, patch, options);
-                const instance = instanceReducer(state[tempId], resolveChangeAction);
+                const resolveChange = createResolveChange(types);
+                const resolveChangeAction = resolveChange(
+                    tempId,
+                    tempId,
+                    true,
+                    idEntityPair.entity as EntityType<T>,
+                    options,
+                );
+                const instance = instanceReducer(optimisticCreated, resolveChangeAction);
                 if (!instance) return state;
-                return addInstances(state, [instance]);
+                const instancePairs: IdInstancePair<T>[] = [{ id: idEntityPair.id, instance }];
+                return addInstances(state, instancePairs);
             }
             case types.ADD_LIST: {
-                const { payload: { entities, configHash }, options } = action;
+                const { payload: { idEntityPairs, configHash }, options } = action;
                 const add = createAddByHash(types);
-                const instances = entities.map((entity) => {
-                    const action = add(entity, configHash, undefined, options);
-                    const instanceState = state[entity.id];
-                    return instanceReducer(instanceState, action) as EntityInstanceState<T>;
+                const instancePairs: IdInstancePair<T>[] = idEntityPairs.map((idEntityPair) => {
+                    const action = add(idEntityPair, configHash, undefined, options);
+                    const instanceState = state[idEntityPair.id];
+                    return {
+                        id: idEntityPair.id,
+                        instance: instanceReducer(instanceState, action) as EntityInstanceState<T>,
+                    };
                 });
-                return addInstances(state, instances);
+                return addInstances(state, instancePairs);
             }
             case types.CHANGE:
             case types.RESOLVE_CHANGE: {

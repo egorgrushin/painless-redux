@@ -83,7 +83,7 @@ export const createTestHelpers = <T, TPageMetadata>(
 
     const actionCreators = createEntityActionCreators<T, TPageMetadata>(
         types,
-        { hashFn: getHash, name: 'test', pageSize: 10, maxPagesCount: 10 },
+        { hashFn: getHash, name: 'test', pageSize: 10, maxPagesCount: 10, id: (data: any) => data.id },
     );
     const reducer = reducerFactory<T>(types);
     return { actionCreators, reducer };
