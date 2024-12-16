@@ -10,9 +10,10 @@ import {
     EntityRemoveOptions,
     EntitySchema,
     EntitySetLoadingStateOptions,
-    EntityType,
+    IdEntityPair,
     IdPatch,
     IdPatchRequest,
+    IdResolver,
 } from '../../types';
 import { EntityActions } from '../../actions';
 import { DeepPartial, Id, LoadingState } from '../../../system-types';
@@ -26,7 +27,7 @@ import { AffectLoadingStateFactory } from '../../..';
 
 export const createDispatchEntityMethods = <T, TPageMetadata>(
     dispatcher: Dispatcher<EntityActionTypes, EntityActions>,
-    idResolver: (data: T) => EntityType<T>,
+    idResolver: IdResolver<T>,
     selectMethods: SelectEntityMethods<T, TPageMetadata>,
     schema: EntitySchema<T>,
 ): DispatchEntityMethods<T, TPageMetadata> => {
@@ -36,12 +37,12 @@ export const createDispatchEntityMethods = <T, TPageMetadata>(
         config?: unknown,
         options?: EntityAddOptions,
     ) => {
-        entity = idResolver(entity);
+        const idEntityPair: IdEntityPair<T> = { id: idResolver(entity), entity };
         const internalOptions: EntityInternalAddOptions = {
             ...options,
             maxPagesCount: schema.maxPagesCount,
         };
-        return dispatcher.createAndDispatch('ADD', [entity, config, undefined], internalOptions);
+        return dispatcher.createAndDispatch('ADD', [idEntityPair, config, undefined], internalOptions);
     };
 
     const addWithId = (
@@ -50,21 +51,23 @@ export const createDispatchEntityMethods = <T, TPageMetadata>(
         config?: unknown,
         options?: EntityAddOptions,
     ) => {
+        const idEntityPair: IdEntityPair<T> = { id: idResolver(entity), entity };
         const internalOptions: EntityInternalAddOptions = {
             ...options,
             maxPagesCount: schema.maxPagesCount,
         };
-        return dispatcher.createAndDispatch('ADD', [entity, config, tempId], internalOptions);
+        return dispatcher.createAndDispatch('ADD', [idEntityPair, config, tempId], internalOptions);
     };
 
     const resolveAdd = (
-        result: T,
+        entity: T,
         success: boolean,
         tempId: string,
         config?: unknown,
         options?: EntityAddOptions,
     ) => {
-        return dispatcher.createAndDispatch('RESOLVE_ADD', [result, success, tempId, config], options);
+        const idEntityPair: IdEntityPair<T> = { id: success ? idResolver(entity) : tempId, entity };
+        return dispatcher.createAndDispatch('RESOLVE_ADD', [idEntityPair, success, tempId, config], options);
     };
 
     const addList = (
@@ -75,12 +78,19 @@ export const createDispatchEntityMethods = <T, TPageMetadata>(
         metadata?: TPageMetadata,
         options?: EntityAddListOptions,
     ) => {
+        const idEntityPairs: IdEntityPair<T>[] = entities.map((entity) => ({
+            id: idResolver(entity),
+            entity,
+        }));
         const internalOptions: EntityInternalAddListOptions = {
             ...options,
             maxPagesCount: schema.maxPagesCount,
         };
-        entities = entities.map((entity) => idResolver(entity));
-        return dispatcher.createAndDispatch('ADD_LIST', [entities, config, isReplace, hasMore, metadata], internalOptions);
+        return dispatcher.createAndDispatch(
+            'ADD_LIST',
+            [idEntityPairs, config, isReplace, hasMore, metadata],
+            internalOptions,
+        );
     };
 
     const changeWithId = (
@@ -190,7 +200,11 @@ export const createDispatchEntityMethods = <T, TPageMetadata>(
             ...options,
             maxPagesCount: schema.maxPagesCount,
         };
-        return dispatcher.createAndDispatch('SET_LOADING_STATE', [state, config, undefined, undefined], internalOptions);
+        return dispatcher.createAndDispatch(
+            'SET_LOADING_STATE',
+            [state, config, undefined, undefined],
+            internalOptions,
+        );
     };
 
     const setLoadingStateById = (

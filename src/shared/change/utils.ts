@@ -7,8 +7,8 @@ export const createEntityChange = <T>(
     patch: DeepPartial<T>,
     stable = false,
     merge = true,
-    id?: string,
-): Change<T> => ({ patch, stable, merge, id });
+    changeId?: string,
+): Change<T> => ({ patch, stable, merge, id: changeId });
 
 export const getMergedChanges = <T>(
     state: ChangeableState<T> | undefined,
@@ -27,7 +27,7 @@ export const getMergedChanges = <T>(
     }
 
     if (changes.length === 0) return { actual };
-    return { actual, changes: changes };
+    return { actual, changes };
 };
 
 export const createInstanceByChanges = <T>(
@@ -35,11 +35,11 @@ export const createInstanceByChanges = <T>(
     patch: DeepPartial<T> | undefined,
     merge: boolean = true,
     success: boolean = true,
-    id?: string,
+    changeId?: string,
 ): ChangeableState<T> | undefined => {
     if (!patch) return state;
     const actual = state?.actual ?? patch as T;
-    const change = createEntityChange(patch, success, merge, id);
+    const change = createEntityChange(patch, success, merge, changeId);
     const changes = state?.changes ?? [];
     return { actual, changes: changes.concat(change) };
 };
@@ -50,12 +50,7 @@ export const resolveChanges = <T>(
     id: string,
 ): Change<T>[] | undefined => {
     if (!changes) return;
-    if (success) {
-        return changes.map((change) => {
-            if (change.id === id) return { ...change, stable: true };
-            return change;
-        });
-    }
+    if (success) return changes.map((change) => change.id === id ? { ...change, stable: true } : change);
     return changes.filter((change) => change.id !== id);
 };
 

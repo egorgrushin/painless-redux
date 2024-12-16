@@ -14,6 +14,7 @@ export const createEntity = <T, TPageMetadata = void>(
     schema?: Partial<EntitySchema<T>>,
 ): Entity<T, TPageMetadata> => {
     const fullSchema = getFullEntitySchema<T>(schema);
+    const idResolver = createIdResolver<T>(fullSchema);
     const actionTypes = createEntityActionTypes(fullSchema.name);
     const actionCreators = createEntityActionCreators<T, TPageMetadata>(actionTypes, fullSchema);
     const reducer = createEntityReducer<T, TPageMetadata>(actionTypes, fullSchema);
@@ -28,7 +29,7 @@ export const createEntity = <T, TPageMetadata = void>(
         actionCreators,
     );
     const selectors = createEntitySelectors<T, TPageMetadata>(selector, fullSchema.hashFn);
-    const idResolver = createIdResolver<T>(fullSchema);
+
 
     const selectMethods = createSelectEntityMethods<T, TPageMetadata>(selectManager, selectors);
     const dispatchMethods = createDispatchEntityMethods<T, TPageMetadata>(dispatcher, idResolver, selectMethods, fullSchema);

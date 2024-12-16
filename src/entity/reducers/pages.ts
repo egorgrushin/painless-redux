@@ -1,4 +1,4 @@
-import { EntityActionTypes, EntityType, Page } from '../types';
+import { EntityActionTypes, IdEntityPair, Page } from '../types';
 import { Dictionary } from '../../system-types';
 import { EntityActions } from '../actions';
 import { isNil, uniq } from 'lodash-es';
@@ -8,9 +8,9 @@ import { removeFromArray } from '../../utils';
 
 const addList = <T, TPageMetadata>(
     state: Page<TPageMetadata> | undefined,
-    data: EntityType<T>[],
+    pairs: IdEntityPair<T>[],
 ): Page<TPageMetadata> => {
-    const newIds = data.map(entity => entity.id);
+    const newIds = pairs.map(({ id }) => id);
     const oldIds = state?.ids ?? [];
     return {
         ...state,
@@ -33,15 +33,15 @@ const createPageReducer = <TPageMetadata>(
                     newState = { ...newState, hasMore: action.payload.hasMore };
                 }
                 if (!isNil(action.payload.metadata)) {
-                    newState = { ...newState, metadata: action.payload.metadata as TPageMetadata }
+                    newState = { ...newState, metadata: action.payload.metadata as TPageMetadata };
                 }
                 if (action.payload.isReplace) {
                     newState = { ...newState, ids: undefined };
                 }
-                return addList(newState, action.payload.entities);
+                return addList(newState, action.payload.idEntityPairs);
             }
             case types.ADD: {
-                return addList(state, [action.payload.entity]);
+                return addList(state, [action.payload.idEntityPair]);
             }
             case types.REMOVE: {
                 const { payload: { id }, options: { safe, optimistic } } = action;
@@ -93,12 +93,12 @@ const createPageReducer = <TPageMetadata>(
                 };
             }
             case types.RESOLVE_ADD: {
-                const { payload: { success, tempId, result } } = action;
+                const { payload: { success, tempId, idEntityPair } } = action;
                 if (!state) return state;
                 if (success) return {
                     ...state,
                     ids: state.ids?.map((id) => {
-                        if (id === tempId) return result.id;
+                        if (id === tempId) return idEntityPair.id;
                         return id;
                     }),
                 };

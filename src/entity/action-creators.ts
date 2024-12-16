@@ -1,4 +1,4 @@
-import { EntityActionTypes, EntitySchema } from './types';
+import { EntityActionTypes, EntitySchema, IdResolver } from './types';
 import {
     createAdd,
     createAddList,
@@ -31,11 +31,11 @@ export const createEntityActionCreators = <T, TPageMetadata>(
     CHANGE: createChange<T>(actionTypes),
     RESOLVE_CHANGE: createResolveChange<T>(actionTypes),
     REMOVE: createRemove(actionTypes),
-    RESOLVE_REMOVE: createResolveRemove<T>(actionTypes),
-    RESTORE_REMOVED: createRestoreRemoved<T>(actionTypes),
+    RESOLVE_REMOVE: createResolveRemove(actionTypes),
+    RESTORE_REMOVED: createRestoreRemoved(actionTypes),
     REMOVE_LIST: createRemoveList(actionTypes),
     RESOLVE_REMOVE_LIST: createResolveRemoveList(actionTypes),
-    RESTORE_REMOVED_LIST: createRestoreRemovedList<T>(actionTypes),
+    RESTORE_REMOVED_LIST: createRestoreRemovedList(actionTypes),
     SET_LOADING_STATE: createSetLoadingState(actionTypes, schema),
     CLEAR: createClear(actionTypes, schema),
     CLEAR_ALL: createClearAll(actionTypes),

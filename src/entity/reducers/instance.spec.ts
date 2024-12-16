@@ -1,6 +1,6 @@
 import { createTestHelpers } from '../../testing/helpers';
 import { createInstanceReducer } from './instance';
-import { EntityInstanceState, EntityType } from '../types';
+import { EntityInstanceState, EntityType, IdEntityPair } from '../types';
 import { Change } from '../../shared/change/types';
 
 const {
@@ -25,7 +25,8 @@ describe('instance', () => {
         `('should add entity as stable change (without id) and merge=$merge if there are changes', ({ merge }) => {
             // arrange
             const entity: EntityType<any> = { id: 1 };
-            const action = actionCreators.ADD(entity, undefined, undefined, { merge });
+            const pair: IdEntityPair<any> = { entity, id: entity.id };
+            const action = actionCreators.ADD(pair, undefined, undefined, { merge });
             const existChange = { stable: false, patch: {}, merge: false };
             const state: EntityInstanceState<any> = {
                 actual: entity, changes: [existChange],

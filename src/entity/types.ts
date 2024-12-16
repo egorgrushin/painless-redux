@@ -1,7 +1,7 @@
-import {Observable} from 'rxjs';
-import {Selector} from 'reselect';
-import {DeepPartial, Dictionary, HashFn, Id, LoadingState} from '../system-types';
-import {ChangeableState, PatchRequest} from '../shared/change/types';
+import { Observable } from 'rxjs';
+import { Selector } from 'reselect';
+import { DeepPartial, Dictionary, HashFn, Id, IdFn, LoadingState } from '../system-types';
+import { ChangeableState, PatchRequest } from '../shared/change/types';
 import {
     LoadingStateActionTypes,
     LoadingStateSelector,
@@ -9,22 +9,23 @@ import {
     LoadingStateSetOptions,
     LoadingStateState,
 } from '../shared/loading-state/types';
-import {SelectEntityMethods} from './methods/select/types';
-import {DispatchEntityMethods} from './methods/dispatch/types';
-import {MixedEntityMethods} from './methods/mixed/types';
-import {SystemActionTypes} from '../shared/system/types';
-import {EntityActionCreators} from './action-creators.types';
-import {RequestOptions} from '../shared/types';
+import { SelectEntityMethods } from './methods/select/types';
+import { DispatchEntityMethods } from './methods/dispatch/types';
+import { MixedEntityMethods } from './methods/mixed/types';
+import { SystemActionTypes } from '../shared/system/types';
+import { EntityActionCreators } from './action-creators.types';
+import { RequestOptions } from '../shared/types';
 
-export type EntityType<T> = T & { id: Id };
+export type EntityType<T> = T;
+
+export type IdResolver<T> = (data: T, forceId?: Id) => Id;
 
 export interface EntitySchema<T> {
     name: string;
     hashFn: HashFn;
     pageSize: number;
     maxPagesCount: number;
-
-    id?(data: T): Id;
+    id: IdFn<T>;
 }
 
 export interface EntityLoadOptions extends EntityInsertOptions, RequestOptions {
@@ -185,3 +186,6 @@ export type PublicSelectEntityMethods<T, TPageMetadata> = Omit<SelectEntityMetho
 export interface Entity<T, TPageMetadata = void> extends PublicSelectEntityMethods<T, TPageMetadata>, PublicDispatchEntityMethods<T, TPageMetadata>, MixedEntityMethods<T, TPageMetadata> {
     actionCreators: EntityActionCreators<T, TPageMetadata>;
 }
+
+export type IdEntityPair<T> = { id: Id; entity: EntityType<T> };
+export type IdInstancePair<T> = { id: Id; instance: EntityInstanceState<T> };
